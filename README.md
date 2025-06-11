@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# 📝 NGI Transcribe App - Frontend
 
-First, run the development server:
+Welcome to the **NGI Transcribe App Frontend**, a Next.js-based web application for transcribing and managing meeting conversations with an intuitive UI.
+
+> This is the frontend of the **Advanced Meeting Intelligence System**, designed to seamlessly interact with the backend API and provide real-time meeting transcription, analysis, and management tools.
+
+---
+
+## 🚀 Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/)
+- **Language**: JavaScript (React)
+- **State Management**: Redux
+- **Styling**: Tailwind CSS
+- **Rich Text Editor**: React-Quill
+- **Animations**: Framer Motion
+- **Form Controls**: React-Select
+
+---
+
+## 📁 Folder Structure (Simplified)
+
+frontend/
+├── app/
+│ ├── components/ # Reusable UI components (buttons, forms, modals, etc.)
+│ ├── pages/ # Next.js App Router pages (structured by route folders)
+│ ├── utils/ # Helper functions (formatters, API utils, etc.)
+│ ├── layout.tsx # Global layout for App Router
+│ └── page.tsx # Entry point of the application (Landing or Dashboard)
+├── redux/ # Redux Toolkit slices, store config (global state)
+├── data/ # Static data, mock data, constants
+├── public/ # Static assets like images, icons, logos
+├── styles/ # Global and modular CSS / Tailwind configs
+├── .env.local # Local environment variables
+├── next.config.js # Next.js configuration
+└── package.json # Project metadata and dependencies
+
+
+---
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- Node.js v16 or higher
+- npm or yarn
+
+### Installation
 
 ```bash
+# Clone the repo
+git clone https://github.com/ayanchyaziz123/ngi-transcribe-app-frontend.git
+cd ngi-transcribe-app-frontend
+
+# Install dependencies
+npm install
+# or
+yarn install
+
+
+#Running the Development Server
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## ✨ Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🤖 AI-Powered Capabilities
 
-## Learn More
+- 🔊 **Real-time Meeting Transcription**  
+  Retrieve and transcribe live or recorded meetings using AI-powered speech recognition with support for **Zoom**, **Google Meet**, and **Microsoft Teams**.
 
-To learn more about Next.js, take a look at the following resources:
+- 🧠 **Smart Summarization**  
+  Automatically generate intelligent summaries of meetings, extracting key points, decisions, and action items.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- 🗣️ **Speaker Identification (Planned)**  
+  AI-driven diarization to identify and label individual speakers during meetings.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 🧠 **Context-Aware Highlights (Planned)**  
+  Automatically detect and highlight critical parts of a meeting using semantic analysis.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 🧩 UI & UX Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 🗂️ **Multi-Step Form Workflow**  
+  Easily manage and edit transcription records through a guided, step-by-step interface.
+
+- 🔍 **Meeting Retrieval from Major Platforms**  
+  Connect your Zoom, Google Meet, or MS Teams accounts to securely fetch and sync past meetings for processing.
+
+- 📅 **Pagination, Filtering & Sorting**  
+  Navigate and organize your transcriptions with advanced filters by date, speaker, or platform.
+
+- 🔐 **Google Authentication**  
+  Log in securely using Google
+
+- 🎨 **Modern UI & Animations**  
+  Built with Tailwind CSS and Framer Motion for sleek transitions, responsiveness, and a great user experience.
+
+
+
