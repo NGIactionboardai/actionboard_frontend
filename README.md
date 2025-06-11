@@ -10,12 +10,9 @@ Welcome to the **NGI Transcribe App Frontend**, a Next.js-based web application 
 ## 🚀 Tech Stack
 
 - **Framework**: [Next.js](https://nextjs.org/)
-- **Language**: JavaScript (React)
-- **State Management**: Redux
+- **Language**: JavaScript (Next JS, React)
+- **State Management**: Redux Toolkit, Redux Persist
 - **Styling**: Tailwind CSS
-- **Rich Text Editor**: React-Quill
-- **Animations**: Framer Motion
-- **Form Controls**: React-Select
 
 ---
 
