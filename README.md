@@ -21,7 +21,7 @@ Welcome to the **NGI Transcribe App Frontend**, a Next.js-based web application 
 
 ## 📁 Folder Structure (Simplified)
 
-<img src="./public/frontend_structure.svg" alt="NGI Transcribe App Frontend Structure" width="800"/>
+<img src="./public/frontend_structure.png" alt="NGI Transcribe App Frontend Structure" width="800"/>
 
 ## 🛠️ Getting Started
 
