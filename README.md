@@ -21,23 +21,7 @@ Welcome to the **NGI Transcribe App Frontend**, a Next.js-based web application 
 
 ## 📁 Folder Structure (Simplified)
 
-frontend/
-├── app/
-│ ├── components/ # Reusable UI components (buttons, forms, modals, etc.)
-│ ├── pages/ # Next.js App Router pages (structured by route folders)
-│ ├── utils/ # Helper functions (formatters, API utils, etc.)
-│ ├── layout.tsx # Global layout for App Router
-│ └── page.tsx # Entry point of the application (Landing or Dashboard)
-├── redux/ # Redux Toolkit slices, store config (global state)
-├── data/ # Static data, mock data, constants
-├── public/ # Static assets like images, icons, logos
-├── styles/ # Global and modular CSS / Tailwind configs
-├── .env.local # Local environment variables
-├── next.config.js # Next.js configuration
-└── package.json # Project metadata and dependencies
-
-
----
+<img src="./public/frontend_structure.svg" alt="NGI Transcribe App Frontend Structure" width="800"/>
 
 ## 🛠️ Getting Started
 
