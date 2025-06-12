@@ -57,7 +57,7 @@ yarn dev
   Automatically generate intelligent summaries of meetings, extracting key points, decisions, and action items.
 
 - 🗣️ **Speaker Identification (Planned)**  
-  AI-driven diarization to identify and label individual speakers during meetings.
+  AI-driven diarization to identify and label individual speakers.
 
 - 🧠 **Context-Aware Highlights (Planned)**  
   Automatically detect and highlight critical parts of a meeting using semantic analysis.
@@ -80,6 +80,11 @@ yarn dev
 
 - 🎨 **Modern UI & Animations**  
   Built with Tailwind CSS and Framer Motion for sleek transitions, responsiveness, and a great user experience.
+
+
+  ## 📁 Flow Chart
+
+<img src="./public/flow_chart.png" alt="NGI Transcribe App Frontend Structure" width="800"/>
 
 
 
