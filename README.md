@@ -29,22 +29,24 @@ Welcome to the **NGI Transcribe App Frontend**, a Next.js-based web application 
 
 ### Installation
 
-````bash```
+
 # Clone the repo
 git clone https://github.com/ayanchyaziz123/ngi-transcribe-app-frontend.git
 cd ngi-transcribe-app-frontend
 
+## Getting Started
+
+```bash
 # Install dependencies
 npm install
 # or
 yarn install
 
-
-#Running the Development Server
+# Running the Development Server
 npm run dev
 # or
-yarn dev
-
+yarn dev    
+```
 
 ## ✨ Features
 
