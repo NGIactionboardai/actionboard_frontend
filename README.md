@@ -29,7 +29,7 @@ Welcome to the **NGI Transcribe App Frontend**, a Next.js-based web application 
 
 ### Installation
 
-```bash
+````bash```
 # Clone the repo
 git clone https://github.com/ayanchyaziz123/ngi-transcribe-app-frontend.git
 cd ngi-transcribe-app-frontend
@@ -82,7 +82,7 @@ yarn dev
   Built with Tailwind CSS and Framer Motion for sleek transitions, responsiveness, and a great user experience.
 
 
-  ## 📁 Flow Chart
+## 📁 Flow Chart
 
 <img src="./public/flow_chart.png" alt="NGI Transcribe App Frontend Structure" width="800"/>
 
