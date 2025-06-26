@@ -73,7 +73,7 @@ export default function OtpVerificationPage() {
         sessionStorage.removeItem('pendingVerificationEmail');
       }
       // Registration and verification complete
-      router.push('/dashboard');
+      router.push('/');
     }
   }, [auth.isAuthenticated, auth.user, router]);
 

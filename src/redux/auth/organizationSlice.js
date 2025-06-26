@@ -8,12 +8,12 @@ const ORG_STORAGE_KEYS = {
 };
 
 const API_ENDPOINTS = {
-  CREATE_ORG: 'https://actionboard-backend-1.onrender.com/api/organisations/create-organization/',
-  GET_USER_ORGS: 'https://actionboard-backend-1.onrender.com/api/organisations/my-organisations/',
-  GET_ALL_ORGS: 'https://actionboard-backend-1.onrender.com/api/organizations/',
-  GET_ORG_DETAILS: 'https://actionboard-backend-1.onrender.com/api/my-organisations/',
-  UPDATE_ORG: 'https://actionboard-backend-1.onrender.com/api/organizations/',
-  DELETE_ORG: 'https://actionboard-backend-1.onrender.com/api/organizations/delete/'
+  CREATE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/create-organization/',
+  GET_USER_ORGS: 'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
+  GET_ALL_ORGS: 'https://actionboard-ai-backend.onrender.com/api/organizations/',
+  GET_ORG_DETAILS: 'https://actionboard-ai-backend.onrender.com/api/my-organisations/',
+  UPDATE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organizations/',
+  DELETE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organizations/delete/'
 };
 
 // Safe localStorage utilities for SSR compatibility

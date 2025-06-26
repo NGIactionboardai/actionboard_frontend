@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import Link from 'next/link';
+import { parseISO, differenceInHours, differenceInMinutes } from 'date-fns';
+import EditSpeakersModal from '@/app/components/EditSpeakersModal';
 
 
 
@@ -33,6 +35,17 @@ export default function MeetingDetails() {
   const [retryCount, setRetryCount] = useState(0);
   const [meeting_insights, setMeeting_insights] = useState(null);
   const [activeTab, setActiveTab] = useState('transcript'); // For tabbed view
+  const [transcriptionStatus, setTranscriptionStatus] = useState(null);
+  const [autoTranscribed, setAutoTranscribed] = useState(false);
+  const [userConfirmed, setUserConfirmed] = useState(false);
+  const [transcriptUpdatedAt, setTranscriptUpdatedAt] = useState(null);
+  const [hoursLeft, setHoursLeft] = useState(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [speakersUpdated, setSpeakersUpdated] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const isTranscriptionOngoing = transcriptionStatus === 'pending' || transcriptionStatus === 'processing';
 
   // Helper function to get auth headers (following your Redux pattern)
   const getAuthHeaders = () => {
@@ -121,6 +134,7 @@ export default function MeetingDetails() {
     
     if (meetingId) {
       fetchMeetingDetails();
+      checkTranscriptionStatus()
     }
   }, [meetingId, authToken]);
 
@@ -137,7 +151,7 @@ export default function MeetingDetails() {
       
       // Use the enhanced API call with retry logic
       const response = await makeApiCall(
-        `https://actionboard-backend-1.onrender.com/api/meetings/zoom/meeting-details/${meetingId}/`,
+        `https://actionboard-ai-backend.onrender.com/api/meetings/zoom/meeting-details/${meetingId}/`,
         { headers }
       );
       
@@ -192,43 +206,46 @@ export default function MeetingDetails() {
     }
   };
 
+  const getCooldownTimeLeft = (endTime, cooldownMinutes = 3) => {
+    if (!endTime) return 0;
+    const now = new Date();
+    const end = parseISO(endTime);
+    const diff = differenceInMinutes(now, end);
+    return Math.max(0, cooldownMinutes - diff);
+  };
+
+  const cooldownLeft = getCooldownTimeLeft(meeting?.end_time);
+  const isUploadOnly = meeting?.recordings?.length === 0;
+
   const handleTranscribe = async () => {
     try {
       setTranscribing(true);
       const headers = getAuthHeaders();
-      
+  
       console.log('Starting transcription for meeting ID:', meetingId);
-      console.log('Using headers:', headers);
-      
-      // Use the same base URL as the meeting details call for consistency
-      const transcribeUrl = `https://actionboard-backend-1.onrender.com/api/transcripts/zoom/transcribe/${meetingId}/`;
-      console.log('Transcribe URL:', transcribeUrl);
-      
-      const response = await makeApiCall(
-        transcribeUrl,
-        {
-          method: 'POST',
-          headers,
-        }
-      );
-      
+      const transcribeUrl = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/transcribe/${meetingId}/`;
+  
+      const response = await makeApiCall(transcribeUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ force: true }),
+      });
+  
       console.log('Transcription response status:', response.status);
-      
+  
       if (response.ok) {
         const data = await response.json();
         console.log('Transcription response data:', data);
-        alert('Transcription started successfully!');
-        
-        // Update the transcript and summary if returned
-        if (data.full_transcript) {
-          setTranscript(data.full_transcript);
+        // alert('Transcription task has been queued.');
+  
+        // Trigger immediate status update
+        const initialStatus = await checkTranscriptionStatus();
+
+        // Start polling if it’s pending or processing
+        if (initialStatus === 'pending' || initialStatus === 'processing') {
+          pollTranscriptionStatus();
         }
-        if (data.summary) {
-          setSummary(data.summary);
-        }
-        if (data.meeting_insights) {
-          setMeeting_insights(data.meeting_insights);
-        }
+  
       } else if (response.status === 401) {
         const errorText = await response.text();
         console.error('401 Error details:', errorText);
@@ -246,12 +263,6 @@ export default function MeetingDetails() {
       }
     } catch (err) {
       console.error('Error starting transcription:', err);
-      console.error('Error details:', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack
-      });
-      
       if (err.message.includes('No authentication token')) {
         alert('Please log in to start transcription.');
       } else if (err.name === 'AbortError') {
@@ -266,6 +277,158 @@ export default function MeetingDetails() {
     }
   };
 
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    setSelectedFile(file);
+  };
+
+  const handleUploadTranscribe = async () => {
+
+    if (!selectedFile) {
+      alert("Please select a file first.");
+      return;
+    }
+
+
+    try {
+      setTranscribing(true);
+      const headers = getAuthHeaders();
+      delete headers['Content-Type'];
+  
+      console.log('Uploading audio file for transcription - Meeting ID:', meetingId);
+  
+      const uploadUrl = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/upload-audio-transcribe/${meetingId}/`;
+  
+      const formData = new FormData();
+      formData.append('audio', selectedFile);
+  
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          
+        },
+        body: formData,
+      });
+  
+      console.log('Upload & Transcribe response status:', response.status);
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Upload transcription response data:', data);
+
+        setShowUploadModal(false)
+        setSelectedFile(null)
+  
+        const initialStatus = await checkTranscriptionStatus();
+  
+        if (initialStatus === 'pending' || initialStatus === 'processing') {
+          pollTranscriptionStatus();
+        }
+      } else if (response.status === 401) {
+        const errorText = await response.text();
+        console.error('401 Error:', errorText);
+        alert('Authentication failed. Please log in again.');
+      } else if (response.status === 403) {
+        const errorText = await response.text();
+        console.error('403 Error:', errorText);
+        alert('Access denied. You do not have permission.');
+      } else if (response.status === 502) {
+        alert('Server is temporarily unavailable. Try again shortly.');
+      } else {
+        const errorData = await response.text();
+        console.error('Unexpected error:', errorData);
+        alert(`Upload failed: ${response.status} - ${errorData}`);
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      if (err.message.includes('No authentication token')) {
+        alert('Please log in to upload a transcript.');
+      } else {
+        alert(`Unexpected error: ${err.message}`);
+      }
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
+  const pollTranscriptionStatus = (interval = 5000, maxAttempts = 20) => {
+    let attempts = 0;
+  
+    const poller = setInterval(async () => {
+      attempts += 1;
+      const status = await checkTranscriptionStatus();
+  
+      if (status === 'completed' || status === 'failed' || attempts >= maxAttempts) {
+        clearInterval(poller);
+  
+        // Call fetchTranscript after polling ends
+        fetchTranscript();
+      }
+    }, interval);
+  };
+  
+
+  const checkTranscriptionStatus = async () => {
+    try {
+      const headers = getAuthHeaders();
+      const statusUrl = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/transcribe-status/${meetingId}/`;
+      const response = await makeApiCall(statusUrl, { headers });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Transcription status:', data.status);
+        setTranscriptionStatus(data.status); 
+        setAutoTranscribed(data.auto_transcribed);
+        setUserConfirmed(data.user_confirmed);
+        setSpeakersUpdated(data.speakers_updated);
+
+        setRetryCount(data.retry_count);
+
+        if (data.created_at) {
+          const createdAt = parseISO(data.created_at);
+          const hoursLeft = Math.max(0, 24 - differenceInHours(new Date(), createdAt));
+          setHoursLeft(hoursLeft);
+        } else {
+          setHoursLeft(null);
+        }
+
+        return data.status; //return for polling to use
+      } else {
+        console.error('Failed to fetch transcription status:', response.status);
+      }
+    } catch (err) {
+      console.error('Error checking transcription status:', err);
+    }
+    return null; // fallback
+  };
+
+  const handleKeepTranscript = async () => {
+    try {
+      const headers = getAuthHeaders();
+      const url = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/auto-transcribe/keep/${meetingId}/`;
+  
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+      });
+  
+      if (!response.ok) {
+        const err = await response.json();
+        alert(err.error || "Failed to keep transcript.");
+        return;
+      }
+  
+      // alert("Transcript successfully kept!");
+      setUserConfirmed(true);
+    } catch (error) {
+      console.error("Error keeping transcript:", error);
+      alert("An error occurred while keeping the transcript.");
+    }
+  };
+  
+
+
   const fetchTranscript = async () => {
     try {
       setTranscriptLoading(true);
@@ -274,7 +437,7 @@ export default function MeetingDetails() {
       console.log('Fetching transcript for meeting ID:', meetingId);
       
       // Use the same base URL as the meeting details call for consistency
-      const fetchUrl = `https://actionboard-backend-1.onrender.com/api/transcripts/zoom/fetch-transcript/${meetingId}/`;
+      const fetchUrl = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/fetch-transcript/${meetingId}/`;
       console.log('Fetch transcript URL:', fetchUrl);
       
       const response = await makeApiCall(fetchUrl, { headers });
@@ -613,67 +776,162 @@ export default function MeetingDetails() {
         </div>
       </div>
 
+      
+
+      {/* Show auto-transcript save prompt if needed */}
+      {transcriptionStatus === 'completed' && autoTranscribed && !userConfirmed && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-md">
+          <p className="text-sm text-gray-700">
+            This transcript was auto-generated.
+            {hoursLeft !== null && hoursLeft > 0 && (
+              <> You have approximately <strong>{hoursLeft} hour{hoursLeft !== 1 && 's'}</strong> left to keep it.</>
+            )}
+          </p>
+          <button
+            onClick={handleKeepTranscript}
+            className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
+          >
+            Save Transcript
+          </button>
+        </div>
+      )}
+
       {/* Action Buttons */}
       {isMeetingPast(meeting) && (
         <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
-          <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">Transcription Actions</h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">
-              {hasTranscript() 
-                ? 'Meeting has been transcribed. You can re-transcribe to update the content.'
-                : 'Transcribe the meeting recording and generate insights.'
-              }
-            </p>
-          </div>
-          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-            <div className="flex space-x-3">
-              <button
-                onClick={handleTranscribe}
-                disabled={transcribing}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {transcribing ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    {hasTranscript() ? 'Re-transcribing...' : 'Transcribing...'}
-                  </>
+          {transcriptionStatus === 'completed' && (
+            <div className="px-4 py-5 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">Transcription Actions</h3>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                {hasTranscript() 
+                  ? 'Meeting has been transcribed. You can re-transcribe to update the content.'
+                  : 'Transcribe the meeting recording and generate insights.'
+                }
+              </p>
+            </div>
+          )}
+          {isUploadOnly ? (
+            // Show Upload & Transcribe logic only if no recordings
+            <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+              <div className="flex space-x-3">
+                {cooldownLeft > 0 ? (
+                  <p className="text-sm text-yellow-600">
+                    We’re still processing your meeting. Please wait <strong>{cooldownLeft} minute{cooldownLeft !== 1 && 's'}</strong> before uploading a file.
+                  </p>
                 ) : (
                   <>
-                    <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                    </svg>
-                    {hasTranscript() ? 'Re-transcribe Meeting' : 'Start Transcription'}
-                  </>
-                )}
-              </button>
 
-              <button
-                onClick={fetchTranscript}
-                disabled={transcriptLoading}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {transcriptLoading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Loading...
-                  </>
-                ) : (
-                  <>
+                  <button
+                    onClick={() => setShowUploadModal(true)}
+                    disabled={transcribing || isTranscriptionOngoing }
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Refresh Transcript
+                    {hasTranscript() ? 'Upload & Re-transcribe' : 'Upload & Transcribe'}
+                  </button>
+
+                  {!(transcribing || isTranscriptionOngoing) && (
+                    !speakersUpdated ? (
+                      <button
+                        onClick={() => setShowEditModal(true)}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Edit Speakers
+                      </button>
+                    ) : (
+                      <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                        <svg className="-ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Speakers Updated
+                      </span>
+                    )
+                  )}                                                              
+                  
                   </>
+                  
+                  
                 )}
-              </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            // Show default Zoom-based buttons
+            <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleTranscribe}
+                  disabled={transcribing || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {transcribing ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {hasTranscript() ? 'Re-transcribing...' : 'Transcribing...'}
+                    </>
+                  ) : (
+                    <>
+                      <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                      </svg>
+                      {hasTranscript() ? 'Re-transcribe Meeting' : 'Start Transcription'}
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={fetchTranscript}
+                  disabled={transcriptLoading || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {transcriptLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Refresh Transcript
+                    </>
+                  )}
+                </button>
+
+                {!(transcribing || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)) && (
+                  !speakersUpdated ? (
+                    <button
+                      onClick={() => setShowEditModal(true)}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Edit Speakers
+                    </button>
+                  ) : (
+                    <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                      <svg className="-ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Speakers Updated
+                    </span>
+                  )
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -720,8 +978,14 @@ export default function MeetingDetails() {
         </div>
       )}
 
-      {/* Tabbed Content Section */}
-      {(transcript || summary || meeting_insights) && (
+
+      {(transcriptionStatus === 'pending' || transcriptionStatus === 'processing') ? (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 rounded-md shadow mb-6">
+          <p className="font-medium">Transcription in progress.</p>
+          <p className="text-sm mt-1">You'll receive a notification once it’s complete. Please check back later.</p>
+        </div>
+      ) : (transcript || summary || meeting_insights) && (
+        
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           {/* Tab Navigation */}
           <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
@@ -828,6 +1092,8 @@ export default function MeetingDetails() {
         </div>
       )}
 
+      
+
       {/* Action Items Section (if you want to add this) */}
       {meeting.action_items && meeting.action_items.length > 0 && (
         <div className="bg-white shadow overflow-hidden sm:rounded-lg mt-8">
@@ -866,6 +1132,116 @@ export default function MeetingDetails() {
           </div>
         </div>
       )}
+
+
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            {/* Icon Header */}
+            <div className="flex items-center justify-center mb-4">
+              <div className="bg-blue-100 rounded-full p-3">
+                <svg
+                  className="h-6 w-6 text-blue-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0a4 4 0 018 0v12m-8 0a4 4 0 01-8 0V4m8 0a4 4 0 118 0v12" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-lg font-semibold text-center text-gray-900 mb-2">Upload Recording File</h2>
+            <p className="text-sm text-gray-600 text-center mb-4">Choose an audio or video file to transcribe.</p>
+
+            {/* File Input */}
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept="audio/*,video/*"
+              className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+
+            {/* Actions */}
+            <div className="mt-6 flex justify-end space-x-3">
+            <button
+              onClick={handleUploadTranscribe}
+              disabled={transcribing || isTranscriptionOngoing}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {transcribing ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="-ml-1 mr-2 h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  {hasTranscript() ? 'Re-Upload' : 'Upload'}
+                </>
+              )}
+            </button>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                disabled={transcribing}
+                className="inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+      )}
+
+      <EditSpeakersModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        meetingId={meetingId}
+        onUpdateSuccess={async () => {
+          await checkTranscriptionStatus();
+          await fetchTranscript();
+        }}
+      />
+
+
+
     </div>
+
+      
   );
 }

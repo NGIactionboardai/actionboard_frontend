@@ -8,14 +8,14 @@ const MEETING_STORAGE_KEYS = {
 };
 
 const API_ENDPOINTS = {
-  CREATE_MEETING: 'https://actionboard-backend-cdqe.onrender.com/api/meetings/create/',
-  GET_USER_MEETINGS: 'https://actionboard-backend-cdqe.onrender.com/api/meetings/my-meetings/',
-  GET_ORG_MEETINGS: 'https://actionboard-backend-cdqe.onrender.com/api/meetings/organization/',
-  GET_MEETING_DETAILS: 'https://actionboard-backend-cdqe.onrender.com/api/meetings/',
-  UPDATE_MEETING: 'https://actionboard-backend-cdqe.onrender.com/api/meetings/',
-  DELETE_MEETING: 'https://actionboard-backend-cdqe.onrender.com/api/meetings/',
-  UPLOAD_MEETING_FILE: 'https://actionboard-backend-cdqe.onrender.com/api/meetings/upload/',
-  SUMMARIZE_MEETING: 'https://actionboard-backend-cdqe.onrender.com/api/meetings/summarize/'
+  CREATE_MEETING: 'https://actionboard-ai-backend.onrender.com/api/meetings/create/',
+  GET_USER_MEETINGS: 'https://actionboard-ai-backend.onrender.com/api/meetings/my-meetings/',
+  GET_ORG_MEETINGS: 'https://actionboard-ai-backend.onrender.com/api/meetings/organization/',
+  GET_MEETING_DETAILS: 'https://actionboard-ai-backend.onrender.com/api/meetings/',
+  UPDATE_MEETING: 'https://actionboard-ai-backend.onrender.com/api/meetings/',
+  DELETE_MEETING: 'https://actionboard-ai-backend.onrender.com/api/meetings/',
+  UPLOAD_MEETING_FILE: 'https://actionboard-ai-backend.onrender.com/api/meetings/upload/',
+  SUMMARIZE_MEETING: 'https://actionboard-ai-backend.onrender.com/api/meetings/summarize/'
 };
 
 // Safe localStorage utilities for SSR compatibility

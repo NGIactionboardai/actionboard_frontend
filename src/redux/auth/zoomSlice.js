@@ -2,8 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 // Base URL for your backend
-const API_BASE_URL = 'https://actionboard-backend-1.onrender.com/api';
-const API_BASE_URL2 = 'https://actionboard-backend-1.onrender.com/api';
+const API_BASE_URL = 'https://actionboard-ai-backend.onrender.com/api';
+const API_BASE_URL2 = 'https://actionboard-ai-backend.onrender.com/api';
 
 // Helper function to get auth headers from Redux state
 const getAuthHeaders = (getState) => {

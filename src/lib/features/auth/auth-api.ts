@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { SignupRequest, LoginRequest } from './auth-types'
 
-const BASE_URL = "https://actionboard-backend-1.onrender.com/api"
+const BASE_URL = "https://actionboard-ai-backend.onrender.com/api"
 
 // Create axios instance with base config
 const api = axios.create({

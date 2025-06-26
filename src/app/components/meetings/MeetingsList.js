@@ -119,17 +119,17 @@ const MeetingsList = ({
                         </p>
                       </div>
                       <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 space-x-2">
-                        {meeting.join_url && (
-                          <a
-                            href={meeting.join_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                          >
-                            Join Meeting
-                          </a>
-                        )}
+                      {meeting.join_url && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(meeting.join_url, '_blank', 'noopener,noreferrer');
+                          }}
+                          className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          Join Meeting
+                        </button>
+                      )}                                  
                         <span className="inline-flex items-center text-xs text-gray-400">
                           <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
