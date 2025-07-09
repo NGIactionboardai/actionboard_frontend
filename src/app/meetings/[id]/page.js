@@ -1,4 +1,4 @@
-// pages/meetings/[id].js or app/meetings/[id]/page.js
+//  app/meetings/[id]/page.js
 'use client';
 
 import Link from 'next/link';
@@ -18,10 +18,14 @@ import { useMeetings, useMeetingsFilters, useMeetingsModal } from '../../hooks/u
 
 // Utils
 import { formatMeetingDateTime, getMeetingStatus } from '../../utils/meetingsUtils';
+import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 export default function Meetings() {
   const params = useParams();
   const organizationId = params?.id;
+  const [orgName, setOrgName] = useState('')
 
   // Custom hooks for state management
   const {
@@ -56,6 +60,27 @@ export default function Meetings() {
     handleCreateMeetingClick
   } = useMeetingsModal(successMessage);
 
+  const token = useSelector((state) => state.auth?.token);
+
+  useEffect(() => {
+      const fetchOrg = async () => {
+
+        try {
+          const res = await makeApiCall(`https://actionboard-ai-backend.onrender.com/api/organisations/${organizationId}/`, {
+            method: 'GET',
+            headers: getAuthHeaders(token)
+          });
+          const data = await res.json();
+          setOrgName(data.name)
+          console.log("Organization Data: ", )
+          // or use saved map
+        } catch {
+          console.log("Failed to fetch organization details")
+        }
+      };
+      fetchOrg();
+    }, [organizationId]);
+
   // If organization ID is not found, show message
   if (!organizationId) {
     return (
@@ -79,6 +104,7 @@ export default function Meetings() {
       {/* Header Section */}
       <MeetingsHeader
         organizationId={organizationId}
+        orgName={orgName}
         onZoomConnectionClick={handleZoomConnectionClick}
         onCreateMeetingClick={handleCreateMeetingClick}
       />

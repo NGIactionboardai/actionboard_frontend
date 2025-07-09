@@ -9,9 +9,11 @@ import {
   setShowDisconnectModal 
 } from '../../../redux/auth/zoomSlice';
 import { ZoomConnectionStatus } from '../ZoomConnection';
+import { useEffect } from 'react';
 
 const MeetingsHeader = ({ 
   organizationId, 
+  orgName,
   onCreateMeetingClick 
 }) => {
   const dispatch = useDispatch();
@@ -27,6 +29,10 @@ const MeetingsHeader = ({
     }
   };
 
+  useEffect(() => {
+    console.log("Organization Name: ", orgName)
+  },[])
+
   return (
     <div className="md:flex md:items-center md:justify-between mb-8">
       <div className="flex-1 min-w-0">
@@ -41,7 +47,7 @@ const MeetingsHeader = ({
         </Link>
         <div className="mt-2">
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            Meetings
+            {orgName}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
             Organization ID: {organizationId}
@@ -86,15 +92,50 @@ const MeetingsHeader = ({
           Create Meeting
         </button>
         
-        <Link 
-          href="/dashboard/upload"
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
-          <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-          </svg>
-          Upload Recording
-        </Link>
+        {isZoomConnected ? (
+          <Link
+            href={`/calendar/${organizationId}`}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+          >
+            <svg
+              className="-ml-1 mr-2 h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7V3m8 4V3m-9 8h10m-12 8h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+            Org Calendar
+          </Link>
+        ) : (
+          <button
+            disabled
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-400 cursor-not-allowed"
+          >
+            <svg
+              className="-ml-1 mr-2 h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7V3m8 4V3m-9 8h10m-12 8h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+            Org Calendar
+          </button>
+        )}
+
       </div>
     </div>
   );

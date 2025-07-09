@@ -10,135 +10,105 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [activePath, setActivePath] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [isClient, setIsClient] = useState(false); // Add client-side check
-  
-  // Redux state
+  const [hasMounted, setHasMounted] = useState(false);
+
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   const authLoading = useSelector(selectAuthLoading);
 
-  // Ref for dropdown
   const dropdownRef = useRef(null);
 
-  // Separate client-side initialization
+  // All hooks are called BEFORE conditional rendering
   useEffect(() => {
-    setIsClient(true);
-    setActivePath(window.location.pathname);
+    setHasMounted(true);
   }, []);
 
-  // Handle scroll effect for navbar shadow
   useEffect(() => {
-    if (!isClient) return;
+    if (!hasMounted) return;
+    setActivePath(window.location.pathname);
+  }, [hasMounted]);
 
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    
+  useEffect(() => {
+    if (!hasMounted) return;
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isClient]);
+  }, [hasMounted]);
 
-  // Close mobile menu when clicking outside
   useEffect(() => {
-    if (!isClient) return;
-
+    if (!hasMounted) return;
     const handleClickOutside = (event) => {
       if (mobileMenuOpen && !event.target.closest('nav')) {
         setMobileMenuOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [mobileMenuOpen, isClient]);
+  }, [mobileMenuOpen, hasMounted]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
-    if (!isClient) return;
-
+    if (!hasMounted) return;
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isClient]);
+  }, [hasMounted]);
 
-  // Close mobile menu when window is resized to desktop size
   useEffect(() => {
-    if (!isClient) return;
-
+    if (!hasMounted) return;
     const handleResize = () => {
       if (window.innerWidth >= 640 && mobileMenuOpen) {
         setMobileMenuOpen(false);
       }
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [mobileMenuOpen, isClient]);
+  }, [mobileMenuOpen, hasMounted]);
 
-  const isActive = (path) => {
-    return activePath === path;
-  };
+  // ✅ Now it's safe to check
+  if (!hasMounted) return null;
+
+  const isActive = (path) => activePath === path;
 
   const handleSignOut = async () => {
     try {
-      // Dispatch Redux logout action
       await dispatch(userLogout()).unwrap();
-      
-      // Close mobile menu and dropdown
       setMobileMenuOpen(false);
       setDropdownOpen(false);
-      
-      // Redirect to home page
       window.location.href = '/';
     } catch (error) {
       console.error('Logout error:', error);
-      // Force logout even if API fails
       setMobileMenuOpen(false);
       setDropdownOpen(false);
       window.location.href = '/';
     }
   };
 
-  // Get user display name
   const getUserDisplayName = () => {
     if (!user) return 'User';
-    
-    if (user.first_name && user.last_name) {
-      return `${user.first_name} ${user.last_name}`;
-    }
-    if (user.firstName && user.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    if (user.name) {
-      return user.name;
-    }
-    if (user.email) {
-      return user.email;
-    }
+    if (user.first_name && user.last_name) return `${user.first_name} ${user.last_name}`;
+    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
+    if (user.name) return user.name;
+    if (user.email) return user.email;
     return 'User';
   };
 
-  // Get user initials for avatar
   const getUserInitials = () => {
     const name = getUserDisplayName();
     if (name === 'User') return 'U';
-    
     const words = name.split(' ');
-    if (words.length >= 2) {
-      return `${words[0][0]}${words[1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
+    return words.length >= 2
+      ? `${words[0][0]}${words[1][0]}`.toUpperCase()
+      : name.substring(0, 2).toUpperCase();
   };
 
   return (
     <nav className={`sticky top-0 z-50 bg-white ${scrolled ? 'shadow-md' : ''} transition-shadow duration-300`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
@@ -152,8 +122,8 @@ export default function Navbar() {
               {isAuthenticated ? (
                 // Authenticated user menu
                 <>
-                  <NavLink href="/dashboard" isActive={isClient && isActive('/dashboard')}>
-                    Dashboard
+                  <NavLink href="/calendar" isActive={hasMounted && isActive('/calendar')}>
+                    Calendar
                   </NavLink>
             
                   {/* User profile dropdown */}
@@ -226,10 +196,10 @@ export default function Navbar() {
               ) : (
                 // Unauthenticated user menu
                 <>
-                  <NavLink href="/auth/login" isActive={isClient && isActive('/auth/login')}>
+                  <NavLink href="/auth/login" isActive={hasMounted && isActive('/auth/login')}>
                     Sign In
                   </NavLink>
-                  <NavLink href="/auth/register" isActive={isClient && isActive('/auth/register')}>
+                  <NavLink href="/auth/register" isActive={hasMounted && isActive('/auth/register')}>
                     Sign Up
                   </NavLink>
                 </>
@@ -278,13 +248,13 @@ export default function Navbar() {
                 </div>
                 <span>Welcome, {getUserDisplayName()}</span>
               </div>
-              <MobileNavLink href="/dashboard" isActive={isClient && isActive('/dashboard')}>
+              <MobileNavLink href="/dashboard" isActive={hasMounted && isActive('/dashboard')}>
                 Dashboard
               </MobileNavLink>
-              <MobileNavLink href="/auth/profile" isActive={isClient && isActive('/auth/profile')}>
+              <MobileNavLink href="/auth/profile" isActive={hasMounted && isActive('/auth/profile')}>
                 Profile
               </MobileNavLink>
-              <MobileNavLink href="/favorite-meetings" isActive={isClient && isActive('/favorite-meetings')}>
+              <MobileNavLink href="/favorite-meetings" isActive={hasMounted && isActive('/favorite-meetings')}>
                 Favorite Meetings
               </MobileNavLink>
               <button 
@@ -298,10 +268,10 @@ export default function Navbar() {
           ) : (
             // Unauthenticated mobile menu
             <>
-              <MobileNavLink href="/auth/login" isActive={isClient && isActive('/auth/login')}>
+              <MobileNavLink href="/auth/login" isActive={hasMounted && isActive('/auth/login')}>
                 Sign In
               </MobileNavLink>
-              <MobileNavLink href="/auth/register" isActive={isClient && isActive('/auth/register')}>
+              <MobileNavLink href="/auth/register" isActive={hasMounted && isActive('/auth/register')}>
                 Sign Up
               </MobileNavLink>
             </>
