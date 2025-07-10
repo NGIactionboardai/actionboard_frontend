@@ -11,6 +11,8 @@ export default function Navbar() {
   const [activePath, setActivePath] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const calendarRef = useRef(null);
 
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -69,6 +71,19 @@ export default function Navbar() {
     return () => window.removeEventListener('resize', handleResize);
   }, [mobileMenuOpen, hasMounted]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+        setCalendarOpen(false);
+      }
+    };
+  
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // ✅ Now it's safe to check
   if (!hasMounted) return null;
 
@@ -107,39 +122,75 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`sticky top-0 z-50 bg-white ${scrolled ? 'shadow-md' : ''} transition-shadow duration-300`}>
+    <nav className={`sticky top-0 z-50 bg-gradient-to-r from-[#05065E] to-[#0A0DC4] ${scrolled ? 'shadow-md' : ''} transition-shadow duration-300`}>
+
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-20">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-indigo-600 hover:text-indigo-800 transition-colors">NGI MS</span>
+            <img src="/ab-main-logo.png" alt="AB Logo" className="h-12 w-12 rounded-full bg-white p-1" />
+            <span className="text-white italic font-bold text-2xl ml-5">ActionBoard AI</span>
             </Link>
           </div>
           
           {/* Desktop menu */}
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            <div className="flex space-x-1 md:space-x-4">
+            <div className="flex items-center space-x-1 md:space-x-4">
               {isAuthenticated ? (
                 // Authenticated user menu
                 <>
-                  <NavLink href="/calendar" isActive={hasMounted && isActive('/calendar')}>
-                    Calendar
-                  </NavLink>
+                  <div className="relative" ref={calendarRef}>
+                    <button
+                      type="button"
+                      onClick={() => setCalendarOpen((prev) => !prev)}
+                      className="px-3 py-2 rounded-md text-sm font-medium focus:bg-gray-50 hover:bg-gray-50 focus:text-gray-700 text-white hover:text-gray-700 transition-colors"
+                    >
+                      Calendar
+                    </button>
+
+                    {calendarOpen && (
+                      <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                        <div className="py-1 text-sm text-gray-700">
+                          <Link
+                            href="/calendar"
+                            className="block px-4 py-2 hover:bg-gray-100"
+                            onClick={() => setCalendarOpen(false)}
+                          >
+                            Personal
+                          </Link>
+                          <Link
+                            href="/calendar/org1"
+                            className="block px-4 py-2 hover:bg-gray-100"
+                            onClick={() => setCalendarOpen(false)}
+                          >
+                            Organization 1
+                          </Link>
+                          <Link
+                            href="/calendar/org2"
+                            className="block px-4 py-2 hover:bg-gray-100"
+                            onClick={() => setCalendarOpen(false)}
+                          >
+                            Organization 2
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
             
                   {/* User profile dropdown */}
                   <div className="relative" ref={dropdownRef}>
                     <button
                       type="button"
-                      className="flex items-center space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:bg-gray-50 px-3 py-2 transition-colors"
+                      className="flex items-center space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:bg-gray-50 hover:bg-gray-50 focus:text-gray-700 text-white hover:text-gray-700 px-3 py-2 transition-colors"
                       onClick={() => setDropdownOpen(!dropdownOpen)}
                       aria-expanded={dropdownOpen}
                       aria-haspopup="true"
                     >
                       {/* User avatar */}
-                      <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-medium">
+                      <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center text-white text-sm font-medium">
                         {getUserInitials()}
                       </div>
-                      <span className="text-gray-700 font-medium">
+                      <span className="font-medium">
                         {getUserDisplayName()}
                       </span>
                       {/* Dropdown arrow */}
@@ -289,8 +340,8 @@ function NavLink({ href, children, isActive }) {
       href={href} 
       className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
         isActive 
-          ? 'text-indigo-700 bg-indigo-50' 
-          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+          ? 'text-white bg-indigo-50' 
+          : 'text-white hover:text-gray-700 hover:bg-gray-50'
       }`}
     >
       {children}
