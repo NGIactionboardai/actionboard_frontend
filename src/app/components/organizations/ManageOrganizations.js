@@ -16,6 +16,9 @@ import {
   selectOrganizationSuccessMessage,
   selectCurrentOrganization
 } from '../../../redux/auth/organizationSlice'; // Adjust import path as needed
+import { Popover } from '@headlessui/react';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
+
 
 /**
  * ManageOrganizations Component
@@ -41,7 +44,7 @@ import {
  * @param {string} [props.viewMeetingsPath] - Custom path for view meetings link
  */
 const ManageOrganizations = ({
-  title = "Manage Organizations",
+  title = "Please Choose your Organizations",
   description = "Create, edit, and manage your organizations",
   createButtonText = "Create Organization",
   onOrganizationSelect,
@@ -186,15 +189,14 @@ const ManageOrganizations = ({
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="flex-1 min-w-0">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+          <h2 className="text-2xl font-bold pb-1 leading-7 text-gray-900 sm:text-3xl sm:truncate">
             {title}
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          {/* <p className="mt-1 text-sm text-gray-500">
             {description}
-          </p>
+          </p> */}
         </div>
-        <div className="mt-4 flex space-x-3 md:mt-0 md:ml-4">
-          {/* Create Organization Button */}
+        {/* <div className="mt-4 flex space-x-3 md:mt-0 md:ml-4">
           <button
             onClick={openCreateModal}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -204,7 +206,7 @@ const ManageOrganizations = ({
             </svg>
             {createButtonText}
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Success/Error Messages */}
@@ -261,7 +263,7 @@ const ManageOrganizations = ({
       )}
 
       {/* Organizations List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div className="sm:rounded-lg">
         {loading ? (
           <div className="px-4 py-12 text-center">
             <div className="inline-flex items-center">
@@ -272,92 +274,68 @@ const ManageOrganizations = ({
               Loading organizations...
             </div>
           </div>
-        ) : filteredOrganizations.length > 0 ? (
-          <ul className="divide-y divide-gray-200">
-            {filteredOrganizations.map((org) => (
-              <li key={org.org_id || org.id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center flex-1">
-                    <div className="flex-1">
-                      <div className="flex items-center">
-                        <h3 className="text-lg font-medium text-gray-900">{org.name}</h3>
-                        {(currentOrganization?.org_id === org.org_id || 
-                          currentOrganization?.id === org.id || 
-                          currentOrganization?.org_id === org.id ||
-                          currentOrganization?.id === org.org_id) && (
-                          <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Current
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        Organization ID: {org.org_id || org.id}
-                      </p>
-                      {org.created_at && (
-                        <p className="text-sm text-gray-500">
-                          Created: {new Date(org.created_at).toLocaleDateString()}
-                        </p>
-                      )}
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+              {/* Add Organization Card */}
+              <div
+                onClick={openCreateModal}
+                className="flex flex-col justify-center items-center p-6 rounded-lg border border-gray-300 shadow hover:shadow-md cursor-pointer transition bg-white"
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-white text-2xl font-bold">
+                  +
+                </div>
+                <p className="mt-4 text-sm font-medium text-gray-600">Add Organization</p>
+              </div>
+
+              {/* Organization Cards */}
+              {filteredOrganizations.map((org) => (
+                <div key={org.org_id || org.id} className="relative group">
+                  {/* Card clickable area */}
+                  <Link
+                    href={`${viewMeetingsPath}/${org.org_id || org.id}`}
+                    className="block h-40 p-4 rounded-xl shadow-md bg-white border border-gray-200 hover:shadow-xl hover:scale-[1.015] transition-transform duration-200 ease-in-out"
+                  >
+                    <div className="flex items-center justify-center h-full">
+                      <h3 className="text-xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-[#0A0DC4] to-[#8B0782]">
+                        {org.name}
+                      </h3>
                     </div>
-                  </div>
-                  {showActions && (
-                    <div className="flex items-center space-x-2">
-                      {!(currentOrganization?.org_id === org.org_id || 
-                         currentOrganization?.id === org.id || 
-                         currentOrganization?.org_id === org.id ||
-                         currentOrganization?.id === org.org_id) && (
+                  </Link>
+
+                  {/* Popover menu */}
+                  <Popover className="absolute top-2 right-2 z-10">
+                    <Popover.Button
+                      className="bg-white p-1 rounded-full hover:bg-gray-100 focus:outline-none"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <EllipsisVerticalIcon className="h-6 w-6 text-gray-500" />
+                    </Popover.Button>
+                    <Popover.Panel className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
+                      <div className="py-1 text-sm text-gray-700">
                         <button
                           onClick={() => handleSetCurrentOrg(org)}
-                          className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
                         >
-                          Set Current
+                          Set as Current
                         </button>
-                      )}
-                      <Link
-                        href={`${viewMeetingsPath}/${org.org_id || org.id}`}
-                        className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                      >
-                        View Meetings
-                      </Link>
-                      <button
-                        onClick={() => openEditModal(org)}
-                        className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => openDeleteModal(org)}
-                        className="inline-flex items-center px-3 py-1 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
+                        <button
+                          onClick={() => openEditModal(org)}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => openDeleteModal(org)}
+                          className="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </Popover.Panel>
+                  </Popover>
                 </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="px-4 py-12 text-center">
-            <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No organizations found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? 'Try adjusting your search term.' : 'Get started by creating your first organization.'}
-            </p>
-            <div className="mt-6">
-              <button
-                onClick={openCreateModal}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                {createButtonText}
-              </button>
+              ))}
             </div>
-          </div>
         )}
       </div>
 
@@ -366,7 +344,7 @@ const ManageOrganizations = ({
         <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div 
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+              className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity" 
               aria-hidden="true"
               onClick={closeModals}
             ></div>
@@ -424,7 +402,7 @@ const ManageOrganizations = ({
         <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="edit-modal-title" role="dialog" aria-modal="true">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div 
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+              className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity" 
               aria-hidden="true"
               onClick={closeModals}
             ></div>
@@ -482,7 +460,7 @@ const ManageOrganizations = ({
         <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="delete-modal-title" role="dialog" aria-modal="true">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div 
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+              className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity" 
               aria-hidden="true"
               onClick={closeModals}
             ></div>
