@@ -1,4 +1,4 @@
-// utils/api.js or app/lib/api.js
+// app/utils/api.js 
 
 export const getAuthHeaders = (token) => {
   const fallbackToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
