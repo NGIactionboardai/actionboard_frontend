@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { userLogout, selectIsAuthenticated, selectUser, selectAuthLoading } from '../../../redux/auth/authSlices';
+import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -13,6 +14,9 @@ export default function Navbar() {
   const [hasMounted, setHasMounted] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const calendarRef = useRef(null);
+  const [orgs, setOrgs] = useState([]);
+
+  const authToken = useSelector((state) => state.auth?.token);
 
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -83,6 +87,25 @@ export default function Navbar() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    const fetchOrgs = async () => {
+      try {
+        const headers = getAuthHeaders(authToken);
+        const response = await makeApiCall(`https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/`, {
+          headers,
+        });
+        const data = await response.json();
+        setOrgs(data || []);
+      } catch (err) {
+        console.error('Error fetching organizations:', err);
+      }
+    };
+  
+    if (isAuthenticated) {
+      fetchOrgs();
+    }
+  }, [isAuthenticated, authToken]);
 
   // ✅ Now it's safe to check
   if (!hasMounted) return null;
@@ -158,20 +181,16 @@ export default function Navbar() {
                           >
                             Personal
                           </Link>
-                          <Link
-                            href="/calendar/org1"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                            onClick={() => setCalendarOpen(false)}
-                          >
-                            Organization 1
-                          </Link>
-                          <Link
-                            href="/calendar/org2"
-                            className="block px-4 py-2 hover:bg-gray-100"
-                            onClick={() => setCalendarOpen(false)}
-                          >
-                            Organization 2
-                          </Link>
+                          {orgs.map((org) => (
+                            <Link
+                              key={org.org_id}
+                              href={`/calendar/${org.org_id}`}
+                              className="block px-4 py-2 hover:bg-gray-100"
+                              onClick={() => setCalendarOpen(false)}
+                            >
+                              {org.name}
+                            </Link>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -338,7 +357,7 @@ function NavLink({ href, children, isActive }) {
   return (
     <Link 
       href={href} 
-      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+      className={`px-3 py-2 rounded-md text-lg font-bold transition-colors ${
         isActive 
           ? 'text-white bg-indigo-50' 
           : 'text-white hover:text-gray-700 hover:bg-gray-50'
