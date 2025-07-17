@@ -1,29 +1,25 @@
-// components/meetings/MeetingsFilters.js
 'use client';
 
 const MeetingsFilters = ({
   searchTerm,
   setSearchTerm,
-  sourceFilter,
-  setSourceFilter,
   statusFilter,
   setStatusFilter,
   dateFilter,
   handleDateFilterChange,
   clearFilters,
-  uniqueSources,
   uniqueStatuses
 }) => {
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
-      <div className="px-4 py-5 sm:px-6">
-        {/* Search and main filters row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+    <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+      <div className="px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
+
           {/* Search input */}
-          <div className="relative rounded-md shadow-sm">
+          <div className="relative w-full md:w-64">
             <input
               type="text"
-              className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md"
+              className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md"
               placeholder="Search meetings..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -34,30 +30,14 @@ const MeetingsFilters = ({
               </svg>
             </div>
           </div>
-          
-          {/* Source filter */}
-          <div>
-            <label htmlFor="source" className="block text-xs font-medium text-gray-500 mb-1">Source</label>
-            <select
-              id="source"
-              name="source"
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-              value={sourceFilter}
-              onChange={(e) => setSourceFilter(e.target.value)}
-            >
-              {uniqueSources.map((source) => (
-                <option key={source} value={source}>{source}</option>
-              ))}
-            </select>
-          </div>
-          
+
           {/* Status filter */}
-          <div>
+          <div className="w-full md:w-40">
             <label htmlFor="status" className="block text-xs font-medium text-gray-500 mb-1">Status</label>
             <select
               id="status"
               name="status"
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              className="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -69,41 +49,41 @@ const MeetingsFilters = ({
             </select>
           </div>
 
-          {/* Clear filters button */}
-          <div className="flex items-end">
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Clear Filters
-            </button>
-          </div>
-        </div>
-
-        {/* Date range filter row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="startDate" className="block text-xs font-medium text-gray-500 mb-1">From Date</label>
+          {/* From Date */}
+          <div className="w-full md:w-44">
+            <label htmlFor="startDate" className="block text-xs font-medium text-gray-500 mb-1">From</label>
             <input
               type="date"
               id="startDate"
               name="startDate"
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              className="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               value={dateFilter.startDate}
               onChange={handleDateFilterChange}
             />
           </div>
-          <div>
-            <label htmlFor="endDate" className="block text-xs font-medium text-gray-500 mb-1">To Date</label>
+
+          {/* To Date */}
+          <div className="w-full md:w-44">
+            <label htmlFor="endDate" className="block text-xs font-medium text-gray-500 mb-1">To</label>
             <input
               type="date"
               id="endDate"
               name="endDate"
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              className="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               value={dateFilter.endDate}
               onChange={handleDateFilterChange}
             />
+          </div>
+
+          {/* Clear Button */}
+          <div className="w-full md:w-auto">
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mt-1 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500"
+            >
+              Clear
+            </button>
           </div>
         </div>
       </div>

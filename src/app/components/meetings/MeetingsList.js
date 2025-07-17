@@ -8,11 +8,13 @@ const MeetingsList = ({
   loading, 
   isZoomConnected, 
   organizationId,
+  orgName,
   onZoomConnectionClick,
   onCreateMeetingClick,
   clearFilters,
   formatMeetingDateTime,
-  getMeetingStatus
+  getMeetingStatus,
+  getTranscriptionStatus
 }) => {
   if (loading) {
     return (
@@ -46,10 +48,10 @@ const MeetingsList = ({
               </h3>
               <p className="mt-1 text-sm text-gray-500">
                 {!isZoomConnected 
-                  ? `You need to connect your Zoom account to create and view meetings for organization ${organizationId}.`
+                  ? `You need to connect your Zoom account to create and view meetings for organization ${orgName}.`
                   : 'Try adjusting your filters or create a new meeting.'}
               </p>
-              <div className="mt-6">
+              {/* <div className="mt-6">
                 {!isZoomConnected ? (
                   <button
                     onClick={onZoomConnectionClick}
@@ -73,7 +75,7 @@ const MeetingsList = ({
                     </button>
                   </>
                 )}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -84,71 +86,103 @@ const MeetingsList = ({
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
       <div className="border-t border-gray-200">
-        <ul className="divide-y divide-gray-200">
-          {filteredMeetings.map((meeting) => {
-            const status = getMeetingStatus(meeting);
-            return (
-              <li key={meeting.id}>
-                <Link href={`/meeting/${meeting.meeting_id || meeting.id}`}>
-                  <div className="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <p className="text-sm font-medium text-indigo-600 truncate">{meeting.topic}</p>
-                        <div className="ml-2 flex-shrink-0 flex">
-                          <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 
-                              status === 'started' ? 'bg-green-100 text-green-800' : 
-                              'bg-gray-100 text-gray-800'}`}>
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </p>
-                        </div>
+
+      <ul className="px-4 py-4">
+        {filteredMeetings.map((meeting) => {
+          const status = getMeetingStatus(meeting);
+          const transcriptStatus = getTranscriptionStatus(meeting);
+
+          const transcriptLabel = (() => {
+            if (transcriptStatus === 'completed') return 'Transcribed';
+            if (transcriptStatus === 'pending' || transcriptStatus === 'processing') return 'Processing';
+            if (transcriptStatus === 'not_found') return 'Not Transcribed';
+            return 'Unknown';
+          })();
+
+          const transcriptBadgeClass = (() => {
+            if (transcriptLabel === 'Transcribed') return 'bg-green-100 text-green-800';
+            if (transcriptLabel === 'Processing') return 'bg-yellow-100 text-yellow-800';
+            if (transcriptLabel === 'Not Transcribed') return 'bg-gray-100 text-gray-800';
+            return 'bg-red-100 text-red-800';
+          })();
+
+          return (
+            <li
+              key={meeting.id}
+              className="mb-4 bg-white hover:bg-gray-50 p-4 rounded-lg border border-gray-500 hover:shadow-md transition cursor-pointer"
+            >
+              <Link href={`/meeting/${meeting.meeting_id || meeting.id}`} className="block">
+                <div className="flex justify-between items-start">
+                  {/* LEFT: Meeting Info */}
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium text-indigo-600 truncate">{meeting.topic}</p>
+                    {/* <p className="text-sm text-gray-500">Meeting ID: {meeting.id}</p> */}
+                    <p className="text-sm text-gray-500">
+                      {formatMeetingDateTime(meeting.start_time)} • {meeting.duration || 'N/A'} min
+                    </p>
+
+                    {/* Status Section (Stacked) */}
+                    <div className="mt-2 space-y-1">
+                      {/* Meeting Status */}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-900">Meeting Status:</span>
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                          ${status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
+                            status === 'started' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'}`}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span>
                       </div>
-                      <div className="ml-2 flex-shrink-0 flex">
-                        <span className="inline-flex items-center text-xs text-gray-500">
-                          {formatMeetingDateTime(meeting.start_time)} • {meeting.duration || 'N/A'} min
+
+                      {/* Transcription Status */}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-900">Transcription Status:</span>
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${transcriptBadgeClass}`}>
+                          {transcriptLabel}
                         </span>
                       </div>
                     </div>
-                    <div className="mt-2 sm:flex sm:justify-between">
-                      <div className="sm:flex">
-                        <p className="flex items-center text-sm text-gray-500">
-                          <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          Meeting ID: {meeting.id}
-                        </p>
-                      </div>
-                      <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 space-x-2">
-                      {meeting.join_url && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(meeting.join_url, '_blank', 'noopener,noreferrer');
-                          }}
-                          className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          Join Meeting
-                        </button>
-                      )}                                  
-                        <span className="inline-flex items-center text-xs text-gray-400">
-                          <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                          </svg>
-                          View Details
-                        </span>
-                      </div>
-                    </div>
+
+                    {/* Agenda */}
                     {meeting.agenda && (
-                      <div className="mt-2">
-                        <p className="text-sm text-gray-600">{meeting.agenda}</p>
-                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{meeting.agenda}</p>
                     )}
                   </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+
+                  {/* RIGHT: Action Buttons */}
+                  <div className="flex flex-col items-center justify-center space-y-2 ml-4">
+                    {meeting.join_url && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          window.open(meeting.join_url, '_blank', 'noopener,noreferrer');
+                        }}
+                        className="min-w-[140px] px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-[#f9f1fc] hover:bg-[#f0e6f7] transition"
+                      >
+                        Join
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Your view details logic
+                      }}
+                      className="min-w-[140px] px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-[#f9f1fc] hover:bg-[#f0e6f7] transition"
+                    >
+                      More
+                    </button>
+                  </div>
+
+
+                </div>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+
       </div>
     </div>
   );
