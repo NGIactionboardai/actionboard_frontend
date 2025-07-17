@@ -165,7 +165,7 @@ export default function MeetingDetails() {
         // Check if transcript already exists in the response
         if (data.transcript) {
           if (typeof data.transcript === 'object') {
-            setTranscript(data.transcript.full_transcript);
+            setTranscript(data.transcript.utterances || []);
             setSummary(data.transcript.summary || null);
             setMeeting_insights(data.transcript.meeting_insights || null);
           } else {
@@ -510,34 +510,37 @@ export default function MeetingDetails() {
   };
 
   const getMeetingStatus = (meeting) => {
-    if (!meeting?.start_time) return 'scheduled';
+
+    return meeting?.status
+    // if (!meeting?.start_time) return 'scheduled';
     
-    const now = new Date();
-    const startTime = new Date(meeting.start_time);
-    const endTime = new Date(startTime.getTime() + (meeting.duration * 60000));
+    // const now = new Date();
+    // const startTime = new Date(meeting.start_time);
+    // const endTime = new Date(startTime.getTime() + (meeting.duration * 60000));
     
-    if (now < startTime) return 'scheduled';
-    if (now >= startTime && now <= endTime) return 'started';
-    return 'ended';
+    // if (now < startTime) return 'scheduled';
+    // if (now >= startTime && now <= endTime) return 'started';
+    // return 'ended';
   };
 
   const isMeetingPast = (meeting) => {
-    if (!meeting?.start_time) return false;
+
+    if (meeting?.status === 'ended') return true
+    else return false
+
+    // if (!meeting?.start_time) return false;
     
-    const now = new Date();
-    const startTime = new Date(meeting.start_time);
-    const endTime = new Date(startTime.getTime() + (meeting.duration * 60000));
+    // const now = new Date();
+    // const startTime = new Date(meeting.start_time);
+    // const endTime = new Date(startTime.getTime() + (meeting.duration * 60000));
     
-    return now > endTime;
+    // return now > endTime;
   };
 
   const isMeetingFuture = (meeting) => {
-    if (!meeting?.start_time) return true;
-    
-    const now = new Date();
-    const startTime = new Date(meeting.start_time);
-    
-    return now < startTime;
+    if (meeting?.status == "scheduled") return true;
+    else return false
+
   };
 
   const hasTranscript = () => {
@@ -705,9 +708,12 @@ export default function MeetingDetails() {
           Back
         </button>
         <div className="mt-2">
-          <h1 className="text-3xl font-bold leading-7 text-gray-900 sm:truncate">
-            {meeting.topic || 'Meeting Details'}
+          <h1 className="text-lg font-bold leading-7 text-gray-900 sm:truncate">
+            Org: {meeting.organisation.name || "Organization"}
           </h1>
+          <h3 className="text-lg font-bold leading-7 text-gray-900 sm:truncate">
+            {meeting.topic || 'Meeting Details'}
+          </h3>
           <div className="mt-2 flex items-center">
             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
               ${status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 
@@ -715,12 +721,52 @@ export default function MeetingDetails() {
                 'bg-gray-100 text-gray-800'}`}>
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </span>
+            {/* Transcription Status Badge */}
+            <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+              ${transcriptionStatus === 'completed'
+                ? 'bg-green-100 text-green-800'
+                : transcriptionStatus === 'not_found'
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-indigo-100 text-indigo-800'}`}>
+              {transcriptionStatus === 'completed'
+                ? 'Transcribed'
+                : transcriptionStatus === 'not_found'
+                ? 'Not Transcribed'
+                : 'In Progress'}
+            </span>
             <span className="ml-3 text-sm text-gray-500">
               Meeting ID: {meeting.meeting_id || meeting.id}
             </span>
           </div>
         </div>
       </div>
+
+      {transcriptionStatus === 'pending' || transcriptionStatus === 'processing' ? (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 rounded-md shadow mb-6">
+          <p className="font-medium">Transcription in progress.</p>
+          <p className="text-sm mt-1">
+            You'll receive a notification once it’s complete. Please check back later.
+          </p>
+        </div>
+      ) : null}
+
+      {/* Show auto-transcript save prompt if needed */}
+      {transcriptionStatus === 'completed' && autoTranscribed && !userConfirmed && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-md">
+          <p className="text-sm text-gray-700">
+            This transcript was auto-generated.
+            {hoursLeft !== null && hoursLeft > 0 && (
+              <> You have approximately <strong>{hoursLeft} hour{hoursLeft !== 1 && 's'}</strong> left to keep it.</>
+            )}
+          </p>
+          <button
+            onClick={handleKeepTranscript}
+            className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Save Transcript
+          </button>
+        </div>
+      )}
 
       {/* Meeting Information */}
       <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
@@ -778,23 +824,7 @@ export default function MeetingDetails() {
 
       
 
-      {/* Show auto-transcript save prompt if needed */}
-      {transcriptionStatus === 'completed' && autoTranscribed && !userConfirmed && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-md">
-          <p className="text-sm text-gray-700">
-            This transcript was auto-generated.
-            {hoursLeft !== null && hoursLeft > 0 && (
-              <> You have approximately <strong>{hoursLeft} hour{hoursLeft !== 1 && 's'}</strong> left to keep it.</>
-            )}
-          </p>
-          <button
-            onClick={handleKeepTranscript}
-            className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
-          >
-            Save Transcript
-          </button>
-        </div>
-      )}
+      
 
       {/* Action Buttons */}
       {isMeetingPast(meeting) && (
@@ -980,10 +1010,7 @@ export default function MeetingDetails() {
 
 
       {(transcriptionStatus === 'pending' || transcriptionStatus === 'processing') ? (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 rounded-md shadow mb-6">
-          <p className="font-medium">Transcription in progress.</p>
-          <p className="text-sm mt-1">You'll receive a notification once it’s complete. Please check back later.</p>
-        </div>
+        null
       ) : (transcript || summary || meeting_insights) && (
         
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -1032,13 +1059,36 @@ export default function MeetingDetails() {
           {/* Tab Content */}
           <div className="px-4 py-5 sm:px-6">
             {/* Transcript Tab */}
-            {activeTab === 'transcript' && transcript && (
+            {activeTab === 'transcript' && Array.isArray(transcript) && (
               <div>
                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Meeting Transcript</h3>
-                <div className="bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
-                  <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
-                    {transcript}
-                  </pre>
+                <div className="bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto space-y-4">
+                {transcript.map((utterance, idx) => {
+                  const formatTime = (ms) => {
+                    const totalSeconds = Math.floor(ms / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    return [hours, minutes, seconds]
+                      .map((val) => String(val).padStart(2, '0'))
+                      .join(':');
+                  };
+
+                  return (
+                    <div key={idx}>
+                      <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                        <span className="font-semibold text-indigo-700">
+                          Speaker {utterance.speaker}
+                        </span>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <span className="text-gray-950">[{formatTime(utterance.start)}]</span>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        {utterance.text}
+                      </p>
+                    </div>
+                  );
+                })}
+
                 </div>
               </div>
             )}
@@ -1135,20 +1185,12 @@ export default function MeetingDetails() {
 
 
       {showUploadModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity z-50 flex items-center justify-center">
           <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             {/* Icon Header */}
             <div className="flex items-center justify-center mb-4">
-              <div className="bg-blue-100 rounded-full p-3">
-                <svg
-                  className="h-6 w-6 text-blue-600"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0a4 4 0 018 0v12m-8 0a4 4 0 01-8 0V4m8 0a4 4 0 118 0v12" />
-                </svg>
+              <div className="bg-blue-100 rounded-full p-0">
+                <img src="/icons/ab-upload-icon.png" alt="Edit" className="w-12 h-12" />
               </div>
             </div>
 
@@ -1169,7 +1211,7 @@ export default function MeetingDetails() {
             <button
               onClick={handleUploadTranscribe}
               disabled={transcribing || isTranscriptionOngoing}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset- disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {transcribing ? (
                 <>
