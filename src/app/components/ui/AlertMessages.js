@@ -43,7 +43,7 @@ const AlertMessages = ({
       )}
 
       {/* Zoom Connection Status Warning */}
-      {!isZoomConnected && (
+      {/* {!isZoomConnected && (
         <div className="mb-4 rounded-md bg-yellow-50 p-4">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -64,7 +64,7 @@ const AlertMessages = ({
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 };
