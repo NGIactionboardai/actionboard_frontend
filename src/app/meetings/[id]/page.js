@@ -17,10 +17,11 @@ import ZoomConnection from '../../components/ZoomConnection';
 import { useMeetings, useMeetingsFilters, useMeetingsModal } from '../../hooks/useMeetings';
 
 // Utils
-import { formatMeetingDateTime, getMeetingStatus } from '../../utils/meetingsUtils';
+import { formatMeetingDateTime, getMeetingStatus, getTranscriptionStatus } from '../../utils/meetingsUtils';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import MeetingsSidebar from '@/app/components/meetings/MeetingsSidebar';
 
 export default function Meetings() {
   const params = useParams();
@@ -100,65 +101,79 @@ export default function Meetings() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header Section */}
-      <MeetingsHeader
-        organizationId={organizationId}
-        orgName={orgName}
-        onZoomConnectionClick={handleZoomConnectionClick}
-        onCreateMeetingClick={handleCreateMeetingClick}
-      />
-
-      {/* Alert Messages Section */}
-      <AlertMessages
-        successMessage={successMessage}
-        error={zoomError}
-        isZoomConnected={isZoomConnected}
-        organizationId={organizationId}
-        onZoomConnectionClick={handleZoomConnectionClick}
-      />
-
-      {/* Filters Section */}
-      <MeetingsFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        sourceFilter={sourceFilter}
-        setSourceFilter={setSourceFilter}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        dateFilter={dateFilter}
-        handleDateFilterChange={handleDateFilterChange}
-        clearFilters={clearFilters}
-        uniqueSources={uniqueSources}
-        uniqueStatuses={uniqueStatuses}
-      />
-
-      {/* Meetings List Section */}
-      <MeetingsList
-        filteredMeetings={filteredMeetings}
-        loading={zoomLoading}
-        isZoomConnected={isZoomConnected}
-        organizationId={organizationId}
-        onZoomConnectionClick={handleZoomConnectionClick}
-        onCreateMeetingClick={handleCreateMeetingClick}
-        clearFilters={clearFilters}
-        formatMeetingDateTime={formatMeetingDateTime}
-        getMeetingStatus={getMeetingStatus}
-      />
-
-      {/* Modals */}
-      <CreateMeetingModal
-        isOpen={isCreateMeetingModalOpen}
-        onClose={() => setIsCreateMeetingModalOpen(false)}
-        organizationId={organizationId}
-        isZoomConnected={isZoomConnected}
-      />
-
-      <ZoomConnection
-        isOpen={isZoomConnectionModalOpen}
-        onClose={() => setIsZoomConnectionModalOpen(false)}
-        organizationId={organizationId}
-      />
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <div className="hidden md:block">
+        <MeetingsSidebar
+          currentOrgId={organizationId}
+          organizationId={organizationId}
+          onZoomConnectionClick={handleZoomConnectionClick}
+          onCreateMeetingClick={handleCreateMeetingClick}
+          isZoomConnected={isZoomConnected}
+          orgName={orgName}
+        />
+      </div>
+  
+      {/* Main Content */}
+      <div className="flex-1 p-6 max-w-6xl mx-auto">
+        <MeetingsHeader
+          organizationId={organizationId}
+          orgName={orgName}
+          onZoomConnectionClick={handleZoomConnectionClick}
+          onCreateMeetingClick={handleCreateMeetingClick}
+        />
+  
+        <AlertMessages
+          successMessage={successMessage}
+          error={zoomError}
+          isZoomConnected={isZoomConnected}
+          organizationId={organizationId}
+          onZoomConnectionClick={handleZoomConnectionClick}
+        />
+  
+        <MeetingsFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          sourceFilter={sourceFilter}
+          setSourceFilter={setSourceFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          dateFilter={dateFilter}
+          handleDateFilterChange={handleDateFilterChange}
+          clearFilters={clearFilters}
+          uniqueSources={uniqueSources}
+          uniqueStatuses={uniqueStatuses}
+        />
+  
+        <MeetingsList
+          filteredMeetings={filteredMeetings}
+          loading={zoomLoading}
+          isZoomConnected={isZoomConnected}
+          orgName={orgName}
+          organizationId={organizationId}
+          onZoomConnectionClick={handleZoomConnectionClick}
+          onCreateMeetingClick={handleCreateMeetingClick}
+          clearFilters={clearFilters}
+          formatMeetingDateTime={formatMeetingDateTime}
+          getMeetingStatus={getMeetingStatus}
+          getTranscriptionStatus={getTranscriptionStatus}
+        />
+  
+        {/* Modals */}
+        <CreateMeetingModal
+          isOpen={isCreateMeetingModalOpen}
+          onClose={() => setIsCreateMeetingModalOpen(false)}
+          organizationId={organizationId}
+          isZoomConnected={isZoomConnected}
+        />
+  
+        <ZoomConnection
+          isOpen={isZoomConnectionModalOpen}
+          onClose={() => setIsZoomConnectionModalOpen(false)}
+          organizationId={organizationId}
+        />
+      </div>
     </div>
   );
+  
 }
