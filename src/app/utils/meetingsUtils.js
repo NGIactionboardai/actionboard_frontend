@@ -16,16 +16,20 @@ export const formatMeetingDateTime = (dateTime) => {
    * @returns {string} Meeting status: 'scheduled', 'started', or 'ended'
    */
   export const getMeetingStatus = (meeting) => {
-    if (!meeting.start_time) return 'scheduled';
+    // if (!meeting.start_time) return 'scheduled';
     
-    const now = new Date();
-    const startTime = new Date(meeting.start_time);
-    const endTime = new Date(startTime.getTime() + (meeting.duration * 60000));
+    // const now = new Date();
+    // const startTime = new Date(meeting.start_time);
+    // const endTime = new Date(startTime.getTime() + (meeting.duration * 60000));
     
-    if (now < startTime) return 'scheduled';
-    if (now >= startTime && now <= endTime) return 'started';
-    return 'ended';
+    // if (now < startTime) return 'scheduled';
+    // if (now >= startTime && now <= endTime) return 'started';
+    return meeting.status;
   };
+
+  export const getTranscriptionStatus = (meeting) => {
+    return meeting.transcription_status;
+  }
   
   /**
    * Get status badge color classes
