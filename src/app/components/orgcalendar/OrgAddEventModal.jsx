@@ -117,19 +117,18 @@ export default function OrgAddEventModal({
         start_time: convertToUTCISOString(selectedDate, startHour, startMinute, startAmpm),
         end_time: convertToUTCISOString(selectedDate, endHour, endMinute, endAmpm),
         event_type: 'organization',
-        org_id: orgId
+        org_id: orgId,
       };
-  
   
       const headers = getAuthHeaders();
       const endpoint = createZoom
-            ? '/api/calendar/events/create-with-meeting/'
-            : '/api/calendar/events/';
+        ? '/api/calendar/events/create-with-meeting/'
+        : '/api/calendar/events/';
   
       const res = await makeApiCall(`https://actionboard-ai-backend.onrender.com${endpoint}`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
   
       if (res.ok) {
@@ -139,8 +138,21 @@ export default function OrgAddEventModal({
         resetForm();
         onClose();
       } else {
-        console.error('Failed to create event.');
-        toast.error('Failed to create event.');
+        const errorData = await res.json();
+        if (
+          errorData?.error?.type === 'overlap_error'
+        ) {
+            toast(errorData.error.message || 'Another event overlaps with this time range.', {
+              icon: '⚠️',
+              style: {
+                borderRadius: '8px',
+                background: '#000',
+                color: '#ffcc00',
+              },
+            });
+        } else {
+          toast.error('Failed to create event.');
+        }
       }
     } catch (err) {
       console.error('Error creating event:', err);

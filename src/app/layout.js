@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
               {/* <main className="p-0">{children}</main> */}
               <main className="p-0">{children}</main>
               <Toaster 
-                position="top-right" 
+                position="top-center" 
                 reverseOrder={false}
                 toastOptions={{
                   // Default options for all toasts

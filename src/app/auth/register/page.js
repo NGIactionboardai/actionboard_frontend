@@ -14,6 +14,7 @@ import {
   selectSuccessMessage,
   selectAuthLoading
 } from '../../../redux/auth/authSlices';
+import GoogleLoginButton from '@/app/components/auth/GoogleLoginButton';
 
 export default function RegistrationPage() {
   const dispatch = useDispatch();
@@ -234,7 +235,10 @@ export default function RegistrationPage() {
           )}
 
           {/* Google Sign Up Button */}
-          <button
+          <div className="w-full mb-6">
+              <GoogleLoginButton />
+          </div>
+          {/* <button
             onClick={handleGoogleSignUp}
             type="button"
             disabled={loading}
@@ -242,7 +246,7 @@ export default function RegistrationPage() {
           >
             <GoogleIcon />
             <span>Continue with Google</span>
-          </button>
+          </button> */}
 
           {/* Divider */}
           <div className="relative mb-6">

@@ -8,8 +8,25 @@ const MeetingsFilters = ({
   dateFilter,
   handleDateFilterChange,
   clearFilters,
-  uniqueStatuses
+  uniqueStatuses,
+  loading
 }) => {
+
+  // if (loading) {
+  //   return (
+  //     <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6 p-4 animate-pulse">
+  //       <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
+  //         <div className="h-10 w-full md:w-64 bg-gray-200 rounded" />
+  //         <div className="h-10 w-full md:w-40 bg-gray-200 rounded" />
+  //         <div className="h-10 w-full md:w-44 bg-gray-200 rounded" />
+  //         <div className="h-10 w-full md:w-44 bg-gray-200 rounded" />
+  //         <div className="h-10 w-full md:w-24 bg-gray-200 rounded" />
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
       <div className="px-4 py-4 sm:px-6">

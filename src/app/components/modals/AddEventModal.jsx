@@ -13,7 +13,8 @@ export default function AddEventModal({
   organizations = [],
   onEventCreated,
   getAuthHeaders,
-  makeApiCall
+  makeApiCall,
+  isZoomConnected
 }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -145,8 +146,21 @@ export default function AddEventModal({
         resetForm();
         onClose();
       } else {
-        console.error('Failed to create event.');
-        toast.error('Failed to create event.');
+        const errorData = await res.json();
+  
+        if (errorData?.error?.type === 'overlap_error') {
+          toast('Another event overlaps with this time range.', {
+            icon: '⚠️',
+            style: {
+              borderRadius: '8px',
+              background: '#000',
+              color: '#ffcc00',
+            },
+          });
+        } else {
+          console.error('Failed to create event:', errorData);
+          toast.error('Failed to create event.');
+        }
       }
     } catch (err) {
       console.error('Error creating event:', err);
@@ -306,12 +320,17 @@ export default function AddEventModal({
                         ))}
                       </select>
   
-                      <label className="inline-flex items-center space-x-2 text-sm mt-2">
+                      <label
+                        className={`inline-flex items-center space-x-2 text-sm mt-2 transition-opacity ${
+                          !isZoomConnected ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
                         <input
                           type="checkbox"
                           checked={createZoom}
                           onChange={e => setCreateZoom(e.target.checked)}
                           className="rounded"
+                          disabled={!isZoomConnected}
                         />
                         <span className="flex items-center gap-1">
                           <img
@@ -322,6 +341,16 @@ export default function AddEventModal({
                           <span>Create Zoom Meeting</span>
                         </span>
                       </label>
+
+                      {!isZoomConnected && (
+                        <button
+                          type="button"
+                          onClick={() => window.location.href = '/configure-meeting-tools'}
+                          className="mt-1 ml-6 text-xs text-blue-600 hover:underline"
+                        >
+                          Connect Zoom
+                        </button>
+                      )}
                     </>
                   )}
   

@@ -26,7 +26,16 @@ export default function OrgSwitcher({
 
   const selected = options.find((org) => org.org_id === selectedOrg);
 
-  if (!selected) return null;
+  if (!selected) {
+    return (
+      <div className="mb-4">
+        <div className="h-4 w-24 bg-gray-200 rounded mb-2 animate-pulse" />
+        <div className="relative">
+          <div className="w-full h-10 bg-gray-200 rounded-md animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-4">

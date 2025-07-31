@@ -16,6 +16,7 @@ import {
   selectAuthLoading,
   selectIsAuthenticated
 } from '../../../redux/auth/authSlices';
+import GoogleLoginButton from '@/app/components/auth/GoogleLoginButton';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -166,7 +167,10 @@ export default function LoginPage() {
           )}
 
           {/* Google Login Button */}
-          <button
+            <div className="w-full mb-6">
+              <GoogleLoginButton />
+            </div>
+          {/* <button
             onClick={handleGoogleLogin}
             type="button"
             disabled={loading}
@@ -174,7 +178,7 @@ export default function LoginPage() {
           >
             <GoogleIcon />
             <span>Continue with Google</span>
-          </button>
+          </button> */}
 
           {/* Divider */}
           <div className="relative mb-6">

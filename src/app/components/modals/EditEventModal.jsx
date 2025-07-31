@@ -11,7 +11,8 @@ export default function EditEventModal({
   eventToEdit,
   getAuthHeaders,
   makeApiCall,
-  onEventUpdated
+  onEventUpdated,
+  isZoomConnected
 }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -77,7 +78,7 @@ export default function EditEventModal({
         title,
         description,
         start_time: convertToUTCISOString(selectedDate, startHour, startMinute, startAmpm),
-        end_time: convertToUTCISOString(selectedDate, endHour, endMinute, endAmpm)
+        end_time: convertToUTCISOString(selectedDate, endHour, endMinute, endAmpm),
       };
   
       const headers = getAuthHeaders();
@@ -86,7 +87,7 @@ export default function EditEventModal({
       const res = await makeApiCall(url, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
   
       if (res.ok) {
@@ -95,8 +96,21 @@ export default function EditEventModal({
         onEventUpdated?.(data);
         onClose();
       } else {
-        console.error('Failed to update event.');
-        toast.error('Failed to update event.');
+        const errorData = await res.json();
+  
+        if (errorData?.error?.type === 'overlap_error') {
+          toast('Another event overlaps with this time range.', {
+            icon: '⚠️',
+            style: {
+              borderRadius: '8px',
+              background: '#000',
+              color: '#ffcc00',
+            },
+          });
+        } else {
+          console.error('Failed to update event:', errorData);
+          toast.error('Failed to update event.');
+        }
       }
     } catch (err) {
       console.error('Error updating event:', err);

@@ -108,7 +108,7 @@ export default function Navbar() {
   }, [isAuthenticated, authToken]);
 
   // ✅ Now it's safe to check
-  if (!hasMounted) return null;
+  // if (!hasMounted) return null;
 
   const isActive = (path) => activePath === path;
 
@@ -158,6 +158,14 @@ export default function Navbar() {
           
           {/* Desktop menu */}
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          {!hasMounted ? (
+            // Show skeleton placeholder while mounting
+            <div className="flex items-center space-x-4 animate-pulse">
+              <div className="w-24 h-6 bg-white/30 rounded-md"></div>
+              <div className="w-24 h-6 bg-white/30 rounded-md"></div>
+            </div>
+          ) : (
+
             <div className="flex items-center space-x-1 md:space-x-4">
               {isAuthenticated ? (
                 // Authenticated user menu
@@ -225,42 +233,53 @@ export default function Navbar() {
 
                     {/* Dropdown menu */}
                     {dropdownOpen && (
-                      <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <div className="py-1">
-                          <Link
-                            href="/auth/profile"
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                            onClick={() => setDropdownOpen(false)}
-                          >
-                            <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                            </svg>
-                            Profile
-                          </Link>
-                          <Link
-                            href="/favorite-meetings"
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                            onClick={() => setDropdownOpen(false)}
-                          >
-                            <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                            </svg>
-                            Favorite Meetings
-                          </Link>
-                          <div className="border-t border-gray-100"></div>
-                          <button
-                            onClick={handleSignOut}
-                            disabled={authLoading}
-                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
-                          >
-                            <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
-                            </svg>
-                            {authLoading ? 'Signing Out...' : 'Logout'}
-                          </button>
+                        <div className="origin-top-right absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <div className="py-1">
+                            <Link
+                              href="/auth/profile"
+                              className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                              onClick={() => setDropdownOpen(false)}
+                            >
+                              <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                              </svg>
+                              Profile
+                            </Link>
+                            <Link
+                              href="/favorite-meetings"
+                              className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                              onClick={() => setDropdownOpen(false)}
+                            >
+                              <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                              </svg>
+                              Favorite Meetings
+                            </Link>
+                            <Link
+                              href="/configure-meeting-tools"
+                              className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                              onClick={() => setDropdownOpen(false)}
+                            >
+                              <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4 3a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h8a1 1 0 100-2H4z" clipRule="evenodd" />
+                              </svg>
+                              Configure Meeting Tools
+                            </Link>
+                            <div className="border-t border-gray-100"></div>
+                            <button
+                              onClick={handleSignOut}
+                              disabled={authLoading}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                            >
+                              <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
+                              </svg>
+                              {authLoading ? 'Signing Out...' : 'Logout'}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+
                   </div>
                 </>
               ) : (
@@ -275,6 +294,9 @@ export default function Navbar() {
                 </>
               )}
             </div>
+
+          )}
+            
           </div>
           
           {/* Mobile menu button */}
@@ -359,7 +381,7 @@ function NavLink({ href, children, isActive }) {
       href={href} 
       className={`px-3 py-2 rounded-md text-lg font-bold transition-colors ${
         isActive 
-          ? 'text-white bg-indigo-50' 
+          ? 'text-white bg-indigo-700' 
           : 'text-white hover:text-gray-700 hover:bg-gray-50'
       }`}
     >

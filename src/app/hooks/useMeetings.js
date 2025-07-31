@@ -30,7 +30,7 @@ export const useMeetings = (organizationId) => {
     if (organizationId) {
       console.log('Setting current organization and checking Zoom status...');
       dispatch(setCurrentOrganization(organizationId));
-      dispatch(getZoomConnectionStatus(organizationId));
+      dispatch(getZoomConnectionStatus());
     }
   }, [dispatch, organizationId]);
 

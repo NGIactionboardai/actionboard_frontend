@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 const MeetingsHeader = ({ organizationId, orgName }) => {
+
   return (
     <div className="md:flex md:items-center md:justify-between mb-8">
       <div className="flex-1 min-w-0">
@@ -19,12 +20,21 @@ const MeetingsHeader = ({ organizationId, orgName }) => {
 
         {/* Org title and ID */}
         <div className="mt-2">
-          <h2 className="text-2xl font-bold leading-7 pb-1 text-gray-900 sm:text-3xl sm:truncate">
-            Welcome to Org {orgName}
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Organization ID: {organizationId}
-          </p>
+          {!orgName ? (
+            <>
+              <div className="h-7 w-64 bg-gray-200 rounded animate-pulse mb-2" />
+              <div className="h-4 w-40 bg-gray-200 rounded animate-pulse" />
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold leading-7 pb-1 text-gray-900 sm:text-3xl sm:truncate">
+                Welcome to Org {orgName}
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Organization ID: {organizationId}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Welcome message */}

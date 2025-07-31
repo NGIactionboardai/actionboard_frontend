@@ -313,7 +313,7 @@ export default function OrgCalendar({ orgId }) {
 
     const handleEventDrop = async (info) => {
       const { event } = info;
-
+    
       if (event.extendedProps?.isOccupiedEvent) {
         toast.error("Occupied slots cannot be moved or updated.");
         info.revert(); // revert the drag/drop
@@ -349,7 +349,21 @@ export default function OrgCalendar({ orgId }) {
     
           toast.success('Event updated successfully');
         } else {
-          toast.error('Failed to update event');
+          const errorData = await res.json();
+    
+          if (errorData?.error?.type === 'overlap_error') {
+            toast(errorData.error.message || 'Another event overlaps with this time range.', {
+              icon: '⚠️',
+              style: {
+                borderRadius: '8px',
+                background: '#000',
+                color: '#ffcc00',
+              },
+            });
+          } else {
+            toast.error('Failed to update event');
+          }
+    
           info.revert();
         }
       } catch (err) {

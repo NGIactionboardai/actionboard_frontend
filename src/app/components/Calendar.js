@@ -15,11 +15,20 @@ import EditEventModal from './modals/EditEventModal';
 import toast from 'react-hot-toast';
 import SearchEventsComponent from './SearchEventsComponent';
 import EventReportsComponent from './EventReportsComponent';
+import { useMeetingsModal } from '../hooks/useMeetings';
+import { getZoomConnectionStatus, selectZoomIsConnected, selectZoomSuccessMessage } from '@/redux/auth/zoomSlice';
+import ZoomConfig from './ZoomConfig';
 
   
 
 
 export default function Calendar() {
+  
+  const dispatch = useDispatch();
+  const isZoomConnected = useSelector(selectZoomIsConnected);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  
+
     const [currentDate, setCurrentDate] = useState(new Date());
     const [currentView, setCurrentView] = useState('dayGridMonth');
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
@@ -83,6 +92,16 @@ export default function Calendar() {
         const api = calendarRef.current?.getApi();
         if (api) setCalendarTitle(api.view.title);
       };
+
+
+    // Check connection status on component mount
+    useEffect(() => {
+      if (isInitialLoad) {
+        dispatch(getZoomConnectionStatus()).finally(() => {
+          setIsInitialLoad(false);
+        });
+      }
+    }, [dispatch, isInitialLoad]);
 
 
     // Helper function to get auth headers (following your Redux pattern)
@@ -308,7 +327,21 @@ export default function Calendar() {
     
           toast.success('Event updated successfully');
         } else {
-          toast.error('Failed to update event');
+          const errorData = await res.json();
+    
+          if (errorData?.error?.type === 'overlap_error') {
+            toast('Another event overlaps with this time range.', {
+              icon: '⚠️',
+              style: {
+                borderRadius: '8px',
+                background: '#000',
+                color: '#ffcc00',
+              },
+            });
+          } else {
+            toast.error('Failed to update event');
+          }
+    
           info.revert();
         }
       } catch (err) {
@@ -896,6 +929,7 @@ export default function Calendar() {
               
 
               <AddEventModal
+                isZoomConnected={isZoomConnected}
                 isOpen={isAddModalOpen}
                 onClose={() => {
                   setIsAddModalOpen(false);
@@ -965,6 +999,7 @@ export default function Calendar() {
 
 
               <EditEventModal
+                isZoomConnected={isZoomConnected}
                 isOpen={isEditModalOpen}
                 onClose={() => {
                   setIsEditModalOpen(false);
@@ -1001,6 +1036,8 @@ export default function Calendar() {
                   setEventBeingEdited(null);
                 }}
               />
+
+              
             
             </div>
           </div>

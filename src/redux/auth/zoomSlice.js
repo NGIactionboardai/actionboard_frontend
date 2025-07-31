@@ -35,19 +35,13 @@ const extractErrorMessage = (error) => {
 // Async thunks for Zoom integration with organization support
 export const initiateZoomAuth = createAsyncThunk(
   'zoom/initiateAuth',
-  async (organizationId, { rejectWithValue, getState }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
       const headers = getAuthHeaders(getState);
       
-      if (!organizationId) {
-        return rejectWithValue({ message: 'Organization ID is required' });
-      }
       
       const response = await axios.get(`${API_BASE_URL}/integrations/zoom/oauth/start/`, {
         headers,
-        params: {
-          org_id: organizationId
-        }
       });
       
       return response.data;
@@ -61,7 +55,7 @@ export const initiateZoomAuth = createAsyncThunk(
 
 export const handleZoomCallback = createAsyncThunk(
   'zoom/handleCallback',
-  async ({ code, state, organizationId }, { rejectWithValue, getState }) => {
+  async ({ code, state }, { rejectWithValue, getState }) => {
     try {
       // Since your Django view handles this via URL params and redirects,
       // we'll just make a request to check the status after callback
@@ -74,9 +68,6 @@ export const handleZoomCallback = createAsyncThunk(
       const headers = getAuthHeaders(getState);
       const statusResponse = await axios.get(`${API_BASE_URL}/integrations/zoom/status/`, {
         headers,
-        params: {
-          org_id: organizationId
-        }
       });
       
       if (statusResponse.data.is_connected) {
@@ -99,19 +90,13 @@ export const handleZoomCallback = createAsyncThunk(
 
 export const getZoomConnectionStatus = createAsyncThunk(
   'zoom/getConnectionStatus',
-  async (organizationId, { rejectWithValue, getState }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
       const headers = getAuthHeaders(getState);
       
-      if (!organizationId) {
-        return rejectWithValue({ message: 'Organization ID is required' });
-      }
       
       const response = await axios.get(`${API_BASE_URL}/integrations/zoom/status/`, {
         headers,
-        params: {
-          org_id: organizationId
-        }
       });
       
       return response.data;
@@ -136,17 +121,13 @@ export const getZoomConnectionStatus = createAsyncThunk(
 
 export const disconnectZoom = createAsyncThunk(
   'zoom/disconnect',
-  async (organizationId, { rejectWithValue, getState }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
       const headers = getAuthHeaders(getState);
       
-      if (!organizationId) {
-        return rejectWithValue({ message: 'Organization ID is required' });
-      }
+      
       
       const response = await axios.post(`${API_BASE_URL}/integrations/zoom/disconnect/`, {
-        org_id: organizationId
-      }, {
         headers,
       });
       

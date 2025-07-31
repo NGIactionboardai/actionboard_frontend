@@ -30,6 +30,9 @@ export default function MeetingDetails() {
   const [error, setError] = useState(null);
   const [transcribing, setTranscribing] = useState(false);
   const [transcript, setTranscript] = useState(null);
+  const [sentimentAnalysis, setSentimentAnalysis] = useState(null);
+  const [sentimentSummaries, setSentimentSummaries] = useState(null);
+  const [sentimentReasoning, setSentimentReasoning] = useState(null);
   const [summary, setSummary] = useState(null);
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);

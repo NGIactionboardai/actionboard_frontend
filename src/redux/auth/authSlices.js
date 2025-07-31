@@ -315,7 +315,6 @@ export const userLogout = createAsyncThunk(
   }
 );
 
-// FIXED: Initial state - don't access localStorage during initialization
 const initialState = {
   // Authentication state - start with null/false for SSR compatibility
   isAuthenticated: false,
@@ -351,6 +350,16 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+
+    googleLoginSuccess: (state, action) => {
+      state.isAuthenticated = true;
+      state.token = action.payload.token;
+      state.refreshToken = action.payload.refreshToken;
+      state.user = action.payload.user;
+      state.error = null;
+      state.successMessage = 'Login successful';
+    },
+
     // Clear error messages
     clearError: (state) => {
       state.error = null;

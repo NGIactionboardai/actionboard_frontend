@@ -22,11 +22,16 @@ import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import MeetingsSidebar from '@/app/components/meetings/MeetingsSidebar';
+import SendInviteModal from '@/app/components/modals/SendInviteModal';
 
 export default function Meetings() {
   const params = useParams();
   const organizationId = params?.id;
   const [orgName, setOrgName] = useState('')
+  const [members, setMembers] = useState([]);
+
+  const [selectedMeeting, setSelectedMeeting] = useState(null);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   // Custom hooks for state management
   const {
@@ -82,6 +87,26 @@ export default function Meetings() {
       fetchOrg();
     }, [organizationId]);
 
+    useEffect(() => {
+      const fetchMembers = async () => {
+        
+        if (!organizationId || !token) return;
+        try {
+          const headers = getAuthHeaders(token);
+          const res = await makeApiCall(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${organizationId}/members/`,
+            { method: 'GET', headers }
+          );
+          const data = await res.json();
+          setMembers(data.members || []);
+        } catch (err) {
+          console.error('Error fetching members', err);
+        }
+      };
+    
+      fetchMembers();
+    }, [organizationId, token]);
+
   // If organization ID is not found, show message
   if (!organizationId) {
     return (
@@ -134,6 +159,7 @@ export default function Meetings() {
         <MeetingsFilters
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          loading={zoomLoading}
           sourceFilter={sourceFilter}
           setSourceFilter={setSourceFilter}
           statusFilter={statusFilter}
@@ -157,6 +183,10 @@ export default function Meetings() {
           formatMeetingDateTime={formatMeetingDateTime}
           getMeetingStatus={getMeetingStatus}
           getTranscriptionStatus={getTranscriptionStatus}
+          onShareClick={(meeting) => {
+            setSelectedMeeting(meeting);
+            setIsInviteModalOpen(true);
+          }}
         />
   
         {/* Modals */}
@@ -172,6 +202,21 @@ export default function Meetings() {
           onClose={() => setIsZoomConnectionModalOpen(false)}
           organizationId={organizationId}
         />
+
+
+        {selectedMeeting && (
+          <SendInviteModal
+            isOpen={isInviteModalOpen}
+            onClose={() => setIsInviteModalOpen(false)}
+            meeting={selectedMeeting}
+            orgId={organizationId}
+            members={members}
+            onSuccess={() => {
+              setIsInviteModalOpen(false);
+              // Optional: show success toast or refetch meeting list
+            }}
+          />
+        )}
       </div>
     </div>
   );
