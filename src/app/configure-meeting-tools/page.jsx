@@ -52,7 +52,7 @@ export default function ConfigureMeetingToolsPage() {
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-3xl font-semibold text-gray-900 mb-10">Configure your Meeting Tool</h1>
+        <h1 className="text-3xl font-semibold text-gray-900 mb-10">Configure your Meeting Platforms</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 justify-items-center">
             {/* Zoom Card */}

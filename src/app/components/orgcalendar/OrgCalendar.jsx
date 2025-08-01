@@ -19,9 +19,14 @@ import EventReportsComponent from '../EventReportsComponent';
 import OrgAddEventModal from './OrgAddEventModal';
 import OrgSearchEventsComponent from './OrgSearchEventsComponent';
 import OrgEventReportsComponent from './OrgEventReportsComponent';
+import { getZoomConnectionStatus, selectZoomIsConnected } from '@/redux/auth/zoomSlice';
 
 
 export default function OrgCalendar({ orgId }) {
+
+    const dispatch = useDispatch();
+    const isZoomConnected = useSelector(selectZoomIsConnected);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const [currentDate, setCurrentDate] = useState(new Date());
     const [currentView, setCurrentView] = useState('dayGridMonth');
@@ -89,6 +94,16 @@ export default function OrgCalendar({ orgId }) {
         const api = calendarRef.current?.getApi();
         if (api) setCalendarTitle(api.view.title);
       };
+
+
+      // Check connection status on component mount
+      useEffect(() => {
+        if (isInitialLoad) {
+          dispatch(getZoomConnectionStatus()).finally(() => {
+            setIsInitialLoad(false);
+          });
+        }
+      }, [dispatch, isInitialLoad]);
 
 
     // Helper function to get auth headers (following your Redux pattern)
@@ -979,6 +994,7 @@ export default function OrgCalendar({ orgId }) {
               
 
               <OrgAddEventModal
+                isZoomConnected={isZoomConnected}
                 isOpen={isAddModalOpen}
                 onClose={() => {
                   setIsAddModalOpen(false);

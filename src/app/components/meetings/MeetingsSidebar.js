@@ -156,7 +156,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
               className="w-full inline-flex justify-center items-center px-4 py-2 text-lg font-bold rounded-md transition-all
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer"
             >
-              Meeting Tools
+              Meeting Platforms
             </button>
           </>
         )}

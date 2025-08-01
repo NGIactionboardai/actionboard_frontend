@@ -13,7 +13,9 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [orgsOpen, setOrgsOpen] = useState(false);
   const calendarRef = useRef(null);
+  const orgRef = useRef(null);
   const [orgs, setOrgs] = useState([]);
 
   const authToken = useSelector((state) => state.auth?.token);
@@ -79,6 +81,9 @@ export default function Navbar() {
     const handleClickOutside = (event) => {
       if (calendarRef.current && !calendarRef.current.contains(event.target)) {
         setCalendarOpen(false);
+      }
+      if (orgRef.current && !orgRef.current.contains(event.target)) {
+        setOrgsOpen(false);
       }
     };
   
@@ -170,6 +175,34 @@ export default function Navbar() {
               {isAuthenticated ? (
                 // Authenticated user menu
                 <>
+                  <div className="relative" ref={orgRef}>
+                    <button
+                      type="button"
+                      onClick={() => setOrgsOpen((prev) => !prev)}
+                      className="px-3 py-2 rounded-md text-sm font-medium focus:bg-gray-50 hover:bg-gray-50 focus:text-gray-700 text-white hover:text-gray-700 transition-colors"
+                    >
+                      Organizations
+                    </button>
+
+                    {orgsOpen && (
+                      <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                        <div className="py-1 text-sm text-gray-700">
+
+                          {orgs.map((org) => (
+                            <Link
+                              key={org.org_id}
+                              href={`/meetings/${org.org_id}`}
+                              className="block px-4 py-2 hover:bg-gray-100"
+                              onClick={() => setOrgsOpen(false)}
+                            >
+                              {org.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="relative" ref={calendarRef}>
                     <button
                       type="button"
@@ -263,7 +296,7 @@ export default function Navbar() {
                               <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M4 3a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h8a1 1 0 100-2H4z" clipRule="evenodd" />
                               </svg>
-                              Configure Meeting Tools
+                              Configure Meeting Platforms
                             </Link>
                             <div className="border-t border-gray-100"></div>
                             <button

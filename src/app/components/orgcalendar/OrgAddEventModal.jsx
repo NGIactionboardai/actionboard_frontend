@@ -14,7 +14,8 @@ export default function OrgAddEventModal({
   orgName,
   onEventCreated,
   getAuthHeaders,
-  makeApiCall
+  makeApiCall,
+  isZoomConnected
 }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -286,22 +287,36 @@ export default function OrgAddEventModal({
                   </p>
   
                   {/* Zoom toggle */}
-                    <label className="inline-flex items-center space-x-2 text-sm mt-2">
-                    <input
-                        type="checkbox"
-                        checked={createZoom}
-                        onChange={e => setCreateZoom(e.target.checked)}
-                        className="rounded"
-                    />
-                    <span className="flex items-center gap-1">
-                        <img
-                        src="/images/zoom02.png"
-                        alt="Zoom"
-                        className="w-4 h-4 object-contain"
+                      <label
+                        className={`inline-flex items-center space-x-2 text-sm mt-2 transition-opacity ${
+                          !isZoomConnected ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={createZoom}
+                          onChange={e => setCreateZoom(e.target.checked)}
+                          className="rounded"
+                          disabled={!isZoomConnected}
                         />
-                        <span>Create Zoom Meeting</span>
-                    </span>
-                    </label>
+                        <span className="flex items-center gap-1">
+                          <img
+                            src="/images/zoom02.png"
+                            alt="Zoom"
+                            className="w-4 h-4 object-contain"
+                          />
+                          <span>Create Zoom Meeting</span>
+                        </span>
+                      </label>
+                      {!isZoomConnected && (
+                        <button
+                          type="button"
+                          onClick={() => window.location.href = '/configure-meeting-tools'}
+                          className="mt-1 ml-6 text-xs text-blue-600 hover:underline"
+                        >
+                          Connect Zoom
+                        </button>
+                      )}
 
   
                   {/* Actions */}
