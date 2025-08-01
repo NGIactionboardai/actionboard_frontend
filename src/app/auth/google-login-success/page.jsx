@@ -27,6 +27,7 @@ const GoogleLoginSuccessPage = () => {
       try {
         const response = await makeApiCall(
           'https://actionboard-ai-backend.onrender.com/api/auth/dj-rest-auth/google/',
+          // 'http://localhost:8000/api/auth/dj-rest-auth/google/',
           {
             method: 'POST',
             headers: {

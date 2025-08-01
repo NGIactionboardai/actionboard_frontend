@@ -352,6 +352,16 @@ const authSlice = createSlice({
   reducers: {
 
     googleLoginSuccess: (state, action) => {
+      const { token, refreshToken, user } = action.payload;
+
+      // Save to localStorage using your storage utility
+      storage.set(AUTH_STORAGE_KEYS.TOKEN, token);
+      storage.set(AUTH_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+      storage.set(AUTH_STORAGE_KEYS.USER, user);
+
+      // Set Axios default headers
+      setupAxiosInterceptors(token);
+      
       state.isAuthenticated = true;
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
