@@ -590,6 +590,7 @@ const authSlice = createSlice({
 
 // Export actions
 export const {
+  googleLoginSuccess,
   clearError,
   clearSuccess,
   clearMessages,
