@@ -152,11 +152,17 @@ export default function EventReportsComponent({ makeApiCall, getAuthHeaders, org
             <strong>Busiest {duration_type === '1w' ? 'Day' : 'Month'}:</strong>{' '}
             {formatTimeLabel(highlights.busiest_time_block)}
           </li>
-          <li>
-            <strong>Longest Event:</strong> {highlights.longest_event.title} (
-            {highlights.longest_event.duration_hours.toFixed(2)} hrs) on{' '}
-            {format(new Date(highlights.longest_event.start), 'MMM d, yyyy')}
-          </li>
+          {highlights.longest_event ? (
+            <li>
+              <strong>Longest Event:</strong> {highlights.longest_event.title} (
+              {highlights.longest_event.duration_hours.toFixed(2)} hrs) on{' '}
+              {format(new Date(highlights.longest_event.start), 'MMM d, yyyy')}
+            </li>
+          ) : (
+            <li>
+              <strong>Longest Event:</strong> No data available.
+            </li>
+          )}
           <li>
             <strong>Most Active Org:</strong> {highlights.most_active_organisation}
           </li>

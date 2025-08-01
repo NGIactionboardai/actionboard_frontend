@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 
 export const metadata = {
-  title: 'MeetingSummarizer - Transcribe and Summarize Your Meetings',
+  title: 'Actionboard AI',
   description: 'An AI-powered platform for meeting transcription and summarization',
 };
 
