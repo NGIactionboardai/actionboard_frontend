@@ -223,7 +223,7 @@ const CreateMeetingModal = ({
                         onChange={handleMeetingFormChange}
                       />
                       <label htmlFor="waiting_room" className="ml-2 block text-sm text-gray-900">
-                        Enable Waiting Room, join_before_host
+                        Enable Waiting Room
                       </label>
                     </div>
 
