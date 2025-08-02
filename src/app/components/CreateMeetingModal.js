@@ -21,8 +21,9 @@ const CreateMeetingModal = ({
     duration: 30,
     agenda: '',
     password: '',
-    waiting_room: true,
-    auto_recording: 'none'
+    waiting_room: false,
+    auto_recording: 'none',
+    join_before_host: true,
   });
 
   const handleMeetingFormChange = (e) => {
@@ -54,6 +55,7 @@ const CreateMeetingModal = ({
         settings: {
           waiting_room: meetingForm.waiting_room,
           auto_recording: meetingForm.auto_recording,
+          join_before_host: meetingForm.join_before_host
         }
       };
 
@@ -66,8 +68,9 @@ const CreateMeetingModal = ({
         duration: 30,
         agenda: '',
         password: '',
-        waiting_room: true,
-        auto_recording: 'none'
+        waiting_room: false,
+        auto_recording: 'none',
+        join_before_host: true
       });
       onClose();
       
@@ -89,8 +92,9 @@ const CreateMeetingModal = ({
       duration: 30,
       agenda: '',
       password: '',
-      waiting_room: true,
-      auto_recording: 'none'
+      waiting_room: false,
+      auto_recording: 'none',
+      join_before_host: true,
     });
     onClose();
   };
@@ -219,7 +223,21 @@ const CreateMeetingModal = ({
                         onChange={handleMeetingFormChange}
                       />
                       <label htmlFor="waiting_room" className="ml-2 block text-sm text-gray-900">
-                        Enable Waiting Room
+                        Enable Waiting Room, join_before_host
+                      </label>
+                    </div>
+
+                    <div className="flex items-center">
+                      <input
+                        id="join_before_host"
+                        name="join_before_host"
+                        type="checkbox"
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        checked={meetingForm.join_before_host}
+                        onChange={handleMeetingFormChange}
+                      />
+                      <label htmlFor="join_before_host" className="ml-2 block text-sm text-gray-900">
+                        Enable Join Before host
                       </label>
                     </div>
                   </div>
