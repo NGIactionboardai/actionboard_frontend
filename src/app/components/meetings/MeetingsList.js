@@ -168,9 +168,9 @@ const MeetingsList = ({
                     </div>
 
                     {/* Agenda */}
-                    {meeting.agenda && (
+                    {/* {meeting.agenda && (
                       <p className="text-sm text-gray-600 mt-1">{meeting.agenda}</p>
-                    )}
+                    )} */}
                   </div>
 
                   {/* RIGHT: Action Buttons */}
