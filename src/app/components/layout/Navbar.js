@@ -192,7 +192,7 @@ export default function Navbar() {
                               className="block px-4 py-2 hover:bg-gray-100"
                               onClick={() => setOrgsOpen(false)}
                             >
-                              Personal
+                              All organizations
                             </Link>
                           {orgs.map((org) => (
                             <Link
