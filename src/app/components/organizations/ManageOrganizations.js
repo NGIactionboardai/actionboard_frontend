@@ -44,7 +44,7 @@ import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
  * @param {string} [props.viewMeetingsPath] - Custom path for view meetings link
  */
 const ManageOrganizations = ({
-  title = "Please Choose your Organizations",
+  title = "Please Choose Your Organization",
   description = "Create, edit, and manage your organizations",
   createButtonText = "Create Organization",
   onOrganizationSelect,
@@ -312,12 +312,12 @@ const ManageOrganizations = ({
                     </Popover.Button>
                     <Popover.Panel className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
                       <div className="py-1 text-sm text-gray-700">
-                        <button
+                        {/* <button
                           onClick={() => handleSetCurrentOrg(org)}
                           className="w-full text-left px-4 py-2 hover:bg-gray-100"
                         >
                           Set as Current
-                        </button>
+                        </button> */}
                         <button
                           onClick={() => openEditModal(org)}
                           className="w-full text-left px-4 py-2 hover:bg-gray-100"

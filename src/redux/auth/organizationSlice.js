@@ -11,9 +11,9 @@ const API_ENDPOINTS = {
   CREATE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/create-organization/',
   GET_USER_ORGS: 'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
   GET_ALL_ORGS: 'https://actionboard-ai-backend.onrender.com/api/organizations/',
-  GET_ORG_DETAILS: 'https://actionboard-ai-backend.onrender.com/api/my-organisations/',
-  UPDATE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organizations/',
-  DELETE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organizations/delete/'
+  GET_ORG_DETAILS: 'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
+  UPDATE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/update-organization/',
+  DELETE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/delete-organization/'
 };
 
 // Safe localStorage utilities for SSR compatibility
@@ -219,7 +219,7 @@ export const updateOrganization = createAsyncThunk(
         };
       }
 
-      const response = await axios.put(`${API_ENDPOINTS.UPDATE_ORG}${orgId}/`, {
+      const response = await axios.patch(`${API_ENDPOINTS.UPDATE_ORG}${orgId}/`, {
         name: updateData.name.trim()
       }, config);
 

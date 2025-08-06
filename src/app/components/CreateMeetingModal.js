@@ -10,7 +10,8 @@ const CreateMeetingModal = ({
   isOpen, 
   onClose, 
   organizationId,
-  isZoomConnected 
+  isZoomConnected,
+  setShowRecordingInfoModal
 }) => {
   const dispatch = useDispatch();
   const zoomLoading = useSelector(selectZoomLoading);
@@ -74,6 +75,7 @@ const CreateMeetingModal = ({
       });
       onClose();
       
+      setTimeout(() => setShowRecordingInfoModal(true), 300);
       // Refresh meetings list
       dispatch(getZoomMeetings(organizationId));
       

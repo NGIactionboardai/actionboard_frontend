@@ -13,12 +13,16 @@ const API_ENDPOINTS = {
   VERIFY_OTP: 'https://actionboard-ai-backend.onrender.com/api/auth/verify-otp/',
   RESEND_OTP: '/api/auth/resend-otp',
   LOGIN: 'https://actionboard-ai-backend.onrender.com/api/auth/signin/',
+  USER_INFO: 'https://actionboard-ai-backend.onrender.com/api/auth/me/',
+  EDIT_USER_INFO: 'https://actionboard-ai-backend.onrender.com/api/auth/edit-user-info/',
+  CHANGE_PASSWORD: 'https://actionboard-ai-backend.onrender.com/api/auth/change-password/',
+  ADD_PASSWORD: 'https://actionboard-ai-backend.onrender.com/api/auth/add-password/',
   REFRESH: '/api/auth/refresh',
   LOGOUT: '/api/auth/logout'
 };
 
 // Safe localStorage utilities for SSR compatibility
-const storage = {
+export const storage = {
   get: (key) => {
     if (typeof window === 'undefined') return null;
     try {
@@ -83,6 +87,26 @@ const extractErrorMessage = (error) => {
   }
   return 'An unexpected error occurred';
 };
+
+export const fetchUserInfo = async () => {
+  const token = storage.get(AUTH_STORAGE_KEYS.TOKEN);
+
+  if (!token) {
+    throw new Error('No access token found');
+  }
+
+  const response = await axios.get(API_ENDPOINTS.USER_INFO, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  // const response = await axios.get(API_ENDPOINTS.USER_INFO);
+
+  // console.log("User Data: ", response.data);
+  return response.data;
+};
+
 
 // Async thunk for user registration
 export const userRegister = createAsyncThunk(
@@ -315,6 +339,19 @@ export const userLogout = createAsyncThunk(
   }
 );
 
+export const changePassword = (data) => {
+  return axios.post(API_ENDPOINTS.CHANGE_PASSWORD, data);
+};
+
+export const addPassword = (data) => {
+  return axios.post(API_ENDPOINTS.ADD_PASSWORD, data);
+};
+
+export const editUserInfo = (data) => {
+  return axios.patch(API_ENDPOINTS.EDIT_USER_INFO, data);
+};
+
+
 const initialState = {
   // Authentication state - start with null/false for SSR compatibility
   isAuthenticated: false,
@@ -368,6 +405,32 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.error = null;
       state.successMessage = 'Login successful';
+    },
+
+    updateUserPasswordStatus: (state, action) => {
+      // const updatedUser = {
+      //   ...state.user,
+      //   has_password: action.payload.has_password,
+      // };
+
+      const { user} = action.payload
+    
+      // Save updated user to localStorage
+      storage.set(AUTH_STORAGE_KEYS.USER, user);
+    
+      // Update Redux state
+      state.user = user;
+      state.successMessage = 'Password set successfully';
+      state.error = null;
+    },
+
+    updateUserInfo: (state, action) => {
+      const { user } = action.payload;
+    
+      storage.set(AUTH_STORAGE_KEYS.USER, user);
+      state.user = user;
+      state.successMessage = 'User information updated successfully';
+      state.error = null;
     },
 
     // Clear error messages
@@ -601,6 +664,8 @@ const authSlice = createSlice({
 // Export actions
 export const {
   googleLoginSuccess,
+  updateUserPasswordStatus,
+  updateUserInfo,
   clearError,
   clearSuccess,
   clearMessages,

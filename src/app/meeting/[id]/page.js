@@ -6,6 +6,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import Link from 'next/link';
 import { parseISO, differenceInHours, differenceInMinutes } from 'date-fns';
 import EditSpeakersModal from '@/app/components/EditSpeakersModal';
+import SpeakerPieChart from '@/app/components/meetings/SpeakerPieChart';
+import PositiveContributionPieChart from '@/app/components/meetings/PositiveContributionPieChart';
+import SentimentDistributionBarChart from '@/app/components/meetings/SentimentDistributionBarChart';
+import SentimentMeter from '@/app/components/meetings/SentimentMeter';
+import SentimentSummaryTable from '@/app/components/meetings/SentimentSummaryTable';
 
 
 
@@ -37,6 +42,10 @@ export default function MeetingDetails() {
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [meeting_insights, setMeeting_insights] = useState(null);
+  const [meeting_sentiment_summary, setMeeting_sentiment_summary] = useState(null)
+  const [speaker_summaries, setSpeaker_summaries] = useState(null)
+  const [speaker_summary_table, setSpeaker_summary_table] = useState(null)
+  const [sentiment_summaries, setSentiment_summaries] = useState(null)
   const [activeTab, setActiveTab] = useState('transcript'); // For tabbed view
   const [transcriptionStatus, setTranscriptionStatus] = useState(null);
   const [autoTranscribed, setAutoTranscribed] = useState(false);
@@ -47,6 +56,9 @@ export default function MeetingDetails() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [speakersUpdated, setSpeakersUpdated] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+
+
+  const [selectedSpeaker, setSelectedSpeaker] = useState('');
 
   const isTranscriptionOngoing = transcriptionStatus === 'pending' || transcriptionStatus === 'processing';
 
@@ -141,6 +153,12 @@ export default function MeetingDetails() {
     }
   }, [meetingId, authToken]);
 
+  useEffect(() => {
+    if (speaker_summaries && Object.keys(speaker_summaries).length > 0 && !selectedSpeaker) {
+      setSelectedSpeaker(Object.keys(speaker_summaries)[0]);
+    }
+  }, [speaker_summaries, selectedSpeaker]);
+
   const fetchMeetingDetails = async () => {
     try {
       setLoading(true);
@@ -171,6 +189,11 @@ export default function MeetingDetails() {
             setTranscript(data.transcript.utterances || []);
             setSummary(data.transcript.summary || null);
             setMeeting_insights(data.transcript.meeting_insights || null);
+            setMeeting_sentiment_summary(data.transcript?.meeting_sentiment_summary || null);
+            setSpeaker_summaries(data.transcript?.meeting_insights?.speaker_summaries || null);
+            setSpeaker_summary_table(data.transcript?.per_speaker_sentiment?.speaker_summary_table || null);
+            setSentiment_summaries(data.transcript?.sentiment_summaries || null);
+
           } else {
             setTranscript(data.transcript);
           }
@@ -1020,6 +1043,18 @@ export default function MeetingDetails() {
           {/* Tab Navigation */}
           <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
+            {meeting_insights && (
+                <button
+                  onClick={() => setActiveTab('insights')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'insights'
+                      ? 'border-indigo-500 text-indigo-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  AI Insights
+                </button>
+              )}
               {transcript && (
                 <button
                   onClick={() => setActiveTab('transcript')}
@@ -1032,35 +1067,62 @@ export default function MeetingDetails() {
                   Transcript
                 </button>
               )}
-              {summary && (
-                <button
-                  onClick={() => setActiveTab('summary')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'summary'
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Summary
-                </button>
-              )}
               {meeting_insights && (
                 <button
-                  onClick={() => setActiveTab('insights')}
+                  onClick={() => setActiveTab('speaker_summary')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'insights'
+                    activeTab === 'speaker_summary'
                       ? 'border-indigo-500 text-indigo-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  AI Insights
+                  Speaker Summary
                 </button>
               )}
+              
+
+              {meeting_sentiment_summary && (
+                  <button
+                    onClick={() => setActiveTab('meeting_sentiment')}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === 'meeting_sentiment'
+                        ? 'border-indigo-500 text-indigo-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    Overall Meeting Sentiment
+                  </button>
+              )}
+              
             </nav>
           </div>
 
           {/* Tab Content */}
           <div className="px-4 py-5 sm:px-6">
+
+            {/* AI Insights Tab */}
+            {activeTab === 'insights' && meeting_insights && (
+              <div>
+                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">AI-Generated Insights</h3>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  {typeof meeting_insights === 'object' ? (
+                    <div className="space-y-4">
+                      {Object.entries(meeting_insights).map(([key, value]) => (
+                        <div key={key}>
+                          <h4 className="font-semibold text-gray-900 capitalize mb-2">
+                            {key.replace(/_/g, ' ')}
+                          </h4>
+                          {renderInsightValue(value)}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-800 whitespace-pre-wrap">{meeting_insights}</p>
+                  )}
+                </div>
+              </div>
+            )}
+            
             {/* Transcript Tab */}
             {activeTab === 'transcript' && Array.isArray(transcript) && (
               <div>
@@ -1096,51 +1158,159 @@ export default function MeetingDetails() {
               </div>
             )}
 
-            {/* Summary Tab */}
-            {activeTab === 'summary' && summary && (
-              <div>
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Meeting Summary</h3>
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  {typeof summary === 'object' ? (
-                    <div className="space-y-4">
-                      {Object.entries(summary).map(([key, value]) => (
-                        <div key={key}>
-                          <h4 className="font-semibold text-gray-900 capitalize mb-2">
-                            {key.replace('_', ' ')}
-                          </h4>
-                          {renderInsightValue(value)}
+            {/* Speaker Summary Tab */}
+
+            {activeTab === 'speaker_summary' && (
+              <>
+                {speaker_summary_table ? (
+                  // Full version with all details
+                  <div className='mb-3'>
+                    <div>
+                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Speaker Summary</h3>
+
+                      {/* Dropdown */}
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Select Speaker:</label>
+                        <select
+                          value={selectedSpeaker}
+                          onChange={(e) => setSelectedSpeaker(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                        >
+                          <option value="" disabled>Select a speaker</option>
+                          {Object.keys(speaker_summaries).map((speakerKey) => (
+                            <option key={speakerKey} value={speakerKey}>{speakerKey}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Speaker summary text */}
+                      {selectedSpeaker && (
+                        <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                          <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                            {speaker_summaries[selectedSpeaker]}
+                          </p>
                         </div>
-                      ))}
+                      )}
+
+                      {/* Pie Chart */}
+                      {selectedSpeaker && (
+                        <div className="max-w-md mx-auto">
+                          <SpeakerPieChart
+                            data={speaker_summary_table.find((entry) =>
+                              selectedSpeaker.toLowerCase().includes(entry.Speaker.toLowerCase())
+                            )}
+                          />
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap">{summary}</p>
-                  )}
-                </div>
+
+                    <div className="mt-10">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Comparative Sentiment Analysis</h3>
+
+                      <div className="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Speaker</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Pos %</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">Neu %</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-red-600 uppercase tracking-wider">Neg %</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Mean Sentiment</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Rating (/10)</th>
+                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Overall</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-100">
+                            {speaker_summary_table.map((entry, idx) => (
+                              <tr key={idx} className="hover:bg-gray-50 transition">
+                                <td className="px-4 py-2 text-sm text-gray-800 font-medium">{entry.Speaker}</td>
+                                <td className="px-4 py-2 text-sm text-green-700">{entry['Pos %']}</td>
+                                <td className="px-4 py-2 text-sm text-blue-700">{entry['Neu %']}</td>
+                                <td className="px-4 py-2 text-sm text-red-700">{entry['Neg %']}</td>
+                                <td className="px-4 py-2 text-sm text-gray-800">{entry['Mean Sentiment']}</td>
+                                <td className="px-4 py-2 text-sm text-gray-800">{entry['Rating (/10)']}</td>
+                                <td className="px-4 py-2 text-sm">
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium
+                                    ${entry.Overall === 'Positive'
+                                      ? 'bg-green-100 text-green-800'
+                                      : entry.Overall === 'Negative'
+                                      ? 'bg-red-100 text-red-800'
+                                      : 'bg-blue-100 text-blue-800'}`}>
+                                    {entry.Overall}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div className="mt-10">
+                      {/* <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Visual Sentiment Analysis</h3> */}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Positive Contribution Pie Chart */}
+                        <div>
+                          <h4 className="text-md font-semibold text-gray-800 mb-2">Positive Contribution to Group Sentiment</h4>
+                          <PositiveContributionPieChart data={speaker_summary_table} />
+                        </div>
+
+                        {/* Sentiment Distribution Bar Chart */}
+                        <div>
+                          <h4 className="text-md font-semibold text-gray-800 mb-2">Sentiment Distribution by Speaker</h4>
+                          <SentimentDistributionBarChart data={speaker_summary_table} />
+                        </div>
+                      </div>
+                    </div>
+
+                    
+                  </div>
+                ) : speaker_summaries ? (
+                  // Only speaker summaries
+                  <div className='mb-3'>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Speaker Summary</h3>
+
+                    {/* Dropdown */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Select Speaker:</label>
+                      <select
+                        value={selectedSpeaker}
+                        onChange={(e) => setSelectedSpeaker(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                      >
+                        <option value="" disabled>Select a speaker</option>
+                        {Object.keys(speaker_summaries).map((speakerKey) => (
+                          <option key={speakerKey} value={speakerKey}>{speakerKey}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Speaker summary text */}
+                    {selectedSpeaker && (
+                      <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                        <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                          {speaker_summaries[selectedSpeaker]}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 italic mt-4">No speaker summaries available.</p>
+                )}
+              </>
+            )}
+
+
+            {/* meeting sentiment Tab */}
+            {activeTab === 'meeting_sentiment' && meeting_sentiment_summary && Array.isArray(transcript) && (
+              <div>
+                <SentimentSummaryTable summary={meeting_sentiment_summary} />
               </div>
             )}
 
-            {/* AI Insights Tab */}
-            {activeTab === 'insights' && meeting_insights && (
-              <div>
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">AI-Generated Insights</h3>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  {typeof meeting_insights === 'object' ? (
-                    <div className="space-y-4">
-                      {Object.entries(meeting_insights).map(([key, value]) => (
-                        <div key={key}>
-                          <h4 className="font-semibold text-gray-900 capitalize mb-2">
-                            {key.replace(/_/g, ' ')}
-                          </h4>
-                          {renderInsightValue(value)}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap">{meeting_insights}</p>
-                  )}
-                </div>
-              </div>
-            )}
+
+            
           </div>
         </div>
       )}

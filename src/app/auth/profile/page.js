@@ -5,9 +5,16 @@ import { User, Mail, Calendar, MapPin, Lock, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../../../redux/auth/authSlices'; // Adjust path as needed
+import ChangePasswordModal from '@/app/components/auth/ChangePasswordModal';
+import AddPasswordModal from '@/app/components/auth/AddPasswordModal';
+import EditInfoModal from '@/app/components/auth/EditInfoModal';
 
 export default function ProfilePage() {
   const user = useSelector(selectUser);
+  const [isAddPasswordOpen, setIsAddPasswordOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
 
   // Get user display name
   const getUserDisplayName = () => {
@@ -87,21 +94,31 @@ export default function ProfilePage() {
               
               {/* Action Buttons */}
               <div className="flex space-x-3">
-                <Link
-                  href="/profile/change-password"
-                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
-                >
-                  <Lock className="w-4 h-4 mr-2" />
-                  Change Password
-                </Link>
+                {user.has_password ? (
+                  <button
+                    onClick={() => setIsChangePasswordOpen(true)}
+                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    Change Password
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setIsAddPasswordOpen(true)}
+                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    Add Password
+                  </button>
+                )}
                 
-                <Link
+                {/* <Link
                   href="/settings"
                   className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200"
                 >
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>
@@ -111,7 +128,15 @@ export default function ProfilePage() {
       {/* Profile Information */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-6 py-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            >
+              Edit
+            </button>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* First Name */}
@@ -249,15 +274,29 @@ export default function ProfilePage() {
                 <Lock className="w-5 h-5 text-gray-400" />
                 <div>
                   <p className="text-sm font-medium text-gray-900">Password</p>
-                  <p className="text-xs text-gray-500">Last updated recently</p>
+                  <p className="text-xs text-gray-500">
+                    {user.has_password ? 'Last updated recently' : 'No password set yet'}
+                  </p>
                 </div>
               </div>
-              <Link
-                href="/profile/change-password"
-                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-200"
-              >
-                Change
-              </Link>
+
+              {user.has_password ? (
+                <button
+                  onClick={() => setIsChangePasswordOpen(true)}
+                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  Change Password
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsAddPasswordOpen(true)}
+                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  Add Password
+                </button>
+              )}
             </div>
 
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -280,6 +319,21 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+      />
+
+      <AddPasswordModal
+        isOpen={isAddPasswordOpen}
+        onClose={() => setIsAddPasswordOpen(false)}
+      />
+
+      <EditInfoModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      />
     </div>
   );
 }

@@ -4,8 +4,8 @@ import React from 'react';
 
 const GoogleLoginButton = () => {
   const handleGoogleLogin = () => {
-    const redirectUri = 'https://actionboard-ai.vercel.app/auth/google-login-success/';
-    // const redirectUri = 'http://localhost:3000/auth/google-login-success/';
+    // const redirectUri = 'https://actionboard-ai.vercel.app/auth/google-login-success/';
+    const redirectUri = 'http://localhost:3000/auth/google-login-success/';
     // const redirectUri = 'http://localhost:3000/';
 
     const params = new URLSearchParams({

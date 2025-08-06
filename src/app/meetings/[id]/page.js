@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import MeetingsSidebar from '@/app/components/meetings/MeetingsSidebar';
 import SendInviteModal from '@/app/components/modals/SendInviteModal';
+import InstructionModal from '@/app/components/meetings/InstructionModal';
 
 export default function Meetings() {
   const params = useParams();
@@ -32,6 +33,7 @@ export default function Meetings() {
 
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [showRecordingInfoModal, setShowRecordingInfoModal] = useState(false);
 
   // Custom hooks for state management
   const {
@@ -126,9 +128,9 @@ export default function Meetings() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col md:flex-row min-h-screen overflow-x-hidden">
       {/* Sidebar */}
-      <div className="hidden md:block">
+      <aside className="hidden md:block w-64 shrink-0">
         <MeetingsSidebar
           currentOrgId={organizationId}
           organizationId={organizationId}
@@ -137,10 +139,10 @@ export default function Meetings() {
           isZoomConnected={isZoomConnected}
           orgName={orgName}
         />
-      </div>
+      </aside>
   
       {/* Main Content */}
-      <div className="flex-1 p-6 max-w-6xl mx-auto">
+      <main className="flex-1 min-w-0 px-4 py-6 w-full max-w-[95%] md:max-w-4xl mx-auto">
         <MeetingsHeader
           organizationId={organizationId}
           orgName={orgName}
@@ -195,6 +197,12 @@ export default function Meetings() {
           onClose={() => setIsCreateMeetingModalOpen(false)}
           organizationId={organizationId}
           isZoomConnected={isZoomConnected}
+          setShowRecordingInfoModal={setShowRecordingInfoModal}
+        />
+
+        <InstructionModal
+          isOpen={showRecordingInfoModal}
+          onClose={() => setShowRecordingInfoModal(false)}
         />
   
         <ZoomConnection
@@ -202,8 +210,7 @@ export default function Meetings() {
           onClose={() => setIsZoomConnectionModalOpen(false)}
           organizationId={organizationId}
         />
-
-
+  
         {selectedMeeting && (
           <SendInviteModal
             isOpen={isInviteModalOpen}
@@ -217,7 +224,7 @@ export default function Meetings() {
             }}
           />
         )}
-      </div>
+      </main>
     </div>
   );
   
