@@ -15,8 +15,8 @@ const GoogleLoginSuccessPage = () => {
       const url = new URL(window.location.href);
       const code = url.searchParams.get('code');
 
-      // const redirect_uri = 'https://actionboard-ai.vercel.app/auth/google-login-success/';
-      const redirect_uri = 'http://localhost:3000/auth/google-login-success/';
+      const redirect_uri = 'https://actionboard-ai.vercel.app/auth/google-login-success/';
+      // const redirect_uri = 'http://localhost:3000/auth/google-login-success/';
 
 
       if (!code) {
@@ -26,8 +26,8 @@ const GoogleLoginSuccessPage = () => {
 
       try {
         const response = await makeApiCall(
-          // 'https://actionboard-ai-backend.onrender.com/api/auth/dj-rest-auth/google/',
-          'http://localhost:8000/api/auth/dj-rest-auth/google/',
+          'https://actionboard-ai-backend.onrender.com/api/auth/dj-rest-auth/google/',
+          // 'http://localhost:8000/api/auth/dj-rest-auth/google/',
           {
             method: 'POST',
             headers: {
