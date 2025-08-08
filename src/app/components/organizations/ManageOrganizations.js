@@ -18,6 +18,7 @@ import {
 } from '../../../redux/auth/organizationSlice'; // Adjust import path as needed
 import { Popover } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
+import withProfileCompletionGuard from '../withProfileCompletionGuard';
 
 
 /**
@@ -189,9 +190,12 @@ const ManageOrganizations = ({
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="flex-1 min-w-0">
-          <h2 className="text-2xl font-bold pb-1 leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            {title}
+          <h2 className="text-3xl font-bold pb-1 mb-5 leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            Welcome to Actionboard AI
           </h2>
+          <h4 className="text-xl font-bold pb-1 leading-7 text-gray-900 sm:text-xl sm:truncate">
+            {title}
+          </h4>
           {/* <p className="mt-1 text-sm text-gray-500">
             {description}
           </p> */}
@@ -225,7 +229,7 @@ const ManageOrganizations = ({
         </div>
       )}
 
-      {error && (
+      {/* {error && (
         <div className="mb-4 rounded-md bg-red-50 p-4">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -238,7 +242,7 @@ const ManageOrganizations = ({
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Search */}
       {showSearch && (

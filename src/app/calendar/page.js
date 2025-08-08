@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { selectIsAuthenticated } from '../../redux/auth/authSlices';
 import Calendar from '../components/Calendar';
+import withProfileCompletionGuard from '../components/withProfileCompletionGuard';
 
-export default function CalendarPage() {
+function CalendarPage() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const router = useRouter();
 
@@ -33,3 +34,5 @@ export default function CalendarPage() {
     </main>
   );
 }
+
+export default withProfileCompletionGuard(CalendarPage)

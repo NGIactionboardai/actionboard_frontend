@@ -16,6 +16,7 @@ const MeetingsList = ({
   getMeetingStatus,
   getTranscriptionStatus,
   onShareClick,
+  onJoinClick,
 }) => {
 
   
@@ -180,7 +181,8 @@ const MeetingsList = ({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          window.open(meeting.join_url, '_blank', 'noopener,noreferrer');
+                          // window.open(meeting.join_url, '_blank', 'noopener,noreferrer');
+                          onJoinClick(meeting)
                         }}
                         className="min-w-[140px] px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-[#f9f1fc] hover:bg-[#f0e6f7] transition"
                       >

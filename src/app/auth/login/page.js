@@ -337,7 +337,7 @@ export default function LoginPage() {
         </div>
 
         {/* Demo Credentials (Remove in Production) */}
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        {/* <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium text-blue-800">Demo Credentials:</p>
             <button
@@ -352,7 +352,7 @@ export default function LoginPage() {
             <p>Email: demo@meetingsummarizer.com</p>
             <p>Password: demo123</p>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

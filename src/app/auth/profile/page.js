@@ -8,8 +8,9 @@ import { selectUser } from '../../../redux/auth/authSlices'; // Adjust path as n
 import ChangePasswordModal from '@/app/components/auth/ChangePasswordModal';
 import AddPasswordModal from '@/app/components/auth/AddPasswordModal';
 import EditInfoModal from '@/app/components/auth/EditInfoModal';
+import withProfileCompletionGuard from '@/app/components/withProfileCompletionGuard';
 
-export default function ProfilePage() {
+function ProfilePage() {
   const user = useSelector(selectUser);
   const [isAddPasswordOpen, setIsAddPasswordOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
@@ -337,3 +338,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+export default withProfileCompletionGuard(ProfilePage)

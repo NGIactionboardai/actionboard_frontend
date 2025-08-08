@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { selectIsAuthenticated } from '../../redux/auth/authSlices'; // Adjust path as needed
 import ManageOrganizations from '../components/organizations/ManageOrganizations';
+import withProfileCompletionGuard from '../components/withProfileCompletionGuard';
 
 const OrganizationsPage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -33,4 +34,6 @@ const OrganizationsPage = () => {
   return <ManageOrganizations />;
 };
 
-export default OrganizationsPage;
+// export default OrganizationsPage;
+
+export default withProfileCompletionGuard(OrganizationsPage)

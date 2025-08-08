@@ -8,8 +8,9 @@ import { selectZoomIsConnected, selectZoomSuccessMessage, setShowConnectionModal
 import { useMeetingsModal } from '../hooks/useMeetings';
 import ZoomConfig from '../components/ZoomConfig';
 import ZoomAccountCard from '../components/ZoomAccountCard';
+import withProfileCompletionGuard from '../components/withProfileCompletionGuard';
 
-export default function ConfigureMeetingToolsPage() {
+function ConfigureMeetingToolsPage() {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const router = useRouter();
@@ -142,3 +143,6 @@ export default function ConfigureMeetingToolsPage() {
     </main>
   );
 }
+
+
+export default withProfileCompletionGuard(ConfigureMeetingToolsPage)

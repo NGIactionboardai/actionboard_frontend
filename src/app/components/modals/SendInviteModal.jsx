@@ -91,6 +91,38 @@ export default function SendInviteModal({ isOpen, onClose, onSuccess, orgId, mee
             Share Meeting
           </Dialog.Title>
 
+          {/* Join URL + Copy + Join Now */}
+          {meeting?.join_url && (
+            <div className="mb-4">
+              <label className="text-sm text-gray-700 font-medium mb-1 block">Meeting Link</label>
+              <div className="flex items-center justify-between bg-gray-100 rounded px-3 py-2 text-sm">
+                <span
+                  className="text-gray-700 truncate max-w-[65%] block"
+                  title={meeting.join_url}
+                >
+                  {meeting.join_url}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(meeting.join_url);
+                      toast.success('Copied meeting link!');
+                    }}
+                    className="text-indigo-600 hover:text-indigo-800 text-xs font-medium"
+                  >
+                    Copy
+                  </button>
+                  {/* <button
+                    onClick={() => window.open(meeting.join_url, '_blank', 'noopener,noreferrer')}
+                    className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                  >
+                    Join now
+                  </button> */}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 🔍 Search Input */}
           <input
             type="text"

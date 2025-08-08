@@ -7,8 +7,9 @@ import MemberFormModal from '@/app/components/memberlist/MemberFormModal';
 import ConfirmDeleteModal from '@/app/components/memberlist/ConfirmDeleteModal';
 import { useSelector } from 'react-redux';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
+import withProfileCompletionGuard from '@/app/components/withProfileCompletionGuard';
 
-export default function MemberListPage() {
+function MemberListPage() {
   const router = useRouter();
   const { org_id } = useParams();
   const [members, setMembers] = useState([]);
@@ -143,3 +144,6 @@ export default function MemberListPage() {
     </main>
   );
 }
+
+
+export default withProfileCompletionGuard(MemberListPage)

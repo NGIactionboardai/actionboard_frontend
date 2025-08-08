@@ -11,23 +11,19 @@ export default function InstructionModal({ isOpen, onClose }) {
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="max-w-lg w-full bg-white rounded-xl p-6 shadow-lg">
           <Dialog.Title className="text-xl font-semibold text-gray-800 mb-4">
-            Important: Recording Required for Transcription
+            Recording & Transcripts
           </Dialog.Title>
 
           <div className="space-y-3 text-sm text-gray-700">
             <p>
-              To receive transcripts and summaries after the meeting, you need to record it.
+              To get a transcript and summary after your meeting, you’ll need to record it.
             </p>
             <ul className="list-disc list-inside ml-2">
-              <li>
-                <strong>Paid Zoom account:</strong> Enable <em>Cloud Recording</em> in Zoom.
-              </li>
-              <li>
-                <strong>Free Zoom account:</strong> Use <em>Local Recording</em> and upload the file manually after the meeting.
-              </li>
+              <li><strong>Paid Zoom account:</strong> Use <em>Cloud Recording</em>.</li>
+              <li><strong>Free Zoom account:</strong> Use <em>Local Recording</em> and upload it after.</li>
             </ul>
-            <p>
-              Recordings are processed to generate transcripts, speaker analysis, and meeting summaries.
+            <p className="text-gray-600">
+              Recording is optional — if you choose not to record, transcripts won’t be available.
             </p>
           </div>
 

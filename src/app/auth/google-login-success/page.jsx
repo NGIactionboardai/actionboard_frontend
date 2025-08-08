@@ -20,7 +20,7 @@ const GoogleLoginSuccessPage = () => {
 
 
       if (!code) {
-        router.push('/login?error=missing-code');
+        router.push('/auth/login?error=missing-code');
         return;
       }
 
@@ -66,6 +66,11 @@ const GoogleLoginSuccessPage = () => {
             user,
           })
         );
+
+        if (!user.country || !user.date_of_birth) {
+          router.push('/auth/complete-profile');
+          return;
+        }
 
         router.push('/organizations');
       } catch (err) {

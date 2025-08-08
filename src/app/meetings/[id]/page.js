@@ -24,6 +24,7 @@ import { useSelector } from 'react-redux';
 import MeetingsSidebar from '@/app/components/meetings/MeetingsSidebar';
 import SendInviteModal from '@/app/components/modals/SendInviteModal';
 import InstructionModal from '@/app/components/meetings/InstructionModal';
+import JoinBtnInstructionModal from '@/app/components/meetings/JoinBtnInstructionModal';
 
 export default function Meetings() {
   const params = useParams();
@@ -33,6 +34,7 @@ export default function Meetings() {
 
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isJoinBtnInstructionModalOpen, setIsJoinBtnInstructionModalOpen] = useState(false);
   const [showRecordingInfoModal, setShowRecordingInfoModal] = useState(false);
 
   // Custom hooks for state management
@@ -189,6 +191,10 @@ export default function Meetings() {
             setSelectedMeeting(meeting);
             setIsInviteModalOpen(true);
           }}
+          onJoinClick={(meeting) => {
+            setSelectedMeeting(meeting);
+            setIsJoinBtnInstructionModalOpen(true);
+          }}
         />
   
         {/* Modals */}
@@ -224,6 +230,16 @@ export default function Meetings() {
             }}
           />
         )}
+
+        {selectedMeeting && (
+          <JoinBtnInstructionModal
+            isOpen={isJoinBtnInstructionModalOpen}
+            onClose={() => setIsJoinBtnInstructionModalOpen(false)}
+            meeting={selectedMeeting}
+          />
+        )}
+
+        
       </main>
     </div>
   );
