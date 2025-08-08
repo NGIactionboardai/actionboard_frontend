@@ -23,35 +23,27 @@ export default function AuthHydrator({ children }) {
   }, [dispatch, isHydrated]);
 
   useEffect(() => {
-    if (isHydrated) {
-      const storedToken = storage.get(AUTH_STORAGE_KEYS.TOKEN);
-      const refreshTokenExists = storage.get(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
-
-      if (storedToken && refreshTokenExists && isTokenExpired(storedToken)) {
-        dispatch(refreshToken());
-      }
-    }
-  }, [isHydrated, dispatch]);
-
-
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const userInfo = await fetchUserInfo();
-        storage.set(AUTH_STORAGE_KEYS.USER, userInfo);
+    const initAuth = async () => {
+      const token = storage.get(AUTH_STORAGE_KEYS.TOKEN);
+      const refreshTokenVal = storage.get(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
   
-        // Re-hydrate Redux state with updated localStorage
-        dispatch(hydrateAuth());
-      } catch (err) {
-        console.error('Failed to fetch user info:', err);
+      if (token && refreshTokenVal && isTokenExpired(token)) {
+        await dispatch(refreshToken()); // wait until finished
+      }
+  
+      const validToken = storage.get(AUTH_STORAGE_KEYS.TOKEN);
+      if (validToken) {
+        try {
+          const userInfo = await fetchUserInfo();
+          storage.set(AUTH_STORAGE_KEYS.USER, userInfo);
+          dispatch(hydrateAuth());
+        } catch (err) {
+          console.error('Failed to fetch user info:', err);
+        }
       }
     };
-
-    const token = storage.get(AUTH_STORAGE_KEYS.TOKEN);
   
-    if (isHydrated && token) {
-      getUser();
-    }
+    if (isHydrated) initAuth();
   }, [isHydrated, dispatch]);
 
   // You can optionally show a loading state while hydrating
@@ -66,8 +58,9 @@ function isTokenExpired(token) {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const exp = payload.exp;
-    return Date.now() >= exp * 1000;
+    // refresh if less than 60 seconds left
+    return Date.now() >= (exp * 1000) - 60000;
   } catch (e) {
-    return true; // invalid token format
+    return true;
   }
 }
