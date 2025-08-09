@@ -1215,8 +1215,6 @@ export default function MeetingDetails() {
                               <th className="px-4 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Pos %</th>
                               <th className="px-4 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">Neu %</th>
                               <th className="px-4 py-3 text-left text-xs font-semibold text-red-600 uppercase tracking-wider">Neg %</th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Mean Sentiment</th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Rating (/10)</th>
                               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Overall</th>
                             </tr>
                           </thead>
@@ -1227,8 +1225,6 @@ export default function MeetingDetails() {
                                 <td className="px-4 py-2 text-sm text-green-700">{entry['Pos %']}</td>
                                 <td className="px-4 py-2 text-sm text-blue-700">{entry['Neu %']}</td>
                                 <td className="px-4 py-2 text-sm text-red-700">{entry['Neg %']}</td>
-                                <td className="px-4 py-2 text-sm text-gray-800">{entry['Mean Sentiment']}</td>
-                                <td className="px-4 py-2 text-sm text-gray-800">{entry['Rating (/10)']}</td>
                                 <td className="px-4 py-2 text-sm">
                                   <span className={`px-2 py-1 rounded-full text-xs font-medium
                                     ${entry.Overall === 'Positive'

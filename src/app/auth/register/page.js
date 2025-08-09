@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, User, Mail, Lock, Check, X, Globe, Calendar } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,6 +15,10 @@ import {
   selectAuthLoading
 } from '../../../redux/auth/authSlices';
 import GoogleLoginButton from '@/app/components/auth/GoogleLoginButton';
+import countries from 'i18n-iso-countries';
+import enLocale from 'i18n-iso-countries/langs/en.json';
+
+countries.registerLocale(enLocale);
 
 export default function RegistrationPage() {
   const dispatch = useDispatch();
@@ -53,16 +57,35 @@ export default function RegistrationPage() {
   ];
 
   // Common countries list
-  const countries = [
-    'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 'France', 'Italy', 'Spain',
-    'Netherlands', 'Sweden', 'Norway', 'Denmark', 'Switzerland', 'Austria', 'Belgium', 'Japan',
-    'South Korea', 'Singapore', 'New Zealand', 'Ireland', 'India', 'Brazil', 'Mexico', 'Other'
-  ];
+  // const countries = [
+  //   'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 'France', 'Italy', 'Spain',
+  //   'Netherlands', 'Sweden', 'Norway', 'Denmark', 'Switzerland', 'Austria', 'Belgium', 'Japan',
+  //   'South Korea', 'Singapore', 'New Zealand', 'Ireland', 'India', 'Brazil', 'Mexico', 'Other'
+  // ];
+
+  // Normalize incoming country (if user.country might be a name or a code)
+  const normalizeToCode = (value) => {
+    if (!value) return '';
+
+    if (typeof value === 'string' && value.length === 2) return value.toUpperCase();
+    
+    const code = countries.getAlpha2Code(String(value), 'en');
+    return code || '';
+  };
+  
+  // Build ordered list: [{code, name}]
+  const countryOptions = useMemo(() => {
+    const names = countries.getNames('en'); // { US: 'United States', ...}
+    const arr = Object.entries(names).map(([code, name]) => ({ code, name }));
+
+    arr.sort((a, b) => a.name.localeCompare(b.name));
+    return arr;
+  }, []);
+  
 
   // Redirect if user is already authenticated
   useEffect(() => {
     if (auth.isAuthenticated && auth.user) {
-      // User is already logged in, redirect to dashboard
       router.push('/dashboard');
     }
   }, [auth.isAuthenticated, auth.user, router]);
@@ -95,6 +118,16 @@ export default function RegistrationPage() {
     // Clear Redux error to remove error banner
     if (error) {
       dispatch(clearError());
+    }
+  };
+
+  const handleCountryChange = (e) => {
+    const selectedName = e.target.value;
+    const code = normalizeToCode(selectedName);
+    setFormData((prev) => ({ ...prev, country: code }));
+  
+    if (errors.country) {
+      setErrors((prev) => ({ ...prev, country: '' }));
     }
   };
 
@@ -361,9 +394,11 @@ export default function RegistrationPage() {
                     }`}
                     required
                   >
-                    <option value="">Select Country</option>
-                    {countries.map(country => (
-                      <option key={country} value={country}>{country}</option>
+                    <option value="">Select your country</option>
+                    {countryOptions.map(({ code, name }) => (
+                      <option key={code} value={code}>
+                        {name}
+                      </option>
                     ))}
                   </select>
                 </div>

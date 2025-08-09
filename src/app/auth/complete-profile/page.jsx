@@ -1,41 +1,64 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { CountryDropdown } from 'react-country-region-selector';
 import toast from 'react-hot-toast';
 import { X } from 'lucide-react';
 import { editUserInfo, updateUserInfo } from '@/redux/auth/authSlices';
+
+import countries from 'i18n-iso-countries';
+import enLocale from 'i18n-iso-countries/langs/en.json';
+
+// Always register English locale
+countries.registerLocale(enLocale);
 
 const CompleteProfilePage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const user = useSelector((state) => state.auth.user);
 
-  const [country, setCountry] = useState(user?.country || '');
-  const [dob, setDob] = useState(user?.date_of_birth || '');
+  const [formData, setFormData] = useState({
+    country: user?.country || '',
+    date_of_birth: user?.date_of_birth || ''
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Build ordered list: [{code, name}]
+  const countryOptions = useMemo(() => {
+    const names = countries.getNames('en'); // { US: 'United States', ... }
+    const arr = Object.entries(names).map(([code, name]) => ({ code, name }));
+    arr.sort((a, b) => a.name.localeCompare(b.name));
+    return arr;
+  }, []);
 
   useEffect(() => {
     if (user?.country && user?.date_of_birth) {
       router.replace('/auth/profile');
     }
-  }, []);
+  }, [user, router]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!country || !dob) {
+
+    if (!formData.country || !formData.date_of_birth) {
       setError('Both fields are required.');
       return;
     }
 
     try {
       setLoading(true);
-      const { data } = await editUserInfo({ country, date_of_birth: dob });
+
+      const { data } = await editUserInfo(formData);
       dispatch(updateUserInfo({ user: data.user }));
+
       toast.success('Profile completed!');
       router.push('/organizations');
     } catch (err) {
@@ -74,22 +97,40 @@ const CompleteProfilePage = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Country Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
-              <CountryDropdown
-                value={country}
-                onChange={(val) => setCountry(val)}
-                classes="w-full border-2 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 border-gray-200 hover:border-gray-300"
-              />
+              <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
+                Country
+              </label>
+              <select
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                disabled={loading}
+                className={`w-full pl-3 pr-4 py-3 text-sm border-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 appearance-none bg-white disabled:opacity-50 disabled:cursor-not-allowed border-gray-200 hover:border-gray-300`}
+                required
+              >
+                <option value="">Select your country</option>
+                {countryOptions.map(({ code, name }) => (
+                  <option key={code} value={code}>
+                    {name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* DOB Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+              <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700 mb-2">
+                Date of Birth
+              </label>
               <input
                 type="date"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
+                id="date_of_birth"
+                name="date_of_birth"
+                value={formData.date_of_birth}
+                onChange={handleChange}
                 className="w-full border-2 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 border-gray-200 hover:border-gray-300"
+                required
               />
             </div>
 
