@@ -10,9 +10,7 @@ import { X } from 'lucide-react';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 
-if (!countries.getNames('en')) {
-  countries.registerLocale(enLocale);
-}
+countries.registerLocale(enLocale);
 
 export default function EditInfoModal({ isOpen, onClose }) {
   const dispatch = useDispatch();
