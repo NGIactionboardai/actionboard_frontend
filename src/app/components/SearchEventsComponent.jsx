@@ -1,6 +1,7 @@
 // SearchEventsComponent.jsx
 'use client';
 
+import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -10,6 +11,9 @@ export default function SearchEventsComponent({
   handleEventClick,
   orgColors
 }) {
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [duration, setDuration] = useState('3m');
@@ -24,27 +28,19 @@ export default function SearchEventsComponent({
 
   const handleSearch = async () => {
     if (!query.trim()) return;
-
+  
     setLoading(true);
     try {
-      const baseUrl = 'https://actionboard-ai-backend.onrender.com/api/calendar/search-events/';
-      const url = new URL(baseUrl);
-      url.searchParams.append('q', query);
+      const params = { q: query };
       if (duration !== 'all') {
-        url.searchParams.append('duration', duration);
+        params.duration = duration;
       }
-
-      const res = await makeApiCall(url.toString(), {
-        method: 'GET',
-        headers: getAuthHeaders()
+  
+      const res = await axios.get(`${API_BASE_URL}/calendar/search-events/`, {
+        params,
       });
-
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data.events);
-      } else {
-        toast.error('Search failed');
-      }
+  
+      setResults(res.data.events);
     } catch (err) {
       console.error(err);
       toast.error('Error during search');
@@ -52,6 +48,8 @@ export default function SearchEventsComponent({
       setLoading(false);
     }
   };
+
+
 
   const formatDate = (isoString) => {
     const options = {

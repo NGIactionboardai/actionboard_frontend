@@ -10,6 +10,8 @@ import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import withProfileCompletionGuard from '@/app/components/withProfileCompletionGuard';
 
 function MemberListPage() {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const router = useRouter();
   const { org_id } = useParams();
   const [members, setMembers] = useState([]);
@@ -24,23 +26,10 @@ function MemberListPage() {
   const fetchMembers = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders(authToken);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${org_id}/members/`);
   
-      const res = await makeApiCall(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${org_id}/members/`,
-        {
-          method: 'GET',
-          headers,
-        }
-      );
-  
-      if (!res.ok) {
-        throw new Error(`Failed to fetch members: ${res.status} ${res.statusText}`);
-      }
-  
-      const data = await res.json();
-      setMembers(data.members);
-      setOrgName(data.organisation_name)
+      setMembers(res.data.members);
+      setOrgName(res.data.organisation_name);
     } catch (err) {
       console.error('Failed to load members:', err);
     } finally {

@@ -11,8 +11,13 @@ import {
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import OrgSwitcher from './OrgSwitcher';
 import { ZoomConnectionStatus } from '../ZoomConfig';
+import axios from 'axios';
+
 
 export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }) {
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth?.token);
   const isZoomConnected = useSelector(selectZoomIsConnected);
@@ -23,24 +28,17 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
   useEffect(() => {
     const fetchOrgs = async () => {
       try {
-        const res = await makeApiCall(
-          'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
-          {
-            method: 'GET',
-            headers: getAuthHeaders(token)
-          }
-        );
-        const data = await res.json();
-        setOrganizations(data || []);
+        const res = await axios.get(`${API_BASE_URL}/organisations/my-organisations/`);
+        setOrgs(res.data || []);
       } catch (err) {
-        console.error('Failed to fetch organizations');
-      } finally {
-        setLoading(false); // Stop loading
+        console.error('Error fetching organizations:', err);
       }
     };
-
-    fetchOrgs();
-  }, []);
+  
+    if (isAuthenticated) {
+      fetchOrgs();
+    }
+  }, [isAuthenticated]);
 
   const handleZoomConnectionClick = () => {
     if (isZoomConnected) {

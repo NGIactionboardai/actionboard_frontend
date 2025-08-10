@@ -4,6 +4,8 @@ import { useEffect, useState, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import axios from 'axios';
+
 
 export default function OrgAddEventModal({
   isOpen,
@@ -17,6 +19,8 @@ export default function OrgAddEventModal({
   makeApiCall,
   isZoomConnected
 }) {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [createZoom, setCreateZoom] = useState(false);
@@ -121,43 +125,31 @@ export default function OrgAddEventModal({
         org_id: orgId,
       };
   
-      const headers = getAuthHeaders();
       const endpoint = createZoom
-        ? '/api/calendar/events/create-with-meeting/'
-        : '/api/calendar/events/';
+        ? '/calendar/events/create-with-meeting/'
+        : '/calendar/events/';
   
-      const res = await makeApiCall(`https://actionboard-ai-backend.onrender.com${endpoint}`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload),
-      });
+      const res = await axios.post(`${API_BASE_URL}${endpoint}`, payload);
   
-      if (res.ok) {
-        const data = await res.json();
-        onEventCreated?.(data);
-        toast.success('Event created successfully!');
-        resetForm();
-        onClose();
-      } else {
-        const errorData = await res.json();
-        if (
-          errorData?.error?.type === 'overlap_error'
-        ) {
-            toast(errorData.error.message || 'Another event overlaps with this time range.', {
-              icon: '⚠️',
-              style: {
-                borderRadius: '8px',
-                background: '#000',
-                color: '#ffcc00',
-              },
-            });
-        } else {
-          toast.error('Failed to create event.');
-        }
-      }
+      onEventCreated?.(res.data);
+      toast.success('Event created successfully!');
+      resetForm();
+      onClose();
+  
     } catch (err) {
-      console.error('Error creating event:', err);
-      toast.error('Something went wrong while creating the event.');
+      if (err.response?.data?.error?.type === 'overlap_error') {
+        toast(err.response.data.error.message || 'Another event overlaps with this time range.', {
+          icon: '⚠️',
+          style: {
+            borderRadius: '8px',
+            background: '#000',
+            color: '#ffcc00',
+          },
+        });
+      } else {
+        console.error('Error creating event:', err);
+        toast.error('Something went wrong while creating the event.');
+      }
     } finally {
       setLoading(false);
     }

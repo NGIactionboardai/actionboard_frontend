@@ -1,10 +1,14 @@
 'use client';
 
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 // import { getAuthHeaders } from '@/utils/auth';
 
 const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [speakerList, setSpeakerList] = useState([]);
   const [speakerMap, setSpeakerMap] = useState({});
   const [loading, setLoading] = useState(false);
@@ -36,15 +40,19 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
   const fetchSpeakers = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
-      const response = await fetch(`https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/list-speakers/${meetingId}/`, {
-        headers,
-      });
-      const data = await response.json();
+      const res = await axios.get(
+        `${API_BASE_URL}/transcripts/zoom/list-speakers/${meetingId}/`
+      );
+
+      const data = res.data;
       setSpeakerList(data.speakers);
+
       const initialMap = {};
-      data.speakers.forEach((s) => (initialMap[s] = s));
+      data.speakers.forEach((s) => {
+        initialMap[s] = s;
+      });
       setSpeakerMap(initialMap);
+
     } catch (err) {
       console.error('Error fetching speakers:', err);
     } finally {
@@ -60,7 +68,7 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
   };
 
   const handleSubmit = async () => {
-    // Step 1: Validate all fields are filled
+
     const newErrors = {};
     speakerList.forEach((speaker) => {
       if (!speakerMap[speaker] || speakerMap[speaker].trim() === '') {
@@ -68,39 +76,28 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
       }
     });
   
-    // If there are validation errors, set them and stop
     if (Object.keys(newErrors).length > 0) {
-      setValidationErrors(newErrors); // 👈 make sure this state is defined in your component
+      setValidationErrors(newErrors);
       return;
     }
   
-    // No validation errors — proceed with submit
     setValidationErrors({});
     setSubmitting(true);
   
     try {
-      const headers = getAuthHeaders();
-      const response = await fetch(
-        `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/update-speakers/${meetingId}/`,
-        {
-          method: 'POST',
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ speaker_map: speakerMap }),
-        }
+      const res = await axios.post(
+        `${API_BASE_URL}/transcripts/zoom/update-speakers/${meetingId}/`,
+        { speaker_map: speakerMap }
       );
   
-      if (response.ok) {
+      if (res.status >= 200 && res.status < 300) {
         onUpdateSuccess?.();
         onClose();
       } else {
-        const err = await response.text();
-        alert(`Failed to update speakers: ${response.status} - ${err}`);
+        alert(`Failed to update speakers: ${res.status} - ${res.statusText}`);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error updating speakers:', err);
       alert('Unexpected error while updating speakers.');
     } finally {
       setSubmitting(false);

@@ -4,6 +4,8 @@ import { useEffect, useState, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import axios from 'axios';
+
 
 export default function EditEventModal({
   isOpen,
@@ -14,6 +16,8 @@ export default function EditEventModal({
   onEventUpdated,
   isZoomConnected
 }) {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [eventType, setEventType] = useState('personal');
@@ -81,40 +85,31 @@ export default function EditEventModal({
         end_time: convertToUTCISOString(selectedDate, endHour, endMinute, endAmpm),
       };
   
-      const headers = getAuthHeaders();
-      const url = `https://actionboard-ai-backend.onrender.com/api/calendar/events/${eventToEdit.id}/`;
   
-      const res = await makeApiCall(url, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify(payload),
-      });
+      const res = await axios.patch(
+        `${API_BASE_URL}/calendar/events/${eventToEdit.id}/`,
+        payload
+      );
   
-      if (res.ok) {
-        const data = await res.json();
-        toast.success('Event updated successfully!');
-        onEventUpdated?.(data);
-        onClose();
-      } else {
-        const errorData = await res.json();
-  
-        if (errorData?.error?.type === 'overlap_error') {
-          toast('Another event overlaps with this time range.', {
-            icon: '⚠️',
-            style: {
-              borderRadius: '8px',
-              background: '#000',
-              color: '#ffcc00',
-            },
-          });
-        } else {
-          console.error('Failed to update event:', errorData);
-          toast.error('Failed to update event.');
-        }
-      }
+      toast.success('Event updated successfully!');
+      onEventUpdated?.(res.data);
+      onClose();
     } catch (err) {
-      console.error('Error updating event:', err);
-      toast.error('Something went wrong while updating the event.');
+      const errorData = err.response?.data;
+  
+      if (errorData?.error?.type === 'overlap_error') {
+        toast('Another event overlaps with this time range.', {
+          icon: '⚠️',
+          style: {
+            borderRadius: '8px',
+            background: '#000',
+            color: '#ffcc00',
+          },
+        });
+      } else {
+        console.error('Failed to update event:', errorData || err.message);
+        toast.error('Failed to update event.');
+      }
     } finally {
       setLoading(false);
     }

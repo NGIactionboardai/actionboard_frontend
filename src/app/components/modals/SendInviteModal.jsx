@@ -6,9 +6,13 @@ import { Button } from '@/components/ui/button';
 import { useSelector } from 'react-redux';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
+
 
 
 export default function SendInviteModal({ isOpen, onClose, onSuccess, orgId, meeting, members = [] }) {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const authToken = useSelector((state) => state.auth.token);
@@ -47,29 +51,18 @@ export default function SendInviteModal({ isOpen, onClose, onSuccess, orgId, mee
 
   const handleSend = async () => {
     if (selected.length === 0 || !meeting?.id) return;
+  
     setLoading(true);
     try {
-      const headers = getAuthHeaders(authToken);
-      const res = await makeApiCall(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/meetings/send-meeting-invitations/${orgId}/`,
+      const res = await axios.post(
+        `${API_BASE_URL}/meetings/send-meeting-invitations/${orgId}/`,
         {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            member_ids: selected,
-            meeting_id: meeting.id,
-          }),
+          member_ids: selected,
+          meeting_id: meeting.id,
         }
       );
   
-      if (!res.ok) {
-        throw new Error('Failed to send invites');
-      }
-  
-      const result = await res.json();
-      console.log(result.detail);
-  
-      toast.success(result.detail || 'Invites sent successfully!');
+      toast.success(res.data.detail || 'Invites sent successfully!');
       onSuccess?.(); // Close modal
   
     } catch (err) {
@@ -79,6 +72,7 @@ export default function SendInviteModal({ isOpen, onClose, onSuccess, orgId, mee
       setLoading(false);
     }
   };
+  
   
 
   return (

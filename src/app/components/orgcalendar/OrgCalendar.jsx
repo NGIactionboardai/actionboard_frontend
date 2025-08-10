@@ -20,9 +20,14 @@ import OrgAddEventModal from './OrgAddEventModal';
 import OrgSearchEventsComponent from './OrgSearchEventsComponent';
 import OrgEventReportsComponent from './OrgEventReportsComponent';
 import { getZoomConnectionStatus, selectZoomIsConnected } from '@/redux/auth/zoomSlice';
+import axios from 'axios';
+
 
 
 export default function OrgCalendar({ orgId }) {
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
     const dispatch = useDispatch();
     const isZoomConnected = useSelector(selectZoomIsConnected);
@@ -183,104 +188,69 @@ export default function OrgCalendar({ orgId }) {
   };
 
   const fetchOrg = async () => {
-        try {
-          const res = await makeApiCall(`https://actionboard-ai-backend.onrender.com/api/organisations/${orgId}/`, {
-            method: 'GET',
-            headers: getAuthHeaders()
-          });
-          const data = await res.json();
-          // console.log("org data:", data)
-          setOrgName(data.name);
-        } catch {
-          setOrgName('Unknown');
-        }
-   };
+    try {
+      const res = await axios.get(`${API_BASE_URL}/organisations/${orgId}/`);
+      setOrgName(res.data.name);
+    } catch (err) {
+      console.error('Failed to fetch organization:', err);
+      setOrgName('Unknown');
+    }
+  };
       
 
 
 
   useEffect(() => {
-    console.log("Org Id: ", orgId)
-
+    console.log("Org Id:", orgId);
+  
     const fetchOrganizationsAndEvents = async () => {
       try {
         setLoadingOrgs(true);
         setLoadingEvents(true);
   
-        const headers = getAuthHeaders();
-  
         // Fetch organizations
-        const orgResponse = await makeApiCall(
-          'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
-          { headers }
-        );
-  
-        let orgs = [];
-        if (orgResponse.ok) {
-          orgs = await orgResponse.json();
-          
-          setOrganizations(orgs);
-        } else {
-          console.error('Failed to fetch organizations');
-        }
+        const orgResponse = await axios.get(`${API_BASE_URL}/organisations/my-organisations/`);
+        const orgs = orgResponse.data || [];
+        setOrganizations(orgs);
   
         const orgColorMap = generateOrgColors(orgs);
         setOrgColors(orgColorMap);
         setLoadingOrgs(false);
   
         // Fetch events
-        const eventResponse = await makeApiCall(
-          'https://actionboard-ai-backend.onrender.com/api/calendar/all-events/',
-          { headers }
-        );
+        const eventResponse = await axios.get(`${API_BASE_URL}/calendar/all-events/`);
+        const { events: rawEvents } = eventResponse.data;
   
-        if (eventResponse.ok) {
-          const { events: rawEvents } = await eventResponse.json();
+        const enriched = rawEvents.map(event => {
+          const orgName = event.organisation_name;
+          const isCurrentOrg = event.organisation_id === orgId;
   
-          const enriched = rawEvents.map(event => {
-            const orgName = event.organisation_name;
-          
-            const isCurrentOrg = event.organisation_id === orgId;
-
-          
-            const base = {
-              id: event.id,
-              start: event.start,
-              end: event.end,
-              backgroundColor: isCurrentOrg ? orgColorMap[orgName] || '#6b7280' : '#9CA3AF', // gray
-              borderColor: isCurrentOrg ? orgColorMap[orgName] || '#6b7280' : '#9CA3AF',
-              textColor: '#fff',
-              extendedProps: {
-                title: event.title,
-                description: event.description,
-                join_url: event.meeting?.join_url || null,
-                organization: isCurrentOrg ? orgName : 'Occupied',
-                event_type: event.event_type,
-                organisation_id: event.org_id,
-                organisation_name: orgName,
-                isOccupiedEvent: !isCurrentOrg
-              }
-            };
-          
-            if (isCurrentOrg) {
-              return {
-                ...base,
-                title: event.title
-              };
-            } else {
-              return {
-                ...base,
-                title: 'Occupied Slot'
-              };
+          const base = {
+            id: event.id,
+            start: event.start,
+            end: event.end,
+            backgroundColor: isCurrentOrg ? orgColorMap[orgName] || '#6b7280' : '#9CA3AF',
+            borderColor: isCurrentOrg ? orgColorMap[orgName] || '#6b7280' : '#9CA3AF',
+            textColor: '#fff',
+            extendedProps: {
+              title: event.title,
+              description: event.description,
+              join_url: event.meeting?.join_url || null,
+              organization: isCurrentOrg ? orgName : 'Occupied',
+              event_type: event.event_type,
+              organisation_id: event.org_id,
+              organisation_name: orgName,
+              isOccupiedEvent: !isCurrentOrg
             }
-          });
-
-          console.log("enriched events: ", enriched)
+          };
   
-          setApiEvents(enriched);
-        } else {
-          console.error('Failed to fetch events');
-        }
+          return isCurrentOrg
+            ? { ...base, title: event.title }
+            : { ...base, title: 'Occupied Slot' };
+        });
+  
+        console.log("enriched events:", enriched);
+        setApiEvents(enriched);
   
         setLoadingEvents(false);
       } catch (error) {
@@ -289,10 +259,11 @@ export default function OrgCalendar({ orgId }) {
         setLoadingEvents(false);
       }
     };
-    
-    fetchOrg();
+  
+    fetchOrg(); // your already-refactored function
     fetchOrganizationsAndEvents();
   }, []);
+
 
     const generateOrgColors = (orgs) => {
       const tailwindColors = [
@@ -328,61 +299,48 @@ export default function OrgCalendar({ orgId }) {
 
     const handleEventDrop = async (info) => {
       const { event } = info;
-    
+
       if (event.extendedProps?.isOccupiedEvent) {
         toast.error("Occupied slots cannot be moved or updated.");
-        info.revert(); // revert the drag/drop
+        info.revert();
         return;
       }
-    
+
       try {
         const updatedData = {
           start_time: event.start.toISOString(),
           end_time: event.end.toISOString(),
         };
-    
-        const headers = getAuthHeaders();
-        const res = await makeApiCall(
-          `https://actionboard-ai-backend.onrender.com/api/calendar/events/${event.id}/`,
-          {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify(updatedData),
-          }
+
+        const res = await axios.patch(
+          `${API_BASE_URL}/calendar/events/${event.id}/`,
+          updatedData
         );
-    
-        if (res.ok) {
-          const updatedEvent = await res.json();
-    
-          setApiEvents((prev) =>
-            prev.map((evt) =>
-              evt.id === event.id
-                ? { ...evt, start: updatedEvent.start, end: updatedEvent.end }
-                : evt
-            )
-          );
-    
-          toast.success('Event updated successfully');
-        } else {
-          const errorData = await res.json();
-    
-          if (errorData?.error?.type === 'overlap_error') {
-            toast(errorData.error.message || 'Another event overlaps with this time range.', {
-              icon: '⚠️',
-              style: {
-                borderRadius: '8px',
-                background: '#000',
-                color: '#ffcc00',
-              },
-            });
-          } else {
-            toast.error('Failed to update event');
-          }
-    
-          info.revert();
-        }
+
+        const updatedEvent = res.data;
+
+        setApiEvents((prev) =>
+          prev.map((evt) =>
+            evt.id === event.id
+              ? { ...evt, start: updatedEvent.start, end: updatedEvent.end }
+              : evt
+          )
+        );
+
+        toast.success('Event updated successfully');
       } catch (err) {
-        toast.error('Error updating event');
+        if (err.response?.data?.error?.type === 'overlap_error') {
+          toast(err.response.data.error.message || 'Another event overlaps with this time range.', {
+            icon: '⚠️',
+            style: {
+              borderRadius: '8px',
+              background: '#000',
+              color: '#ffcc00',
+            },
+          });
+        } else {
+          toast.error('Failed to update event');
+        }
         info.revert();
       }
     };
@@ -394,21 +352,14 @@ export default function OrgCalendar({ orgId }) {
       if (!confirmed) return;
     
       try {
-        const res = await makeApiCall(`https://actionboard-ai-backend.onrender.com/api/calendar/events/${eventId}/`, {
-          method: 'DELETE',
-          headers: getAuthHeaders()
-        });
+        await axios.delete(`${API_BASE_URL}/calendar/events/${eventId}/`);
     
-        if (res.ok) {
-          setApiEvents(prev => prev.filter(event => String(event.id) !== String(eventId)));
-          toast.success("Event deleted successfully");
-          setIsEventModalOpen(false);
-        } else {
-          toast.error("Failed to delete event");
-        }
+        setApiEvents(prev => prev.filter(event => String(event.id) !== String(eventId)));
+        toast.success("Event deleted successfully");
+        setIsEventModalOpen(false);
       } catch (err) {
         console.error(err);
-        toast.error("Error deleting event");
+        toast.error("Failed to delete event");
       }
     };
 

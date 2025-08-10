@@ -5,8 +5,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { userLogout, selectIsAuthenticated, selectUser, selectAuthLoading } from '../../../redux/auth/authSlices';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
+import axios from 'axios';
+
 
 export default function Navbar() {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activePath, setActivePath] = useState('');
@@ -96,12 +100,8 @@ export default function Navbar() {
   useEffect(() => {
     const fetchOrgs = async () => {
       try {
-        const headers = getAuthHeaders(authToken);
-        const response = await makeApiCall(`https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/`, {
-          headers,
-        });
-        const data = await response.json();
-        setOrgs(data || []);
+        const res = await axios.get(`${API_BASE_URL}/organisations/my-organisations/`);
+        setOrgs(res.data || []);
       } catch (err) {
         console.error('Error fetching organizations:', err);
       }
@@ -110,7 +110,7 @@ export default function Navbar() {
     if (isAuthenticated) {
       fetchOrgs();
     }
-  }, [isAuthenticated, authToken]);
+  }, [isAuthenticated]);
 
   // ✅ Now it's safe to check
   // if (!hasMounted) return null;

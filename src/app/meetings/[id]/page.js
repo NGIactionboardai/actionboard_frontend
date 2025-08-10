@@ -3,6 +3,8 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import axios from 'axios';
+
 
 // Components
 import MeetingsHeader from '../../components/meetings/MeetingsHeader';
@@ -27,6 +29,8 @@ import InstructionModal from '@/app/components/meetings/InstructionModal';
 import JoinBtnInstructionModal from '@/app/components/meetings/JoinBtnInstructionModal';
 
 export default function Meetings() {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const params = useParams();
   const organizationId = params?.id;
   const [orgName, setOrgName] = useState('')
@@ -73,43 +77,35 @@ export default function Meetings() {
   const token = useSelector((state) => state.auth?.token);
 
   useEffect(() => {
-      const fetchOrg = async () => {
-
-        try {
-          const res = await makeApiCall(`https://actionboard-ai-backend.onrender.com/api/organisations/${organizationId}/`, {
-            method: 'GET',
-            headers: getAuthHeaders(token)
-          });
-          const data = await res.json();
-          setOrgName(data.name)
-          console.log("Organization Data: ", )
-          // or use saved map
-        } catch {
-          console.log("Failed to fetch organization details")
-        }
-      };
+    const fetchOrg = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/organisations/${organizationId}/`);
+        setOrgName(res.data.name);
+        console.log("Organization Data:", res.data);
+      } catch (error) {
+        console.log("Failed to fetch organization details", error);
+      }
+    };
+  
+    if (organizationId) {
       fetchOrg();
-    }, [organizationId]);
+    }
+  }, [organizationId]);
 
-    useEffect(() => {
-      const fetchMembers = async () => {
-        
-        if (!organizationId || !token) return;
-        try {
-          const headers = getAuthHeaders(token);
-          const res = await makeApiCall(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${organizationId}/members/`,
-            { method: 'GET', headers }
-          );
-          const data = await res.json();
-          setMembers(data.members || []);
-        } catch (err) {
-          console.error('Error fetching members', err);
-        }
-      };
-    
-      fetchMembers();
-    }, [organizationId, token]);
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!organizationId) return;  // token handled globally by interceptor
+  
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${organizationId}/members/`);
+        setMembers(res.data.members || []);
+      } catch (err) {
+        console.error('Error fetching members', err);
+      }
+    };
+  
+    fetchMembers();
+  }, [organizationId]);
 
   // If organization ID is not found, show message
   if (!organizationId) {

@@ -10,32 +10,25 @@ export default function MemberFormModal({ orgId, existing, onClose, onSuccess, a
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders(authToken);
-      const body = JSON.stringify({ name, email });
+      const payload = { name, email };
   
       const url = existing
         ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${orgId}/members/${existing.id}/`
         : `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${orgId}/members/`;
   
-      const method = existing ? 'PATCH' : 'POST';
-  
-      const res = await makeApiCall(url, {
-        method,
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json',
-        },
-        body,
-      });
-  
-      if (!res.ok) {
-        throw new Error(`Failed to ${existing ? 'update' : 'create'} member: ${res.status} ${res.statusText}`);
+      if (existing) {
+        await axios.patch(url, payload);
+      } else {
+        await axios.post(url, payload);
       }
   
       onSuccess();
       onClose();
     } catch (err) {
-      console.error('Failed to save member', err);
+      console.error(
+        `Failed to ${existing ? 'update' : 'create'} member`,
+        err.response?.data || err.message
+      );
     } finally {
       setLoading(false);
     }

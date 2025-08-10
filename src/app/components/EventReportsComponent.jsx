@@ -3,8 +3,12 @@
 
 import { useEffect, useState } from 'react';
 import { format, parseISO, isValid } from 'date-fns';
+import axios from 'axios';
 
 export default function EventReportsComponent({ makeApiCall, getAuthHeaders, orgColors }) {
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [duration, setDuration] = useState('1w');
@@ -13,27 +17,22 @@ export default function EventReportsComponent({ makeApiCall, getAuthHeaders, org
     const fetchReports = async () => {
       setLoading(true);
       try {
-        const url = new URL('https://actionboard-ai-backend.onrender.com/api/calendar/event-reports/');
-        if (duration !== 'all') {
-          url.searchParams.append('duration', duration);
-        }
-
-        const res = await makeApiCall(url.toString(), {
-          method: 'GET',
-          headers: getAuthHeaders(),
+        const params = duration !== 'all' ? { duration } : {};
+  
+        const res = await axios.get(`${API_BASE_URL}/calendar/event-reports/`, {
+          params,
         });
-
-        const data = await res.json();
-        setReport(data);
+  
+        setReport(res.data);
       } catch (err) {
         console.error('Error fetching reports:', err);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchReports();
-  }, [duration, makeApiCall, getAuthHeaders]);
+  }, [duration]);
 
   if (loading) {
     return <div className="text-sm text-gray-500">Loading report...</div>;

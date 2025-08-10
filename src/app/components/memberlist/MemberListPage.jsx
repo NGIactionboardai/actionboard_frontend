@@ -15,18 +15,16 @@ export default function MemberListPage({ orgId }) {
   const [showDelete, setShowDelete] = useState(false)
 
   const fetchMembers = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/organisations/${orgId}/members/`, {
-        headers: await getAuthHeaders(),
-      })
-      setMembers(res.data.results)
+      const res = await axios.get(`/organisations/${orgId}/members/`);
+      setMembers(res.data.results || []);
     } catch (err) {
-      console.error('Failed to fetch members', err)
+      console.error('Failed to fetch members', err.response?.data || err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchMembers()

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { format, parseISO, isValid } from 'date-fns';
+import axios from 'axios';
+
 
 export default function OrgEventReportsComponent({
   orgId,
@@ -10,6 +12,8 @@ export default function OrgEventReportsComponent({
   getAuthHeaders,
   orgColors
 }) {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [duration, setDuration] = useState('1w');
@@ -18,18 +22,12 @@ export default function OrgEventReportsComponent({
     const fetchReports = async () => {
       setLoading(true);
       try {
-        const url = new URL('https://actionboard-ai-backend.onrender.com/api/calendar/event-reports/');
-        if (duration !== 'all') {
-          url.searchParams.append('duration', duration);
-        }
-        url.searchParams.append('org_id', orgId); // Scoped to org
-
-        const res = await makeApiCall(url.toString(), {
-          method: 'GET',
-          headers: getAuthHeaders(),
-        });
-
-        const data = await res.json();
+        const params = {};
+        if (duration !== 'all') params.duration = duration;
+        if (orgId) params.org_id = orgId;
+  
+        const { data } = await axios.get(`${API_BASE_URL}/calendar/event-reports/`, { params });
+  
         setReport(data);
       } catch (err) {
         console.error('Error fetching org reports:', err);
@@ -37,9 +35,9 @@ export default function OrgEventReportsComponent({
         setLoading(false);
       }
     };
-
+  
     fetchReports();
-  }, [duration, orgId, makeApiCall, getAuthHeaders]);
+  }, [duration, orgId]);
 
   if (loading) {
     return <div className="text-sm text-gray-500">Loading report for {orgName}...</div>;

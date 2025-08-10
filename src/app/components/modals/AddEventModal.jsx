@@ -4,6 +4,8 @@ import { useEffect, useState, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import axios from 'axios';
+
 
 export default function AddEventModal({
   isOpen,
@@ -16,6 +18,8 @@ export default function AddEventModal({
   makeApiCall,
   isZoomConnected
 }) {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [eventType, setEventType] = useState('personal');
@@ -90,6 +94,13 @@ export default function AddEventModal({
     return dt.toISOString();
   };
 
+  const toLocalDateInputValue = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSubmit = async () => {
     // Basic validation
     if (!title.trim()) {
@@ -120,51 +131,37 @@ export default function AddEventModal({
         description,
         start_time: convertToUTCISOString(selectedDate, startHour, startMinute, startAmpm),
         end_time: convertToUTCISOString(selectedDate, endHour, endMinute, endAmpm),
-        event_type: eventType
+        event_type: eventType,
+        ...(eventType === 'organization' && { org_id: selectedOrg }),
       };
   
-      if (eventType === 'organization') {
-        payload.org_id = selectedOrg;
-      }
-  
-      const headers = getAuthHeaders();
       const endpoint =
         createZoom && eventType === 'organization'
-          ? '/api/calendar/events/create-with-meeting/'
-          : '/api/calendar/events/';
+          ? '/calendar/events/create-with-meeting/'
+          : '/calendar/events/';
   
-      const res = await makeApiCall(`https://actionboard-ai-backend.onrender.com${endpoint}`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload)
-      });
+      // Use API_BASE_URL. Make sure NEXT_PUBLIC_API_BASE_URL does NOT end with a trailing slash.
+      const res = await axios.post(`${API_BASE_URL}${endpoint}`, payload);
   
-      if (res.ok) {
-        const data = await res.json();
-        onEventCreated?.(data);
-        toast.success('Event created successfully!');
-        resetForm();
-        onClose();
-      } else {
-        const errorData = await res.json();
-  
-        if (errorData?.error?.type === 'overlap_error') {
-          toast('Another event overlaps with this time range.', {
-            icon: '⚠️',
-            style: {
-              borderRadius: '8px',
-              background: '#000',
-              color: '#ffcc00',
-            },
-          });
-        } else {
-          console.error('Failed to create event:', errorData);
-          toast.error('Failed to create event.');
-        }
-      }
+      onEventCreated?.(res.data);
+      toast.success('Event created successfully!');
+      resetForm();
+      onClose();
     } catch (err) {
-      console.error('Error creating event:', err);
-      toast.error('Something went wrong while creating the event.');
+      const errorData = err.response?.data;
+      if (errorData?.error?.type === 'overlap_error') {
+        toast('Another event overlaps with this time range.', {
+          icon: '⚠️',
+          style: {
+            borderRadius: '8px',
+            background: '#000',
+            color: '#ffcc00',
+          },
+        });
+      } else {
+        console.error('Failed to create event:', errorData || err.message);
+        toast.error('Failed to create event.');
+      }
     } finally {
       setLoading(false);
     }
@@ -244,8 +241,13 @@ export default function AddEventModal({
                     </span>
                     <input
                       type="date"
-                      value={selectedDate.toISOString().slice(0, 10)}
-                      onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                      value={toLocalDateInputValue(selectedDate)}
+                      onChange={(e) => {
+                        const [year, month, day] = e.target.value.split('-').map(Number);
+                        const newDate = new Date(selectedDate);
+                        newDate.setFullYear(year, month - 1, day);
+                        setSelectedDate(newDate);
+                      }}
                       className="border rounded px-2 py-1 text-sm"
                     />
                   </div>

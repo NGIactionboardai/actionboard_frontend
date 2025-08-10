@@ -11,12 +11,16 @@ import PositiveContributionPieChart from '@/app/components/meetings/PositiveCont
 import SentimentDistributionBarChart from '@/app/components/meetings/SentimentDistributionBarChart';
 import SentimentMeter from '@/app/components/meetings/SentimentMeter';
 import SentimentSummaryTable from '@/app/components/meetings/SentimentSummaryTable';
+import axios from 'axios';
+
 
 
 
 
 
 export default function MeetingDetails() {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -163,66 +167,63 @@ export default function MeetingDetails() {
     try {
       setLoading(true);
       setError(null);
-      
-      const headers = getAuthHeaders();
-      
+  
       console.log('Fetching meeting details for ID:', meetingId);
       console.log('Using Redux token:', !!authToken);
       console.log('User authenticated:', isAuthenticated);
-      
-      // Use the enhanced API call with retry logic
-      const response = await makeApiCall(
-        `https://actionboard-ai-backend.onrender.com/api/meetings/zoom/meeting-details/${meetingId}/`,
-        { headers }
+  
+      const { data, status } = await axios.get(
+        `${API_BASE_URL}/meetings/zoom/meeting-details/${meetingId}/`
       );
-      
-      console.log('Response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Meeting data received:', data);
-        setMeeting(data);
-        
-        // Check if transcript already exists in the response
-        if (data.transcript) {
-          if (typeof data.transcript === 'object') {
-            setTranscript(data.transcript.utterances || []);
-            setSummary(data.transcript.summary || null);
-            setMeeting_insights(data.transcript.meeting_insights || null);
-            setMeeting_sentiment_summary(data.transcript?.meeting_sentiment_summary || null);
-            setSpeaker_summaries(data.transcript?.meeting_insights?.speaker_summaries || null);
-            setSpeaker_summary_table(data.transcript?.per_speaker_sentiment?.speaker_summary_table || null);
-            setSentiment_summaries(data.transcript?.sentiment_summaries || null);
-
-          } else {
-            setTranscript(data.transcript);
-          }
+  
+      console.log('Response status:', status);
+      console.log('Meeting data received:', data);
+  
+      setMeeting(data);
+  
+      if (data.transcript) {
+        if (typeof data.transcript === 'object') {
+          setTranscript(data.transcript.utterances || []);
+          setSummary(data.transcript.summary || null);
+          setMeeting_insights(data.transcript.meeting_insights || null);
+          setMeeting_sentiment_summary(data.transcript.meeting_sentiment_summary || null);
+          setSpeaker_summaries(data.transcript.meeting_insights?.speaker_summaries || null);
+          setSpeaker_summary_table(data.transcript.per_speaker_sentiment?.speaker_summary_table || null);
+          setSentiment_summaries(data.transcript.sentiment_summaries || null);
+        } else {
+          setTranscript(data.transcript);
         }
-        if (data.summary && !transcript) {
-          setSummary(data.summary);
-        }
-        
-        // Reset retry count on success
-        setRetryCount(0);
-      } else if (response.status === 401) {
-        setError('Authentication failed. Please log in again.');
-      } else if (response.status === 403) {
-        setError('Access denied. You do not have permission to view this meeting.');
-      } else if (response.status === 404) {
-        setError('Meeting not found.');
-      } else if (response.status === 502) {
-        setError('Server is temporarily unavailable. Our server may be starting up or experiencing issues.');
-      } else {
-        const errorText = await response.text();
-        console.error('API Error:', errorText);
-        setError(`Failed to load meeting details: ${response.status} - ${errorText}`);
       }
+  
+      if (data.summary && !data.transcript) {
+        setSummary(data.summary);
+      }
+  
+      setRetryCount(0);
     } catch (err) {
       console.error('Error fetching meeting details:', err);
-      
-      if (err.message.includes('No authentication token')) {
+  
+      if (err.response) {
+        switch (err.response.status) {
+          case 401:
+            setError('Authentication failed. Please log in again.');
+            break;
+          case 403:
+            setError('Access denied. You do not have permission to view this meeting.');
+            break;
+          case 404:
+            setError('Meeting not found.');
+            break;
+          case 502:
+            setError('Server is temporarily unavailable. Our server may be starting up or experiencing issues.');
+            break;
+          default:
+            setError(`Failed to load meeting details: ${err.response.status} - ${err.response.statusText}`);
+            break;
+        }
+      } else if (err.message.includes('No authentication token')) {
         setError('Please log in to view meeting details.');
-      } else if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+      } else if (err.message.includes('Network Error')) {
         setError('Unable to connect to the server. Please check your internet connection or try again later.');
       } else {
         setError('Failed to load meeting details. Please try again.');
@@ -231,6 +232,7 @@ export default function MeetingDetails() {
       setLoading(false);
     }
   };
+  
 
   const getCooldownTimeLeft = (endTime, cooldownMinutes = 3) => {
     if (!endTime) return 0;
@@ -246,54 +248,44 @@ export default function MeetingDetails() {
   const handleTranscribe = async () => {
     try {
       setTranscribing(true);
-      const headers = getAuthHeaders();
-  
       console.log('Starting transcription for meeting ID:', meetingId);
-      const transcribeUrl = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/transcribe/${meetingId}/`;
   
-      const response = await makeApiCall(transcribeUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ force: true }),
-      });
+      const transcribeUrl = `${API_BASE_URL}/transcripts/zoom/transcribe/${meetingId}/`;
   
+      const response = await axios.post(transcribeUrl, { force: true });
       console.log('Transcription response status:', response.status);
+      console.log('Transcription response data:', response.data);
   
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Transcription response data:', data);
-        // alert('Transcription task has been queued.');
+      // Trigger immediate status update
+      const initialStatus = await checkTranscriptionStatus();
   
-        // Trigger immediate status update
-        const initialStatus = await checkTranscriptionStatus();
-
-        // Start polling if it’s pending or processing
-        if (initialStatus === 'pending' || initialStatus === 'processing') {
-          pollTranscriptionStatus();
-        }
-  
-      } else if (response.status === 401) {
-        const errorText = await response.text();
-        console.error('401 Error details:', errorText);
-        alert('Authentication failed. Please log in again.');
-      } else if (response.status === 403) {
-        const errorText = await response.text();
-        console.error('403 Error details:', errorText);
-        alert('Access denied. You do not have permission to transcribe this meeting.');
-      } else if (response.status === 502) {
-        alert('Server is temporarily unavailable. Please try again in a few moments.');
-      } else {
-        const errorData = await response.text();
-        console.error('Transcription error response:', errorData);
-        alert(`Failed to start transcription: ${response.status} - ${errorData}`);
+      // Start polling if pending or processing
+      if (initialStatus === 'pending' || initialStatus === 'processing') {
+        pollTranscriptionStatus();
       }
     } catch (err) {
-      console.error('Error starting transcription:', err);
-      if (err.message.includes('No authentication token')) {
+      if (err.response) {
+        const { status, data } = err.response;
+        console.error(`Transcription error response: ${status}`, data);
+  
+        switch (status) {
+          case 401:
+            alert('Authentication failed. Please log in again.');
+            break;
+          case 403:
+            alert('Access denied. You do not have permission to transcribe this meeting.');
+            break;
+          case 502:
+            alert('Server is temporarily unavailable. Please try again in a few moments.');
+            break;
+          default:
+            alert(`Failed to start transcription: ${status} - ${data?.detail || JSON.stringify(data)}`);
+        }
+      } else if (err.message.includes('No authentication token')) {
         alert('Please log in to start transcription.');
       } else if (err.name === 'AbortError') {
         alert('Request timed out. Please check your connection and try again.');
-      } else if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+      } else if (err.message.includes('Network Error')) {
         alert('Unable to connect to the transcription service. Please check your internet connection or try again later.');
       } else {
         alert(`Failed to start transcription: ${err.message}. Please try again.`);
@@ -309,66 +301,54 @@ export default function MeetingDetails() {
   };
 
   const handleUploadTranscribe = async () => {
-
     if (!selectedFile) {
       alert("Please select a file first.");
       return;
     }
-
-
+  
     try {
       setTranscribing(true);
-      const headers = getAuthHeaders();
-      delete headers['Content-Type'];
   
       console.log('Uploading audio file for transcription - Meeting ID:', meetingId);
   
-      const uploadUrl = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/upload-audio-transcribe/${meetingId}/`;
+      const uploadUrl = `${API_BASE_URL}/transcripts/zoom/upload-audio-transcribe/${meetingId}/`;
   
       const formData = new FormData();
       formData.append('audio', selectedFile);
   
-      const response = await fetch(uploadUrl, {
-        method: 'POST',
-        headers: {
-          ...headers,
-          
-        },
-        body: formData,
-      });
+      const response = await axios.post(uploadUrl, formData);
   
       console.log('Upload & Transcribe response status:', response.status);
   
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status >= 200 && response.status < 300) {
+        const data = response.data;
         console.log('Upload transcription response data:', data);
-
-        setShowUploadModal(false)
-        setSelectedFile(null)
+  
+        setShowUploadModal(false);
+        setSelectedFile(null);
   
         const initialStatus = await checkTranscriptionStatus();
   
         if (initialStatus === 'pending' || initialStatus === 'processing') {
           pollTranscriptionStatus();
         }
-      } else if (response.status === 401) {
-        const errorText = await response.text();
-        console.error('401 Error:', errorText);
-        alert('Authentication failed. Please log in again.');
-      } else if (response.status === 403) {
-        const errorText = await response.text();
-        console.error('403 Error:', errorText);
-        alert('Access denied. You do not have permission.');
-      } else if (response.status === 502) {
-        alert('Server is temporarily unavailable. Try again shortly.');
       } else {
-        const errorData = await response.text();
-        console.error('Unexpected error:', errorData);
-        alert(`Upload failed: ${response.status} - ${errorData}`);
+        alert(`Upload failed with status: ${response.status}`);
       }
     } catch (err) {
       console.error('Upload error:', err);
-      if (err.message.includes('No authentication token')) {
+  
+      if (err.response) {
+        if (err.response.status === 401) {
+          alert('Authentication failed. Please log in again.');
+        } else if (err.response.status === 403) {
+          alert('Access denied. You do not have permission.');
+        } else if (err.response.status === 502) {
+          alert('Server is temporarily unavailable. Try again shortly.');
+        } else {
+          alert(`Upload failed: ${err.response.status} - ${err.response.data}`);
+        }
+      } else if (err.message.includes('No authentication token')) {
         alert('Please log in to upload a transcript.');
       } else {
         alert(`Unexpected error: ${err.message}`);
@@ -377,6 +357,7 @@ export default function MeetingDetails() {
       setTranscribing(false);
     }
   };
+  
 
   const pollTranscriptionStatus = (interval = 5000, maxAttempts = 20) => {
     let attempts = 0;
@@ -397,59 +378,49 @@ export default function MeetingDetails() {
 
   const checkTranscriptionStatus = async () => {
     try {
-      const headers = getAuthHeaders();
-      const statusUrl = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/transcribe-status/${meetingId}/`;
-      const response = await makeApiCall(statusUrl, { headers });
+      const statusUrl = `${API_BASE_URL}/transcripts/zoom/transcribe-status/${meetingId}/`;
+      const response = await axios.get(statusUrl);
   
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Transcription status:', data.status);
-        setTranscriptionStatus(data.status); 
-        setAutoTranscribed(data.auto_transcribed);
-        setUserConfirmed(data.user_confirmed);
-        setSpeakersUpdated(data.speakers_updated);
-
-        setRetryCount(data.retry_count);
-
-        if (data.created_at) {
-          const createdAt = parseISO(data.created_at);
-          const hoursLeft = Math.max(0, 24 - differenceInHours(new Date(), createdAt));
-          setHoursLeft(hoursLeft);
-        } else {
-          setHoursLeft(null);
-        }
-
-        return data.status; //return for polling to use
+      const data = response.data;
+      console.log('Transcription status:', data.status);
+  
+      setTranscriptionStatus(data.status);
+      setAutoTranscribed(data.auto_transcribed);
+      setUserConfirmed(data.user_confirmed);
+      setSpeakersUpdated(data.speakers_updated);
+      setRetryCount(data.retry_count);
+  
+      if (data.created_at) {
+        const createdAt = parseISO(data.created_at);
+        const hoursLeft = Math.max(0, 24 - differenceInHours(new Date(), createdAt));
+        setHoursLeft(hoursLeft);
       } else {
-        console.error('Failed to fetch transcription status:', response.status);
+        setHoursLeft(null);
       }
+  
+      return data.status;
     } catch (err) {
-      console.error('Error checking transcription status:', err);
+      if (err.response) {
+        console.error('Failed to fetch transcription status:', err.response.status, err.response.data);
+      } else {
+        console.error('Error checking transcription status:', err.message);
+      }
+      return null;
     }
-    return null; // fallback
   };
 
   const handleKeepTranscript = async () => {
     try {
-      const headers = getAuthHeaders();
-      const url = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/auto-transcribe/keep/${meetingId}/`;
-  
-      const response = await fetch(url, {
-        method: 'POST',
-        headers,
-      });
-  
-      if (!response.ok) {
-        const err = await response.json();
-        alert(err.error || "Failed to keep transcript.");
-        return;
-      }
-  
-      // alert("Transcript successfully kept!");
+      const url = `${API_BASE_URL}/transcripts/zoom/auto-transcribe/keep/${meetingId}/`;
+      await axios.post(url);
       setUserConfirmed(true);
-    } catch (error) {
-      console.error("Error keeping transcript:", error);
-      alert("An error occurred while keeping the transcript.");
+    } catch (err) {
+      if (err.response && err.response.data) {
+        alert(err.response.data.error || "Failed to keep transcript.");
+      } else {
+        console.error("Error keeping transcript:", err);
+        alert("An error occurred while keeping the transcript.");
+      }
     }
   };
   
@@ -458,72 +429,45 @@ export default function MeetingDetails() {
   const fetchTranscript = async () => {
     try {
       setTranscriptLoading(true);
-      const headers = getAuthHeaders();
-      
+  
       console.log('Fetching transcript for meeting ID:', meetingId);
-      
-      // Use the same base URL as the meeting details call for consistency
-      const fetchUrl = `https://actionboard-ai-backend.onrender.com/api/transcripts/zoom/fetch-transcript/${meetingId}/`;
+      const fetchUrl = `${API_BASE_URL}/transcripts/zoom/fetch-transcript/${meetingId}/`;
       console.log('Fetch transcript URL:', fetchUrl);
-      
-      const response = await makeApiCall(fetchUrl, { headers });
-      
-      console.log('Fetch transcript response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Fetch transcript response data:', data);
-        
-        // Handle the response structure from your FetchTranscriptView
-        if (data.full_transcript) {
-          setTranscript(data.full_transcript);
-        }
-        if (data.summary) {
-          setSummary(data.summary);
-        }
-        if (data.meeting_insights) {
-          setMeeting_insights(data.meeting_insights);
-        }
-        
-        // If no transcript found
-        if (data.transcript === null) {
-          alert('No transcript found for this meeting. Try starting transcription first.');
-        }
-      } else if (response.status === 401) {
-        const errorText = await response.text();
-        console.error('401 Error details:', errorText);
-        alert('Authentication failed. Please log in again.');
-      } else if (response.status === 403) {
-        const errorText = await response.text();
-        console.error('403 Error details:', errorText);
-        alert('Access denied. You do not have permission to view this transcript.');
-      } else if (response.status === 404) {
-        const errorText = await response.text();
-        console.error('404 Error details:', errorText);
-        alert('Meeting not found.');
-      } else if (response.status === 502) {
-        alert('Server is temporarily unavailable. Please try again in a few moments.');
-      } else {
-        const errorData = await response.text();
-        console.error('Fetch transcript error response:', errorData);
-        alert(`Failed to fetch transcript: ${response.status} - ${errorData}`);
+  
+      const response = await axios.get(fetchUrl);
+      const data = response.data;
+  
+      console.log('Fetch transcript response data:', data);
+  
+      if (data.full_transcript) setTranscript(data.full_transcript);
+      if (data.summary) setSummary(data.summary);
+      if (data.meeting_insights) setMeeting_insights(data.meeting_insights);
+  
+      if (data.transcript === null) {
+        alert('No transcript found for this meeting. Try starting transcription first.');
       }
     } catch (err) {
-      console.error('Error fetching transcript:', err);
-      console.error('Error details:', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack
-      });
-      
-      if (err.message.includes('No authentication token')) {
-        alert('Please log in to fetch transcript.');
-      } else if (err.name === 'AbortError') {
-        alert('Request timed out. Please check your connection and try again.');
-      } else if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
-        alert('Unable to connect to the transcript service. Please check your internet connection or try again later.');
+      if (err.response) {
+        const status = err.response.status;
+        const data = err.response.data;
+        console.error(`${status} Error details:`, data);
+  
+        if (status === 401) alert('Authentication failed. Please log in again.');
+        else if (status === 403) alert('Access denied. You do not have permission to view this transcript.');
+        else if (status === 404) alert('Meeting not found.');
+        else if (status === 502) alert('Server is temporarily unavailable. Please try again in a few moments.');
+        else alert(`Failed to fetch transcript: ${status} - ${JSON.stringify(data)}`);
       } else {
-        alert(`Failed to fetch transcript: ${err.message}. Please try again.`);
+        console.error('Error fetching transcript:', err);
+        if (err.message.includes('No authentication token')) {
+          alert('Please log in to fetch transcript.');
+        } else if (err.name === 'AbortError') {
+          alert('Request timed out. Please check your connection and try again.');
+        } else if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+          alert('Unable to connect to the transcript service. Please check your internet connection or try again later.');
+        } else {
+          alert(`Failed to fetch transcript: ${err.message}. Please try again.`);
+        }
       }
     } finally {
       setTranscriptLoading(false);

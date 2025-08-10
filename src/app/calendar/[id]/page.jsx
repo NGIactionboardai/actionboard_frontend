@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import OrgCalendar from '@/app/components/orgcalendar/OrgCalendar';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import { selectIsAuthenticated } from '@/redux/auth/authSlices';
+import axios from 'axios';
 
 export default function OrgCalendarPage() {
   const { id: orgId } = useParams();
@@ -15,6 +16,9 @@ export default function OrgCalendarPage() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const router = useRouter();
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+
   useEffect(() => {
     if (!isAuthenticated) router.push('/auth/login');
   }, [isAuthenticated]);
@@ -22,20 +26,20 @@ export default function OrgCalendarPage() {
   useEffect(() => {
     const fetchOrg = async () => {
       try {
-        const res = await makeApiCall(`/api/organisations/${orgId}/`, {
-          method: 'GET',
-          headers: getAuthHeaders()
-        });
-        const data = await res.json();
-        console.log("org data:", data)
+        const res = await axios.get(`${API_BASE_URL}/organisations/${orgId}/`);
+        const data = res.data; // Axios already parses JSON
+        console.log('org data:', data);
+  
         setOrgName(data.name);
         setOrgColor(generateColorFromName(data.name)); // or use saved map
-      } catch {
+      } catch (err) {
+        console.error('Error fetching organization:', err);
         setOrgName('Unknown');
       }
     };
+  
     fetchOrg();
-  }, []);
+  }, [orgId]);
 
   return isAuthenticated && orgName ? (
     <OrgCalendar orgId={orgId} />
