@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserInfo, hydrateAuth, refreshToken, selectIsHydrated, storage } from '../../redux/auth/authSlices';
+import { registerAuthInterceptor } from '../utils/registerAuthInterceptor';
 
 // Constants
 const AUTH_STORAGE_KEYS = {
@@ -41,15 +42,12 @@ export default function AuthHydrator({ children }) {
           console.error('Failed to fetch user info:', err);
         }
       }
+
+      registerAuthInterceptor();
     };
   
     if (isHydrated) initAuth();
   }, [isHydrated, dispatch]);
-
-  // You can optionally show a loading state while hydrating
-  // if (!isHydrated) {
-  //   return <div>Loading...</div>;
-  // }
 
   return children;
 }

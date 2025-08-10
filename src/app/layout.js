@@ -6,6 +6,7 @@ import Sidebar from '../app/components/layout/Sidebar';
 import ReduxWrapper from '@/redux/ReduxWrapper';
 import AuthHydrator from './components/AuthHydrator';
 import { Toaster } from 'react-hot-toast';
+import InterceptorLoader from './components/InterceptorLoader';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -49,12 +50,14 @@ export const metadata = {
   manifest: "/favicon/manifest.json"
 };
 
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <ReduxWrapper>
           <AuthHydrator>
+            {/* <InterceptorLoader />  */}
             <div className="min-h-screen bg-gray-50">
               <Navbar />
               {/* <main className="p-0">{children}</main> */}

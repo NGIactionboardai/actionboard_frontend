@@ -1,3 +1,4 @@
+import { refreshAxios } from '@/app/utils/refreshAxios';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -17,7 +18,7 @@ const API_ENDPOINTS = {
   EDIT_USER_INFO: 'https://actionboard-ai-backend.onrender.com/api/auth/edit-user-info/',
   CHANGE_PASSWORD: 'https://actionboard-ai-backend.onrender.com/api/auth/change-password/',
   ADD_PASSWORD: 'https://actionboard-ai-backend.onrender.com/api/auth/add-password/',
-  REFRESH: '/api/auth/refresh',
+  REFRESH: 'https://actionboard-ai-backend.onrender.com/api/auth/token/refresh/',
   LOGOUT: '/api/auth/logout'
 };
 
@@ -273,32 +274,41 @@ export const userLogin = createAsyncThunk(
 // Async thunk for token refresh
 export const refreshToken = createAsyncThunk(
   'auth/refreshToken',
-  async (_, { rejectWithValue, getState }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const refreshToken = storage.get(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+      const storedRefreshToken = storage.get(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
       
-      if (!refreshToken) {
+      if (!storedRefreshToken) {
         throw new Error('No refresh token available');
       }
 
-      const response = await axios.post(API_ENDPOINTS.REFRESH, { refreshToken });
-      const { token, refreshToken: newRefreshToken } = response.data;
+      // Backend expects the refresh token in the "refresh" field
+      const response = await refreshAxios.post(API_ENDPOINTS.REFRESH, { refresh: storedRefreshToken });
+      
+      const newAccessToken = response.data.access;
+      const newRefreshToken = response.data.refresh;
 
-      // Update stored tokens
-      storage.set(AUTH_STORAGE_KEYS.TOKEN, token);
+      if (!newAccessToken) {
+        throw new Error('No access token returned from server');
+      }
+
+      // Save new tokens
+      storage.set(AUTH_STORAGE_KEYS.TOKEN, newAccessToken);
       if (newRefreshToken) {
         storage.set(AUTH_STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
       }
 
-      // Setup axios headers
-      setupAxiosInterceptors(token);
+      // Update axios default Authorization header
+      setupAxiosInterceptors(newAccessToken);
+
+      console.log("Token refresh success")
 
       return {
-        token,
+        token: newAccessToken,
         refreshToken: newRefreshToken
       };
     } catch (error) {
-      // If refresh fails, logout user
+      // On failure, clear all tokens and logout
       storage.clear();
       setupAxiosInterceptors(null);
       const message = extractErrorMessage(error);
@@ -609,11 +619,11 @@ const authSlice = createSlice({
         state.refreshing = true;
       })
       .addCase(refreshToken.fulfilled, (state, action) => {
-        state.refreshing = false;
         state.token = action.payload.token;
         if (action.payload.refreshToken) {
           state.refreshToken = action.payload.refreshToken;
         }
+        state.refreshing = false;
         state.sessionExpired = false;
         state.error = null;
       })
