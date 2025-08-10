@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserInfo, hydrateAuth, refreshToken, selectIsHydrated, storage } from '../../redux/auth/authSlices';
 import { registerAuthInterceptor } from '../utils/registerAuthInterceptor';
+import LoadingPage from './LoadingPage';
 
 // Constants
 const AUTH_STORAGE_KEYS = {
@@ -52,7 +53,7 @@ export default function AuthHydrator({ children }) {
   }, [isHydrated, dispatch]);
 
   if (!ready) {
-    return null; // or a spinner/loading UI here
+    return <LoadingPage />;
   }
 
   return children;
