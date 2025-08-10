@@ -57,7 +57,6 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <ReduxWrapper>
           <AuthHydrator>
-            {/* <InterceptorLoader />  */}
             <div className="min-h-screen bg-gray-50">
               <Navbar />
               {/* <main className="p-0">{children}</main> */}

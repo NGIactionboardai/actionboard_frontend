@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserInfo, hydrateAuth, refreshToken, selectIsHydrated, storage } from '../../redux/auth/authSlices';
 import { registerAuthInterceptor } from '../utils/registerAuthInterceptor';
@@ -15,6 +15,7 @@ const AUTH_STORAGE_KEYS = {
 export default function AuthHydrator({ children }) {
   const dispatch = useDispatch();
   const isHydrated = useSelector(selectIsHydrated);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     // Only hydrate once on client mount
@@ -44,10 +45,15 @@ export default function AuthHydrator({ children }) {
       }
 
       registerAuthInterceptor();
+      setReady(true); 
     };
   
     if (isHydrated) initAuth();
   }, [isHydrated, dispatch]);
+
+  if (!ready) {
+    return null; // or a spinner/loading UI here
+  }
 
   return children;
 }
