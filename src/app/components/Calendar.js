@@ -279,10 +279,16 @@ export default function Calendar() {
       const { event } = info;
     
       try {
+        console.log('event.start:', event.start, 'event.end:', event.end);
+
+        const endDate = event.end ? event.end : new Date(event.start.getTime() + 30 * 60 * 1000);
+
         const updatedData = {
           start_time: event.start.toISOString(),
-          end_time: event.end.toISOString(),
+          end_time: endDate.toISOString(),
         };
+
+        
     
         const res = await axios.patch(
           `${API_BASE_URL}/calendar/events/${event.id}/`,
@@ -301,6 +307,7 @@ export default function Calendar() {
     
         toast.success('Event updated successfully');
       } catch (err) {
+        console.error('handleEventDrop error:', err);
         if (err.response?.data?.error?.type === 'overlap_error') {
           toast('Another event overlaps with this time range.', {
             icon: '⚠️',
@@ -889,7 +896,7 @@ export default function Calendar() {
                       arg.view.calendar.changeView('timeGridDay');
                     }
                   }}
-              />
+                />
             )}
             
               

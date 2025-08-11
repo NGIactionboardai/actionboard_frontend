@@ -307,6 +307,9 @@ export default function OrgCalendar({ orgId }) {
       }
 
       try {
+
+        const endDate = event.end ? event.end : new Date(event.start.getTime() + 30 * 60 * 1000);
+
         const updatedData = {
           start_time: event.start.toISOString(),
           end_time: event.end.toISOString(),
