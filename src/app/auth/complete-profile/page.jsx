@@ -37,7 +37,7 @@ const CompleteProfilePage = () => {
     if (user?.country && user?.date_of_birth) {
       router.replace('/auth/profile');
     }
-  }, [user, router]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
