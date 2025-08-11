@@ -270,8 +270,18 @@ export default function Calendar() {
     };
 
     const handleCalendarSelect = (info) => {
-      setAddEventStart(info.startStr);  // ISO string
-      setAddEventEnd(info.endStr);
+      let start = new Date(info.startStr);
+      let end = new Date(info.endStr);
+    
+      // Helper to get just the time portion in milliseconds since midnight
+      const timeOfDay = (date) => date.getHours() * 3600000 + date.getMinutes() * 60000 + date.getSeconds() * 1000 + date.getMilliseconds();
+    
+      if (timeOfDay(start) === timeOfDay(end)) {
+        end = new Date(start.getTime() + 30 * 60 * 1000); // add 30 mins to start
+      }
+    
+      setAddEventStart(start.toISOString());
+      setAddEventEnd(end.toISOString());
       setIsAddModalOpen(true);
     };
 
