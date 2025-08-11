@@ -28,17 +28,42 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
   useEffect(() => {
     const fetchOrgs = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/organisations/my-organisations/`);
-        setOrgs(res.data || []);
+        const res = await makeApiCall(
+          'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
+          {
+            method: 'GET',
+            headers: getAuthHeaders(token)
+          }
+        );
+        const data = await res.json();
+        setOrganizations(data || []);
       } catch (err) {
-        console.error('Error fetching organizations:', err);
+        console.error('Failed to fetch organizations');
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
+
+    fetchOrgs();
+  }, []);
+
+
+  useEffect(() => {
+    
+    const fetchOrgs = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/organisations/my-organisations/`);
+        setOrganizations(res.data || []);
+      } catch (err) {
+        console.error('Error fetching organizations:', err);
+      } finally {
+        setLoading(false);
+      }
+    }; 
+    
+    fetchOrgs();
   
-    if (isAuthenticated) {
-      fetchOrgs();
-    }
-  }, [isAuthenticated]);
+  }, []);
 
   const handleZoomConnectionClick = () => {
     if (isZoomConnected) {
