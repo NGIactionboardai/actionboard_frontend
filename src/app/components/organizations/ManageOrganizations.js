@@ -186,11 +186,13 @@ const ManageOrganizations = ({
   };
 
   const openCreateModal = () => {
+    setFormError('')
     setFormData({ name: '' });
     setIsCreateModalOpen(true);
   };
 
   const openEditModal = (org) => {
+    setFormError('')
     setSelectedOrg(org);
     setFormData({ name: org.name });
     setIsEditModalOpen(true);
