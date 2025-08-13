@@ -243,7 +243,7 @@ export default function RegistrationPage() {
             <User className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-gray-600">Join MeetingSummarizer today</p>
+          <p className="text-gray-600">Join Actionboard AI today</p>
         </div>
 
         {/* Main Form Card */}

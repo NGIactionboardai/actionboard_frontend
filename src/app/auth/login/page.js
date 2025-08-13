@@ -142,7 +142,7 @@ export default function LoginPage() {
             <User className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to MeetingSummarizer</p>
+          <p className="text-gray-600">Sign in to Actionboard AI</p>
         </div>
 
         {/* Main Login Card */}
@@ -329,7 +329,7 @@ export default function LoginPage() {
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link href="/privacy" className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200">
+              <Link href="/privacy-policy" className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200">
                 Privacy Policy
               </Link>
             </p>

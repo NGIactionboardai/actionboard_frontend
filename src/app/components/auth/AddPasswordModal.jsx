@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Eye, EyeOff, X } from 'lucide-react';
+import { Check, Eye, EyeOff, X } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addPassword, updateUserPasswordStatus } from '@/redux/auth/authSlices';
 import toast from 'react-hot-toast';
@@ -16,6 +16,14 @@ export default function AddPasswordModal({ isOpen, onClose }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const passwordRequirements = [
+    { label: 'At least 8 characters', test: (pwd) => pwd.length >= 8 },
+    { label: 'Contains uppercase letter', test: (pwd) => /[A-Z]/.test(pwd) },
+    { label: 'Contains lowercase letter', test: (pwd) => /[a-z]/.test(pwd) },
+    { label: 'Contains number', test: (pwd) => /\d/.test(pwd) },
+    { label: 'Contains special character', test: (pwd) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd) }
+  ];
+
   useEffect(() => {
     if (isOpen) {
       setPassword('');
@@ -28,26 +36,23 @@ export default function AddPasswordModal({ isOpen, onClose }) {
 
   const handleSubmit = async () => {
     setError('');
-    setLoading(true);
 
     if (!password || !confirmPassword) {
       setError('Both fields are required.');
-      setLoading(false);
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      setLoading(false);
+    if (!passwordRequirements.every(req => req.test(password))) {
+      setError('Password does not meet all requirements.');
       return;
     }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
     try {
       const response = await addPassword({ new_password: password });
       dispatch(updateUserPasswordStatus({ user: response.data.user }));
@@ -131,6 +136,29 @@ export default function AddPasswordModal({ isOpen, onClose }) {
                       className="w-full border rounded-md px-3 py-2 pr-10 text-sm"
                     />
                   </div>
+
+                  {/* Password Requirements */}
+                  {password && (
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs font-medium text-gray-700 mb-2">Password Requirements:</p>
+                      <div className="grid grid-cols-1 gap-1">
+                        {passwordRequirements.map((req, index) => {
+                          const isValid = req.test(password);
+                          return (
+                            <div
+                              key={index}
+                              className={`flex items-center gap-2 text-xs transition-colors duration-200 ${
+                                isValid ? 'text-green-600' : 'text-gray-500'
+                              }`}
+                            >
+                              {isValid ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                              <span>{req.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {error && <p className="text-red-500 text-sm">{error}</p>}
                 </div>

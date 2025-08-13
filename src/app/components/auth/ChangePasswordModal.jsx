@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Eye, EyeOff, X } from 'lucide-react';
+import { Check, Eye, EyeOff, X } from 'lucide-react';
 import { changePassword } from '@/redux/auth/authSlices';
 import toast from 'react-hot-toast';
 
@@ -15,6 +15,14 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
 
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
+
+  const passwordRequirements = [
+    { label: 'At least 8 characters', test: (pwd) => pwd.length >= 8 },
+    { label: 'Contains uppercase letter', test: (pwd) => /[A-Z]/.test(pwd) },
+    { label: 'Contains lowercase letter', test: (pwd) => /[a-z]/.test(pwd) },
+    { label: 'Contains number', test: (pwd) => /\d/.test(pwd) },
+    { label: 'Contains special character', test: (pwd) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd) }
+  ];
 
   useEffect(() => {
     if (isOpen) {
@@ -31,8 +39,9 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
       setError('Both fields are required');
       return;
     }
-    if (newPassword.length < 6) {
-      setError('New password must be at least 6 characters');
+
+    if (!passwordRequirements.every(req => req.test(newPassword))) {
+      setError('New password does not meet all requirements');
       return;
     }
 
@@ -133,6 +142,29 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
                       {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+
+                  {/* Password Requirements */}
+                  {newPassword && (
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs font-medium text-gray-700 mb-2">Password Requirements:</p>
+                      <div className="grid grid-cols-1 gap-1">
+                        {passwordRequirements.map((req, index) => {
+                          const isValid = req.test(newPassword);
+                          return (
+                            <div
+                              key={index}
+                              className={`flex items-center gap-2 text-xs transition-colors duration-200 ${
+                                isValid ? 'text-green-600' : 'text-gray-500'
+                              }`}
+                            >
+                              {isValid ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                              <span>{req.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {error && <p className="text-red-500 text-sm">{error}</p>}
                 </div>
