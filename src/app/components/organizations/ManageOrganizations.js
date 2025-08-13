@@ -19,6 +19,8 @@ import {
 import { Popover } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import withProfileCompletionGuard from '../withProfileCompletionGuard';
+import toast from 'react-hot-toast';
+
 
 
 /**
@@ -74,6 +76,7 @@ const ManageOrganizations = ({
     name: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const [formError, setFormError] = useState('');
 
   // Load organizations on component mount
   useEffect(() => {
@@ -95,60 +98,90 @@ const ManageOrganizations = ({
     org?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const handleCreateOrg = async (e) => {
+  const handleCreateOrg = (e) => {
     e.preventDefault();
+    setFormError(''); // Clear previous errors
+  
     if (!formData.name.trim()) return;
-
-    try {
-      const result = await dispatch(createOrganization({ name: formData.name })).unwrap();
-      setIsCreateModalOpen(false);
-      setFormData({ name: '' });
-      
-      // Call custom callback if provided
-      if (onOrganizationCreate) {
-        onOrganizationCreate(result.organization);
-      }
-    } catch (error) {
-      console.error('Create organization failed:', error);
-    }
+  
+    dispatch(createOrganization({ name: formData.name }))
+      .unwrap()
+      .then((result) => {
+        // Success flow
+        setIsCreateModalOpen(false);
+        setFormData({ name: '' });
+        toast.success(`Organization "${result.organization.name}" created successfully!`);
+  
+        if (onOrganizationCreate) {
+          onOrganizationCreate(result.organization);
+        }
+      })
+      .catch((error) => {
+        // The error here is exactly what rejectWithValue returned from the thunk
+        console.log('Create organization failed:', error);
+  
+        const errorMsg =
+          error?.fieldErrors?.name?.[0] || 
+          error?.message ||                
+          error?.error ||                  
+          'Failed to create organization. Please try again.';
+  
+        setFormError(errorMsg); // Inline error
+        // toast.error(errorMsg); // Optional toast
+      });
   };
-
+  
+  
   const handleEditOrg = async (e) => {
     e.preventDefault();
+    setFormError('');
+  
     if (!selectedOrg || !formData.name.trim()) return;
-
+  
     try {
       const result = await dispatch(updateOrganization({
         orgId: selectedOrg.org_id || selectedOrg.id,
         updateData: { name: formData.name }
       })).unwrap();
+  
       setIsEditModalOpen(false);
       setSelectedOrg(null);
       setFormData({ name: '' });
-      
-      // Call custom callback if provided
+      toast.success(`Organization "${result.organization.name}" updated successfully!`);
       if (onOrganizationUpdate) {
         onOrganizationUpdate(result.organization);
       }
     } catch (error) {
-      console.error('Update organization failed:', error);
+      console.log('Update organization failed:', error);
+  
+        const errorMsg =
+          error?.fieldErrors?.name?.[0] || 
+          error?.message ||                
+          error?.error ||                  
+          'Failed to create organization. Please try again.';
+  
+        setFormError(errorMsg); 
+      // toast.error(errorMsg);
     }
   };
-
+  
   const handleDeleteOrg = async () => {
     if (!selectedOrg) return;
-
+  
     try {
-      const result = await dispatch(deleteOrganization(selectedOrg.org_id || selectedOrg.id)).unwrap();
+      await dispatch(deleteOrganization(selectedOrg.org_id || selectedOrg.id)).unwrap();
+  
+      toast.success(`Organization "${selectedOrg.name}" deleted successfully!`);
+  
       setIsDeleteModalOpen(false);
       setSelectedOrg(null);
-      
-      // Call custom callback if provided
+  
       if (onOrganizationDelete) {
         onOrganizationDelete(selectedOrg);
       }
     } catch (error) {
       console.error('Delete organization failed:', error);
+      toast.error('Failed to delete organization. Please try again.');
     }
   };
 
@@ -214,7 +247,7 @@ const ManageOrganizations = ({
       </div>
 
       {/* Success/Error Messages */}
-      {successMessage && (
+      {/* {successMessage && (
         <div className="mb-4 rounded-md bg-green-50 p-4">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -227,7 +260,7 @@ const ManageOrganizations = ({
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* {error && (
         <div className="mb-4 rounded-md bg-red-50 p-4">
@@ -269,14 +302,18 @@ const ManageOrganizations = ({
       {/* Organizations List */}
       <div className="sm:rounded-lg">
         {loading ? (
-          <div className="px-4 py-12 text-center">
-            <div className="inline-flex items-center">
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Loading organizations...
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            {/* Repeat placeholder skeletons */}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-40 p-4 rounded-xl shadow-md border border-gray-200 bg-gray-100 animate-pulse"
+              >
+                <div className="flex items-center justify-center h-full">
+                  <div className="w-3/4 h-6 bg-gray-300 rounded"></div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
@@ -375,6 +412,9 @@ const ManageOrganizations = ({
                           required
                           autoFocus
                         />
+                        {formError && (
+                          <p className="text-sm text-red-500 mt-1">{formError}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -433,6 +473,9 @@ const ManageOrganizations = ({
                           required
                           autoFocus
                         />
+                        {formError && (
+                          <p className="text-sm text-red-500 mt-1">{formError}</p>
+                        )}
                       </div>
                     </div>
                   </div>

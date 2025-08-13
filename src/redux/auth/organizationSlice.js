@@ -62,6 +62,14 @@ const storage = {
 
 // Helper function to extract error message
 const extractErrorMessage = (error) => {
+
+  if (error?.fieldErrors) {
+    const firstField = Object.values(error.fieldErrors)?.[0];
+    if (Array.isArray(firstField) && firstField.length > 0) {
+      return firstField[0];
+    }
+  }
+
   if (error.response?.data?.message) {
     return error.response.data.message;
   }
@@ -72,6 +80,40 @@ const extractErrorMessage = (error) => {
     return error.message;
   }
   return 'An unexpected error occurred';
+};
+
+export const normalizeAxiosError = (err) => {
+  const status = err?.response?.status;
+  const data = err?.response?.data;
+
+  let message = 'An unexpected error occurred';
+  let fieldErrors = undefined;
+
+  if (data) {
+    if (typeof data === 'string') {
+      message = data;
+    } else if (data.message) {
+      message = data.message;
+    } else if (data.detail) {
+      message = data.detail;
+    } else if (data.error) {
+      message = data.error;
+    }
+
+    // DRF field errors (e.g., { name: ["..."] })
+    if (typeof data === 'object') {
+      fieldErrors = data;
+      if (!data.message && !data.detail && !data.error) {
+        const firstVal = Object.values(data)[0];
+        if (Array.isArray(firstVal)) message = firstVal[0];
+        else if (typeof firstVal === 'string') message = firstVal;
+      }
+    }
+  } else if (err?.message) {
+    message = err.message;
+  }
+
+  return { message, fieldErrors, status };
 };
 
 // Async thunk for creating organization
@@ -110,10 +152,28 @@ export const createOrganization = createAsyncThunk(
         organization,
         message: response.data.message || 'Organization created successfully'
       };
-    } catch (error) {
-      console.log("Create organization error:", error);
-      const message = extractErrorMessage(error);
-      return rejectWithValue({ message, code: error.response?.status });
+    } catch (err) {
+        console.log("Create organization error:", err);
+
+        // return rejectWithValue(err.response.data)
+
+        if (axios.isAxiosError(err)) {
+          const data = err.response?.data || {};
+          return rejectWithValue({
+            message: data?.message || null,
+            error: data?.error || null,
+            fieldErrors: data || {},
+            status: err.response?.status || null,
+            raw: data
+          });
+        }
+
+        return rejectWithValue({
+          message: err.message || 'An unexpected error occurred',
+          fieldErrors: {},
+          status: null,
+          raw: {}
+        });
     }
   }
 );
@@ -235,9 +295,26 @@ export const updateOrganization = createAsyncThunk(
         organization,
         message: response.data.message || 'Organization updated successfully'
       };
-    } catch (error) {
-      const message = extractErrorMessage(error);
-      return rejectWithValue({ message, code: error.response?.status });
+    } catch (err) {
+      console.log("Update organization error:", err);
+
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data || {};
+        return rejectWithValue({
+          message: data?.message || null,
+          error: data?.error || null,
+          fieldErrors: data || {},
+          status: err.response?.status || null,
+          raw: data
+        });
+      }
+
+      return rejectWithValue({
+        message: err.message || 'An unexpected error occurred',
+        fieldErrors: {},
+        status: null,
+        raw: {}
+      });
     }
   }
 );
