@@ -25,27 +25,27 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
   const [selectedOrg, setSelectedOrg] = useState(organizationId);
   const [loading, setLoading] = useState(true); // New loading state
 
-  useEffect(() => {
-    const fetchOrgs = async () => {
-      try {
-        const res = await makeApiCall(
-          'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
-          {
-            method: 'GET',
-            headers: getAuthHeaders(token)
-          }
-        );
-        const data = await res.json();
-        setOrganizations(data || []);
-      } catch (err) {
-        console.error('Failed to fetch organizations');
-      } finally {
-        setLoading(false); // Stop loading
-      }
-    };
+  // useEffect(() => {
+  //   const fetchOrgs = async () => {
+  //     try {
+  //       const res = await makeApiCall(
+  //         'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
+  //         {
+  //           method: 'GET',
+  //           headers: getAuthHeaders(token)
+  //         }
+  //       );
+  //       const data = await res.json();
+  //       setOrganizations(data || []);
+  //     } catch (err) {
+  //       console.error('Failed to fetch organizations');
+  //     } finally {
+  //       setLoading(false); // Stop loading
+  //     }
+  //   };
 
-    fetchOrgs();
-  }, []);
+  //   fetchOrgs();
+  // }, []);
 
 
   useEffect(() => {

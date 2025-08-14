@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   createZoomMeeting,
   getZoomMeetings,
-  selectZoomLoading
+  selectZoomLoading,
+  selectZoomUserInfo
 } from '../../redux/auth/zoomSlice'; // Adjust import path as needed
 
 const CreateMeetingModal = ({ 
@@ -15,6 +16,8 @@ const CreateMeetingModal = ({
 }) => {
   const dispatch = useDispatch();
   const zoomLoading = useSelector(selectZoomLoading);
+  const zoomUserInfo = useSelector(selectZoomUserInfo);
+
 
   const [meetingForm, setMeetingForm] = useState({
     topic: '',
@@ -205,14 +208,27 @@ const CreateMeetingModal = ({
                       <select
                         id="auto_recording"
                         name="auto_recording"
-                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 
+                                  focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 
+                                  sm:text-sm rounded-md"
                         value={meetingForm.auto_recording}
                         onChange={handleMeetingFormChange}
                       >
                         <option value="none">No Recording</option>
                         <option value="local">Local Recording</option>
-                        <option value="cloud">Cloud Recording</option>
+
+                        {/* Only show Cloud Recording if account_type is 2 (Licensed) or 3 (On-Prem) */}
+                        {zoomUserInfo?.account_type && zoomUserInfo.account_type !== 1 && (
+                          <option value="cloud">Cloud Recording</option>
+                        )}
                       </select>
+
+                      {/* Optional helper text */}
+                      {zoomUserInfo?.account_type === 1 && (
+                        <p className="mt-1 text-xs text-gray-500">
+                          Cloud recording is available only for Licensed or On-Prem Zoom accounts.
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex items-center">

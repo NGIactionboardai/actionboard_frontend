@@ -1,38 +1,75 @@
-// EventReportsComponent.jsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { format, parseISO, isValid } from 'date-fns';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 export default function EventReportsComponent({ makeApiCall, getAuthHeaders, orgColors }) {
-
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [duration, setDuration] = useState('1w');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  const fetchReports = async () => {
+    setLoading(true);
+
+    try {
+      const params = {};
+
+      if (startDate && endDate) {
+        params.start_date = startDate;
+        params.end_date = endDate;
+      } else if (duration !== 'all') {
+        params.duration = duration;
+      }
+
+      const res = await axios.get(`${API_BASE_URL}/calendar/event-reports/`, { params });
+      setReport(res.data);
+    } catch (err) {
+      console.error('Error fetching reports:', err);
+      toast.error('Failed to fetch reports');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchReports = async () => {
-      setLoading(true);
-      try {
-        const params = duration !== 'all' ? { duration } : {};
-  
-        const res = await axios.get(`${API_BASE_URL}/calendar/event-reports/`, {
-          params,
-        });
-  
-        setReport(res.data);
-      } catch (err) {
-        console.error('Error fetching reports:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
     fetchReports();
-  }, [duration]);
+  }, [duration, endDate]);
+
+  const handleStartDateChange = (value) => {
+    setStartDate(value);
+
+    if (endDate && new Date(value) >= new Date(endDate)) {
+      const nextDay = new Date(value);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setEndDate(nextDay.toISOString().split('T')[0]);
+    }
+
+    // setDuration('all');
+
+  };
+
+  const handleEndDateChange = (value) => {
+    if (startDate && new Date(value) <= new Date(startDate)) {
+      toast.error('End date must be after start date.');
+      return;
+    }
+    setEndDate(value);
+    setDuration('all');
+  };
+
+  const handleDurationChange = (value) => {
+    setDuration(value);
+    if (value !== 'all') {
+      setStartDate('');
+      setEndDate('');
+    }
+  };
 
   if (loading) {
     return <div className="text-sm text-gray-500">Loading report...</div>;
@@ -52,23 +89,21 @@ export default function EventReportsComponent({ makeApiCall, getAuthHeaders, org
   } = report;
 
   const formatTimeLabel = (label) => {
-    // if label looks like "2025-07"
     if (/^\d{4}-\d{2}$/.test(label)) {
       const parsedDate = parseISO(label + '-01');
       return isValid(parsedDate) ? format(parsedDate, 'MMMM yyyy') : label;
     }
-    return label; // fallback for days like "Monday"
+    return label;
   };
 
   return (
     <div className="space-y-6 text-sm text-gray-800">
-      {/* Duration Filter */}
-      <div className="flex items-center justify-end">
-        <label htmlFor="duration" className="mr-2 text-sm text-gray-600">Duration:</label>
+      {/* Duration + Date Filters */}
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <label className="text-sm text-gray-600">Duration:</label>
         <select
-          id="duration"
           value={duration}
-          onChange={(e) => setDuration(e.target.value)}
+          onChange={(e) => handleDurationChange(e.target.value)}
           className="border border-gray-300 rounded-md px-2 py-1 text-sm shadow-sm"
         >
           <option value="1w">Last 1 Week</option>
@@ -76,6 +111,27 @@ export default function EventReportsComponent({ makeApiCall, getAuthHeaders, org
           <option value="3m">Last 3 Months</option>
           <option value="all">All</option>
         </select>
+
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => handleStartDateChange(e.target.value)}
+          className="border border-gray-300 rounded-md px-2 py-1 text-sm shadow-sm"
+        />
+
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => handleEndDateChange(e.target.value)}
+          min={
+            startDate
+              ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1))
+                  .toISOString()
+                  .split('T')[0]
+              : ''
+          }
+          className="border border-gray-300 rounded-md px-2 py-1 text-sm shadow-sm"
+        />
       </div>
 
       {/* Summary */}
@@ -99,7 +155,8 @@ export default function EventReportsComponent({ makeApiCall, getAuthHeaders, org
             <li key={block.label} className="py-2">
               <div className="font-medium">{formatTimeLabel(block.label)}</div>
               <div className="text-sm text-gray-600">
-                {block.event_count} events ({block.event_hours.toFixed(2)} hrs), {block.meeting_count} meetings
+                {block.event_count} events ({block.event_hours.toFixed(2)} hrs),{' '}
+                {block.meeting_count} meetings
               </div>
             </li>
           ))}
@@ -179,4 +236,3 @@ function SummaryCard({ label, value }) {
     </div>
   );
 }
-

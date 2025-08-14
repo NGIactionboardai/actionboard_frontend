@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
-
 export default function OrgSearchEventsComponent({
   orgId,
   orgName,
@@ -18,48 +17,72 @@ export default function OrgSearchEventsComponent({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [duration, setDuration] = useState('3m');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const formatTime = (isoStr) => {
-    return new Date(isoStr).toLocaleTimeString([], {
-      hour: 'numeric',
-      minute: '2-digit'
-    });
-  };
-
-  const formatDate = (isoString) => {
-    const options = {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    return new Date(isoString).toLocaleString(undefined, options);
-  };
+  const formatTime = (isoStr) =>
+    new Date(isoStr).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
   const handleSearch = async () => {
     if (!query.trim()) return;
-  
+
+    // Validation: if start & end date, ensure order
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (start >= end) {
+        toast.error('End date must be at least 1 day after start date.');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      const params = {
-        q: query,
-        org_id: orgId,
-      };
-      if (duration !== 'all') {
+      const params = { q: query, org_id: orgId };
+
+      if (startDate && endDate) {
+        params.start_date = startDate;
+        params.end_date = endDate;
+      } else if (duration !== 'all') {
         params.duration = duration;
       }
-  
+
       const { data } = await axios.get(`${API_BASE_URL}/calendar/search-events/`, { params });
-  
       setResults(data.events || []);
     } catch (err) {
       console.error(err);
       toast.error('Error during search');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStartDateChange = (value) => {
+    setStartDate(value);
+
+    // If end date is before or same as start date, adjust it
+    if (endDate && new Date(value) >= new Date(endDate)) {
+      const nextDay = new Date(value);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setEndDate(nextDay.toISOString().split('T')[0]);
+    }
+
+    // Reset duration when picking dates
+    setDuration('all');
+  };
+
+  const handleEndDateChange = (value) => {
+    setEndDate(value);
+    setDuration('all');
+  };
+
+  const handleDurationChange = (value) => {
+    setDuration(value);
+    if (value !== 'all') {
+      // Clear date range if duration selected
+      setStartDate('');
+      setEndDate('');
     }
   };
 
@@ -71,8 +94,8 @@ export default function OrgSearchEventsComponent({
         <span className="text-xs text-gray-500">Search scoped to this organization only</span>
       </div>
 
-      {/* Search Input and Filter */}
-      <div className="flex gap-2 items-center">
+      {/* Search + Filters */}
+      <div className="flex flex-wrap gap-2 items-center">
         <input
           type="text"
           className="flex-1 border rounded-md px-3 py-2 text-sm"
@@ -80,9 +103,11 @@ export default function OrgSearchEventsComponent({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+
+        {/* Duration (disabled if dates picked) */}
         <select
           value={duration}
-          onChange={(e) => setDuration(e.target.value)}
+          onChange={(e) => handleDurationChange(e.target.value)}
           className="border rounded-md px-2 py-1 text-sm text-gray-700"
         >
           <option value="3m">Last 3 Months</option>
@@ -90,6 +115,28 @@ export default function OrgSearchEventsComponent({
           <option value="1y">Last 1 Year</option>
           <option value="all">All</option>
         </select>
+
+        {/* Start Date */}
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => handleStartDateChange(e.target.value)}
+          className="border rounded-md px-2 py-1 text-sm text-gray-700"
+        />
+
+        {/* End Date */}
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => handleEndDateChange(e.target.value)}
+          min={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1))
+            .toISOString()
+            .split('T')[0] : ''}
+          className="border rounded-md px-2 py-1 text-sm text-gray-700"
+        />
+
+        
+
         <button
           onClick={handleSearch}
           className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
@@ -110,15 +157,6 @@ export default function OrgSearchEventsComponent({
               const orgColor = orgColors?.[orgName] || '#6B7280';
               const startDate = new Date(event.start);
               const endDate = new Date(event.end);
-
-              const dateDisplay = startDate.toLocaleDateString(undefined, {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-              });
-
-              const timeDisplay = `${formatTime(event.start)} - ${formatTime(event.end)}`;
 
               return (
                 <div
@@ -145,8 +183,17 @@ export default function OrgSearchEventsComponent({
                 >
                   {/* Time Column */}
                   <div className="w-32 text-sm text-gray-700 whitespace-nowrap">
-                    <div className="text-xs text-gray-500">{dateDisplay}</div>
-                    <div>{timeDisplay}</div>
+                    <div className="text-xs text-gray-500">
+                      {startDate.toLocaleDateString(undefined, {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </div>
+                    <div>
+                      {formatTime(event.start)} - {formatTime(event.end)}
+                    </div>
                   </div>
 
                   {/* Title + Org */}

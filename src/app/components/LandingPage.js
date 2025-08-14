@@ -22,7 +22,7 @@ const  LandingPage = () => {
             ActionBoard AI turns your meetings into actionable transcripts, live notes and intelligent summaries.
           </p>
           <Link
-            href="/signup"
+            href="/auth/register"
             className="inline-block px-6 py-3 text-white font-semibold rounded-md bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] transition"
           >
             Start Free Trial

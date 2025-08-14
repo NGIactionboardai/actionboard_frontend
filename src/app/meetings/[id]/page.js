@@ -27,6 +27,7 @@ import MeetingsSidebar from '@/app/components/meetings/MeetingsSidebar';
 import SendInviteModal from '@/app/components/modals/SendInviteModal';
 import InstructionModal from '@/app/components/meetings/InstructionModal';
 import JoinBtnInstructionModal from '@/app/components/meetings/JoinBtnInstructionModal';
+import { selectZoomUserInfo } from '@/redux/auth/zoomSlice';
 
 export default function Meetings() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { format, parseISO, isValid } from 'date-fns';
 import axios from 'axios';
 
-
 export default function OrgEventReportsComponent({
   orgId,
   orgName,
@@ -17,17 +16,26 @@ export default function OrgEventReportsComponent({
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [duration, setDuration] = useState('1w');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     const fetchReports = async () => {
       setLoading(true);
       try {
         const params = {};
-        if (duration !== 'all') params.duration = duration;
+
+        // Priority: date range over duration
+        if (startDate && endDate) {
+          params.start_date = startDate;
+          params.end_date = endDate;
+        } else if (duration !== 'all') {
+          params.duration = duration;
+        }
+
         if (orgId) params.org_id = orgId;
-  
+
         const { data } = await axios.get(`${API_BASE_URL}/calendar/event-reports/`, { params });
-  
         setReport(data);
       } catch (err) {
         console.error('Error fetching org reports:', err);
@@ -35,9 +43,34 @@ export default function OrgEventReportsComponent({
         setLoading(false);
       }
     };
-  
+
     fetchReports();
-  }, [duration, orgId]);
+  }, [duration, endDate, orgId]);
+
+  const handleStartDateChange = (value) => {
+    setStartDate(value);
+    // setDuration('all'); // disable duration when selecting date
+
+    // Ensure end date is after start date
+    if (endDate && new Date(endDate) <= new Date(value)) {
+      const nextDay = new Date(value);
+      nextDay.setDate(nextDay.getDate() + 1);
+      setEndDate(nextDay.toISOString().split('T')[0]);
+    }
+  };
+
+  const handleEndDateChange = (value) => {
+    setEndDate(value);
+    setDuration('all'); // disable duration when selecting date
+  };
+
+  const handleDurationChange = (value) => {
+    setDuration(value);
+    if (value !== 'all') {
+      setStartDate('');
+      setEndDate('');
+    }
+  };
 
   if (loading) {
     return <div className="text-sm text-gray-500">Loading report for {orgName}...</div>;
@@ -71,13 +104,12 @@ export default function OrgEventReportsComponent({
         <span className="block mb-1">Organization: <strong>{orgName}</strong></span>
       </div>
 
-      {/* Duration Selector */}
-      <div className="flex items-center justify-end">
-        <label htmlFor="duration" className="mr-2 text-sm text-gray-600">Duration:</label>
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 items-center justify-end">
+        {/* Duration */}
         <select
-          id="duration"
           value={duration}
-          onChange={(e) => setDuration(e.target.value)}
+          onChange={(e) => handleDurationChange(e.target.value)}
           className="border border-gray-300 rounded-md px-2 py-1 text-sm shadow-sm"
         >
           <option value="1w">Last 1 Week</option>
@@ -85,6 +117,21 @@ export default function OrgEventReportsComponent({
           <option value="3m">Last 3 Months</option>
           <option value="all">All</option>
         </select>
+
+        {/* Date range */}
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => handleStartDateChange(e.target.value)}
+          className="border border-gray-300 rounded-md px-2 py-1 text-sm shadow-sm"
+        />
+        <input
+          type="date"
+          value={endDate}
+          min={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1)).toISOString().split('T')[0] : ''}
+          onChange={(e) => handleEndDateChange(e.target.value)}
+          className="border border-gray-300 rounded-md px-2 py-1 text-sm shadow-sm"
+        />
       </div>
 
       {/* Summary Block */}

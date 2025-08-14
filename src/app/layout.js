@@ -7,6 +7,7 @@ import ReduxWrapper from '@/redux/ReduxWrapper';
 import AuthHydrator from './components/AuthHydrator';
 import { Toaster } from 'react-hot-toast';
 import InterceptorLoader from './components/InterceptorLoader';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -60,7 +61,10 @@ export default function RootLayout({ children }) {
             <div className="min-h-screen bg-gray-50">
               <Navbar />
               {/* <main className="p-0">{children}</main> */}
-              <main className="p-0">{children}</main>
+              <ProtectedRoute>
+                <main className="p-0">{children}</main>
+              </ProtectedRoute>
+              
               <Toaster 
                 position="top-center" 
                 reverseOrder={false}
@@ -74,12 +78,14 @@ export default function RootLayout({ children }) {
                     borderRadius: '8px',
                   },
                   success: {
+                    duration: 3000,
                     iconTheme: {
                       primary: '#10b981', // green-500
                       secondary: '#fff',
                     },
                   },
                   error: {
+                    duration: 3000,
                     iconTheme: {
                       primary: '#ef4444', // red-500
                       secondary: '#fff',
