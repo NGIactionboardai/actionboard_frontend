@@ -362,53 +362,88 @@ export default function Navbar() {
       </div>
       
       {/* Mobile menu, show/hide based on menu state */}
-      <div 
-        className={`sm:hidden transition-all duration-300 ease-in-out ${
-          mobileMenuOpen 
-            ? 'max-h-96 opacity-100 border-b border-gray-200' 
-            : 'max-h-0 opacity-0 overflow-hidden'
-        }`}
-      >
-        <div className="px-2 pt-2 pb-3 space-y-1">
-          {isAuthenticated ? (
-            // Authenticated mobile menu
-            <>
-              <div className="flex items-center px-3 py-2 text-sm text-gray-600 border-b border-gray-200 mb-2">
-                <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-medium mr-3">
-                  {getUserInitials()}
+        <div 
+          className={`sm:hidden absolute top-full left-0 w-full bg-gradient-to-r from-[#05065E] to-[#0A0DC4] z-50 transition-all duration-300 ease-in-out ${
+            mobileMenuOpen 
+              ? 'translate-y-0 opacity-100' 
+              : '-translate-y-4 opacity-0 pointer-events-none'
+          }`}
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {isAuthenticated ? (
+              <>
+                {/* User Info */}
+                <div className="flex items-center px-3 py-2 text-sm text-white border-b border-gray-700 mb-2">
+                  <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center text-white text-sm font-medium mr-3">
+                    {getUserInitials()}
+                  </div>
+                  <span>Welcome, {getUserDisplayName()}</span>
                 </div>
-                <span>Welcome, {getUserDisplayName()}</span>
-              </div>
-              <MobileNavLink href="/dashboard" isActive={hasMounted && isActive('/dashboard')}>
-                Dashboard
-              </MobileNavLink>
-              <MobileNavLink href="/auth/profile" isActive={hasMounted && isActive('/auth/profile')}>
-                Profile
-              </MobileNavLink>
-              <MobileNavLink href="/favorite-meetings" isActive={hasMounted && isActive('/favorite-meetings')}>
-                Favorite Meetings
-              </MobileNavLink>
-              <button 
-                className="w-full text-left block px-3 py-2 text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800 rounded-md transition-colors border-l-4 border-transparent disabled:opacity-50"
-                onClick={handleSignOut}
-                disabled={authLoading}
-              >
-                {authLoading ? 'Signing Out...' : 'Logout'}
-              </button>
-            </>
-          ) : (
-            // Unauthenticated mobile menu
-            <>
-              <MobileNavLink href="/auth/login" isActive={hasMounted && isActive('/auth/login')}>
-                Sign In
-              </MobileNavLink>
-              <MobileNavLink href="/auth/register" isActive={hasMounted && isActive('/auth/register')}>
-                Sign Up
-              </MobileNavLink>
-            </>
-          )}
+
+                {/* Organizations */}
+                <details className="px-3">
+                  <summary className="cursor-pointer text-white font-medium py-2">Organizations</summary>
+                  <div className="ml-3 space-y-1">
+                    <MobileNavLinkDark href="/organizations" onClick={() => setMobileMenuOpen(false)}>
+                      All Organizations
+                    </MobileNavLinkDark>
+                    {orgs.map((org) => (
+                      <MobileNavLinkDark key={org.org_id} href={`/meetings/${org.org_id}`} onClick={() => setMobileMenuOpen(false)}>
+                        {org.name}
+                      </MobileNavLinkDark>
+                    ))}
+                  </div>
+                </details>
+
+                {/* Calendar */}
+                <details className="px-3">
+                  <summary className="cursor-pointer text-white font-medium py-2">Calendar</summary>
+                  <div className="ml-3 space-y-1">
+                    <MobileNavLinkDark href="/calendar" onClick={() => setMobileMenuOpen(false)}>Personal</MobileNavLinkDark>
+                    {orgs.map((org) => (
+                      <MobileNavLinkDark key={org.org_id} href={`/calendar/${org.org_id}`} onClick={() => setMobileMenuOpen(false)}>
+                        {org.name}
+                      </MobileNavLinkDark>
+                    ))}
+                  </div>
+                </details>
+
+                {/* Configure */}
+                <MobileNavLinkDark href="/configure-meeting-tools" onClick={() => setMobileMenuOpen(false)}>
+                  Configure Meeting Platforms
+                </MobileNavLinkDark>
+
+                {/* Profile */}
+                <MobileNavLinkDark href="/auth/profile" onClick={() => setMobileMenuOpen(false)}>
+                  Profile
+                </MobileNavLinkDark>
+
+                {/* Logout */}
+                <button 
+                  className="w-full text-left block px-3 py-2 text-base font-medium text-white hover:bg-indigo-600 rounded-md transition-colors disabled:opacity-50"
+                  onClick={() => {
+                    handleSignOut();
+                    setMobileMenuOpen(false);
+                  }}
+                  disabled={authLoading}
+                >
+                  {authLoading ? 'Signing Out...' : 'Logout'}
+                </button>
+              </>
+            ) : (
+              <>
+                <MobileNavLinkDark href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+                  Sign In
+                </MobileNavLinkDark>
+                <MobileNavLinkDark href="/auth/register" onClick={() => setMobileMenuOpen(false)}>
+                  Sign Up
+                </MobileNavLinkDark>
+              </>
+            )}
+          </div>
         </div>
-      </div>
+
+
     </nav>
   );
 }
@@ -438,6 +473,22 @@ function MobileNavLink({ href, children, isActive }) {
         isActive 
           ? 'text-indigo-700 bg-indigo-50 border-l-4 border-indigo-500 pl-2' 
           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800 border-l-4 border-transparent'
+      }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function MobileNavLinkDark({ href, children, isActive, onClick }) {
+  return (
+    <Link 
+      href={href} 
+      onClick={onClick}
+      className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+        isActive 
+          ? 'bg-indigo-700 text-white border-l-4 border-indigo-400 pl-2' 
+          : 'text-white hover:bg-indigo-600 border-l-4 border-transparent'
       }`}
     >
       {children}

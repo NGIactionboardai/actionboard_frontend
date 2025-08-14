@@ -134,22 +134,22 @@ const MeetingsList = ({
           return (
             <li
               key={meeting.id}
-              className="mb-4 bg-white hover:bg-gray-50 p-4 rounded-lg border border-gray-500 hover:shadow-md transition cursor-pointer"
+              className="mb-4 bg-white hover:bg-gray-50 p-4 rounded-lg border border-gray-300 hover:shadow-md transition cursor-pointer"
             >
               <Link href={`/meeting/${meeting.meeting_id || meeting.id}`} className="block">
-                <div className="flex justify-between items-start">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                  
                   {/* LEFT: Meeting Info */}
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium text-indigo-600 truncate">{meeting.topic}</p>
-                    {/* <p className="text-sm text-gray-500">Meeting ID: {meeting.id}</p> */}
+                  <div className="flex-1 flex flex-col space-y-1">
+                    <p className="text-sm font-medium text-indigo-600 break-words">{meeting.topic}</p>
                     <p className="text-sm text-gray-500">
                       {formatMeetingDateTime(meeting.start_time)} • {meeting.duration || 'N/A'} min
                     </p>
 
-                    {/* Status Section (Stacked) */}
+                    {/* Status Section */}
                     <div className="mt-2 space-y-1">
                       {/* Meeting Status */}
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm text-gray-900">Meeting Status:</span>
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                           ${status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
@@ -160,31 +160,25 @@ const MeetingsList = ({
                       </div>
 
                       {/* Transcription Status */}
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm text-gray-900">Transcription Status:</span>
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${transcriptBadgeClass}`}>
                           {transcriptLabel}
                         </span>
                       </div>
                     </div>
-
-                    {/* Agenda */}
-                    {/* {meeting.agenda && (
-                      <p className="text-sm text-gray-600 mt-1">{meeting.agenda}</p>
-                    )} */}
                   </div>
 
                   {/* RIGHT: Action Buttons */}
-                  <div className="flex flex-col items-center justify-center space-y-2 ml-4">
+                  <div className="flex flex-col items-stretch sm:items-center gap-2 min-w-[140px]">
                     {meeting.join_url && (
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          // window.open(meeting.join_url, '_blank', 'noopener,noreferrer');
-                          onJoinClick(meeting)
+                          onJoinClick(meeting);
                         }}
-                        className="min-w-[140px] px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-[#f9f1fc] hover:bg-[#f0e6f7] transition"
+                        className="w-full sm:w-auto px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-[#f9f1fc] hover:bg-[#f0e6f7] transition"
                       >
                         Join
                       </button>
@@ -193,14 +187,13 @@ const MeetingsList = ({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        onShareClick(meeting); // 👈 Pass meeting to modal trigger
+                        onShareClick(meeting);
                       }}
-                      className="min-w-[140px] px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
+                      className="w-full sm:w-auto px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
                     >
                       Invite
                     </button>
                   </div>
-
 
                 </div>
               </Link>

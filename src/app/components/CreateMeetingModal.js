@@ -115,7 +115,18 @@ const CreateMeetingModal = ({
           onClick={handleClose}
         ></div>
         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        {/* <div className="
+          relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all
+          w-[98%] sm:my-8 sm:align-middle sm:max-w-lg sm:w-full
+          max-h-[90vh] overflow-y-auto sm:max-h-none sm:overflow-visible
+        "> */}
+        <div className="
+          relative inline-block 
+          bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all
+          w-[98%] max-w-lg
+          my-4 align-middle
+          sm:my-8 sm:w-full
+        ">
           <form onSubmit={handleCreateMeeting}>
             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">

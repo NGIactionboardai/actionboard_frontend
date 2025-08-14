@@ -30,10 +30,10 @@ const MeetingsFilters = ({
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
       <div className="px-4 py-4 sm:px-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-4">
 
           {/* Search input */}
-          <div className="relative w-full md:w-64">
+          <div className="relative w-full sm:flex-1 min-w-[150px]">
             <input
               type="text"
               className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md"
@@ -42,14 +42,14 @@ const MeetingsFilters = ({
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
           </div>
 
           {/* Status filter */}
-          <div className="w-full md:w-40">
+          <div className="w-full sm:w-auto sm:min-w-[120px]">
             <label htmlFor="status" className="block text-xs font-medium text-gray-500 mb-1">Status</label>
             <select
               id="status"
@@ -66,8 +66,8 @@ const MeetingsFilters = ({
             </select>
           </div>
 
-          {/* From Date */}
-          <div className="w-full md:w-44">
+          {/* Dates */}
+          <div className="w-full sm:w-auto sm:min-w-[140px]">
             <label htmlFor="startDate" className="block text-xs font-medium text-gray-500 mb-1">From</label>
             <input
               type="date"
@@ -79,8 +79,7 @@ const MeetingsFilters = ({
             />
           </div>
 
-          {/* To Date */}
-          <div className="w-full md:w-44">
+          <div className="w-full sm:w-auto sm:min-w-[140px]">
             <label htmlFor="endDate" className="block text-xs font-medium text-gray-500 mb-1">To</label>
             <input
               type="date"
@@ -93,7 +92,7 @@ const MeetingsFilters = ({
           </div>
 
           {/* Clear Button */}
-          <div className="w-full md:w-auto">
+          <div className="w-full sm:w-auto">
             <button
               type="button"
               onClick={clearFilters}
@@ -102,7 +101,8 @@ const MeetingsFilters = ({
               Clear
             </button>
           </div>
-        </div>
+          </div>
+
       </div>
     </div>
   );

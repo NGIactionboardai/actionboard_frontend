@@ -41,6 +41,8 @@ export default function Meetings() {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isJoinBtnInstructionModalOpen, setIsJoinBtnInstructionModalOpen] = useState(false);
   const [showRecordingInfoModal, setShowRecordingInfoModal] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
 
   // Custom hooks for state management
   const {
@@ -127,9 +129,29 @@ export default function Meetings() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen overflow-x-hidden">
-      {/* Sidebar */}
-      <aside className="hidden md:block w-64 shrink-0">
+    <div className="flex min-h-screen">
+      {/* Mobile Sidebar */}
+      <div className={`fixed top-20 bottom-0 left-0 w-72 bg-white shadow-lg transform transition-transform duration-300 z-50 xl:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <MeetingsSidebar
+          currentOrgId={organizationId}
+          organizationId={organizationId}
+          onZoomConnectionClick={handleZoomConnectionClick}
+          onCreateMeetingClick={handleCreateMeetingClick}
+          isZoomConnected={isZoomConnected}
+          orgName={orgName}
+        />
+      </div>
+
+      {/* Backdrop */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden xl:block w-64 shrink-0 bg-white shadow-lg">
         <MeetingsSidebar
           currentOrgId={organizationId}
           organizationId={organizationId}
@@ -139,16 +161,25 @@ export default function Meetings() {
           orgName={orgName}
         />
       </aside>
-  
+
       {/* Main Content */}
-      <main className="flex-1 min-w-0 px-4 py-6 w-full max-w-[95%] md:max-w-4xl mx-auto">
-        <MeetingsHeader
-          organizationId={organizationId}
-          orgName={orgName}
-          onZoomConnectionClick={handleZoomConnectionClick}
-          onCreateMeetingClick={handleCreateMeetingClick}
-        />
-  
+      <main className="flex-1 px-4 py-6 w-full max-w-[95%] md:max-w-4xl mx-auto">
+        {/* Header with hamburger on mobile */}
+        <div className="flex items-center justify-between md:justify-start mb-4">
+        <button
+          onClick={() => setIsSidebarOpen(prev => !prev)}
+          className="xl:hidden fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-4 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Options
+        </button>
+          <MeetingsHeader
+            organizationId={organizationId}
+            orgName={orgName}
+            onZoomConnectionClick={handleZoomConnectionClick}
+            onCreateMeetingClick={handleCreateMeetingClick}
+          />
+        </div>
+
         <AlertMessages
           successMessage={successMessage}
           error={zoomError}
@@ -235,8 +266,6 @@ export default function Meetings() {
             meeting={selectedMeeting}
           />
         )}
-
-        
       </main>
     </div>
   );

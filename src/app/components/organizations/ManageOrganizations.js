@@ -94,9 +94,27 @@ const ManageOrganizations = ({
   }, [successMessage, error, dispatch]);
 
   // Filter organizations based on search term
-  const filteredOrganizations = userOrganizations?.filter(org =>
-    org?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  // const filteredOrganizations = userOrganizations?.filter(org =>
+  //   org?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  // ) || [];
+
+  const filteredOrganizations =
+  (userOrganizations || [])
+    .filter(org =>
+      org?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      const term = searchTerm.toLowerCase();
+      const aName = a?.name?.toLowerCase() || "";
+      const bName = b?.name?.toLowerCase() || "";
+
+      const aStarts = aName.startsWith(term);
+      const bStarts = bName.startsWith(term);
+
+      if (aStarts && !bStarts) return -1; // a first
+      if (!aStarts && bStarts) return 1;  // b first
+      return 0; // keep original order for same priority
+    });
 
   const handleCreateOrg = (e) => {
     e.preventDefault();
@@ -225,10 +243,10 @@ const ManageOrganizations = ({
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="flex-1 min-w-0">
-          <h2 className="text-3xl font-bold pb-1 mb-5 leading-7 text-gray-900 sm:text-3xl sm:truncate">
+          <h2 className="text-2xl sm:text-3xl font-bold pb-1 mb-3 sm:mb-5 leading-snug text-gray-900">
             Welcome to Actionboard AI
           </h2>
-          <h4 className="text-xl font-bold pb-1 leading-7 text-gray-900 sm:text-xl sm:truncate">
+          <h4 className="text-lg sm:text-xl font-bold pb-1 leading-snug text-gray-900">
             {title}
           </h4>
           {/* <p className="mt-1 text-sm text-gray-500">
