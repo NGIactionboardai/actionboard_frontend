@@ -74,7 +74,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
   };
 
   return (
-    <div className="fixed top-20 bottom-0 left-0 w-full md:w-72 p-4 h-[calc(100vh-80px)] overflow-y-auto bg-gray-100 border-r border-gray-200">
+    <div className="fixed top-0 bottom-0 left-0 w-full md:w-72 p-4 h-[calc(100vh-80px)] overflow-y-auto bg-gray-100 border-r border-gray-200">
       {/* Org Switcher or Skeleton */}
       {loading ? (
         <div className="h-10 w-full bg-gray-300/70 dark:bg-gray-700/70 rounded animate-pulse mb-6" />
