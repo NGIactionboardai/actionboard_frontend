@@ -50,7 +50,8 @@ function ProfilePage() {
     if (!dateString) return 'Not provided';
     
     try {
-      const date = new Date(dateString);
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day); // local date
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
