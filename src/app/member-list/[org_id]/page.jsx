@@ -42,52 +42,57 @@ function MemberListPage() {
   }, [org_id]);
 
   return (
-    <main className="min-h-screen px-6 py-10 bg-gray-50">
+    <main className="min-h-screen px-4 sm:px-6 py-8 sm:py-10 bg-gray-50">
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <button
           onClick={() => router.push(`/meetings/${org_id}`)}
-          className="mb-6 text-blue-600 hover:underline text-sm"
+          className="mb-4 sm:mb-6 text-blue-600 hover:underline text-xs sm:text-sm"
         >
           ← Back to Org Home
         </button>
-
+  
         {orgName && (
-            <h1 className="text-2xl mb-4 font-semibold text-gray-800">Org: {orgName}</h1>
-          )}
-
+          <h1 className="text-lg sm:text-2xl mb-3 sm:mb-4 font-semibold text-gray-800 break-words">
+            Org: {orgName}
+          </h1>
+        )}
+  
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          
-          
-          <h2 className="text-2xl font-semibold text-gray-800">Member List</h2>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5 sm:mb-6">
+          <h2 className="text-lg sm:text-2xl font-semibold text-gray-800">Member List</h2>
           <button
             onClick={() => {
               setSelectedMember(null);
               setShowFormModal(true);
             }}
-            className="bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-white px-4 py-2 rounded-lg  cursor-pointer"
+            className="w-full sm:w-auto bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-white px-4 py-2 rounded-lg cursor-pointer text-sm sm:text-base"
           >
             + Add Member
           </button>
         </div>
-
+  
         {/* List */}
         {loading ? (
-          <p>Loading members...</p>
+          <p className="text-center text-gray-600 text-sm sm:text-base">Loading members...</p>
         ) : members.length === 0 ? (
-          <p className="text-center text-gray-500 mt-4">No members found in the list.</p>
+          <p className="text-center text-gray-500 mt-4 text-sm sm:text-base">
+            No members found in the list.
+          </p>
         ) : (
           <ul className="divide-y">
             {members.map((member) => (
-              <li key={member.id} className="py-4 flex justify-between items-center">
+              <li
+                key={member.id}
+                className="py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
+              >
                 <div>
-                  <p className="font-medium text-gray-900">{member.name}</p>
-                  <p className="text-sm text-gray-600">{member.email}</p>
+                  <p className="font-medium text-gray-900 text-sm sm:text-base">{member.name}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">{member.email}</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   <button
-                    className="bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-white px-4 py-2 rounded-lg cursor-pointer"
+                    className="flex-1 sm:flex-none bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-white px-3 sm:px-4 py-2 rounded-lg cursor-pointer text-xs sm:text-sm"
                     onClick={() => {
                       setSelectedMember(member);
                       setShowFormModal(true);
@@ -96,7 +101,7 @@ function MemberListPage() {
                     Edit
                   </button>
                   <button
-                    className="bg-red-600 text-white hover:bg-red-400 text-sm px-4 py-2 rounded-lg cursor-pointer"
+                    className="flex-1 sm:flex-none bg-red-600 text-white hover:bg-red-500 text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg cursor-pointer"
                     onClick={() => {
                       setSelectedMember(member);
                       setShowDeleteModal(true);
@@ -110,7 +115,7 @@ function MemberListPage() {
           </ul>
         )}
       </div>
-
+  
       {/* Modals */}
       {showFormModal && (
         <MemberFormModal
@@ -132,6 +137,7 @@ function MemberListPage() {
       )}
     </main>
   );
+  
 }
 
 
