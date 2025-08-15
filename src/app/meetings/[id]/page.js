@@ -28,6 +28,7 @@ import SendInviteModal from '@/app/components/modals/SendInviteModal';
 import InstructionModal from '@/app/components/meetings/InstructionModal';
 import JoinBtnInstructionModal from '@/app/components/meetings/JoinBtnInstructionModal';
 import { selectZoomUserInfo } from '@/redux/auth/zoomSlice';
+import { SlidersHorizontal } from 'lucide-react';
 
 export default function Meetings() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -166,12 +167,15 @@ export default function Meetings() {
       <main className="flex-1 px-4 py-6 w-full max-w-[95%] md:max-w-4xl mx-auto">
         {/* Header with hamburger on mobile */}
         <div className="flex items-center justify-between md:justify-start mb-4">
+
         <button
           onClick={() => setIsSidebarOpen(prev => !prev)}
           className="xl:hidden fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-4 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          Options
+          <SlidersHorizontal className="w-5 h-5" />
         </button>
+
+
           <MeetingsHeader
             organizationId={organizationId}
             orgName={orgName}
