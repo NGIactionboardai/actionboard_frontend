@@ -76,18 +76,35 @@ const setupAxiosInterceptors = (token) => {
 };
 
 // Helper function to extract error message
-const extractErrorMessage = (error) => {
-  if (error.response?.data?.message) {
-    return error.response.data.message;
+export function extractErrorMessage(error) {
+  if (!error) return 'An unknown error occurred';
+
+  // 1. Axios response data exists
+  if (error.response?.data) {
+    const data = error.response.data;
+
+    // If it's a string
+    if (typeof data === 'string') return data;
+
+    // DRF's common "detail" field
+    if (data.detail) return data.detail;
+
+    // Non-field errors array
+    if (Array.isArray(data.non_field_errors)) {
+      return data.non_field_errors.join(', ');
+    }
+
+    // Field-specific errors { email: ["..."], password: ["..."] }
+    if (typeof data === 'object') {
+      return Object.values(data).flat().join(', ');
+    }
   }
-  if (error.response?.data?.error) {
-    return error.response.data.error;
-  }
-  if (error.message) {
-    return error.message;
-  }
-  return 'An unexpected error occurred';
-};
+
+  // 2. Fall back to JS error.message
+  if (error.message) return error.message;
+
+  return 'An unknown error occurred';
+}
 
 export const fetchUserInfo = async () => {
   const token = storage.get(AUTH_STORAGE_KEYS.TOKEN);
@@ -265,7 +282,24 @@ export const userLogin = createAsyncThunk(
         message: response.data.message || 'Login successful'
       };
     } catch (error) {
-      const message = extractErrorMessage(error);
+      let message = 'Login failed';
+      
+      if (error.response?.data) {
+        // If backend sends { detail: "..." } or { error: "..." }
+        if (typeof error.response.data === 'string') {
+          message = error.response.data;
+        } else if (error.response.data.detail) {
+          message = error.response.data.detail;
+        } else if (Array.isArray(error.response.data.non_field_errors)) {
+          message = error.response.data.non_field_errors.join(', ');
+        } else if (typeof error.response.data === 'object') {
+          // serializer errors or custom keys
+          message = Object.values(error.response.data).flat().join(', ');
+        }
+      } else if (error.message) {
+        message = error.message;
+      }
+
       return rejectWithValue({ message, code: error.response?.status });
     }
   }
@@ -610,6 +644,7 @@ const authSlice = createSlice({
       .addCase(userLogin.rejected, (state, action) => {
         state.loggingIn = false;
         state.loading = false;
+        console.log('Login fail Message: ', action.payload)
         state.error = action.payload?.message || 'Login failed';
         state.successMessage = null;
       })
