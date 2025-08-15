@@ -50,7 +50,7 @@ export default function MeetingDetails() {
   const [speaker_summaries, setSpeaker_summaries] = useState(null)
   const [speaker_summary_table, setSpeaker_summary_table] = useState(null)
   const [sentiment_summaries, setSentiment_summaries] = useState(null)
-  const [activeTab, setActiveTab] = useState('transcript'); // For tabbed view
+  const [activeTab, setActiveTab] = useState('insights'); // For tabbed view
   const [transcriptionStatus, setTranscriptionStatus] = useState(null);
   const [autoTranscribed, setAutoTranscribed] = useState(false);
   const [userConfirmed, setUserConfirmed] = useState(false);
@@ -667,7 +667,7 @@ export default function MeetingDetails() {
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8 space-y-2">
         <button
           onClick={() => router.back()}
           className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
@@ -677,22 +677,25 @@ export default function MeetingDetails() {
           </svg>
           Back
         </button>
-        <div className="mt-2">
-          <h1 className="text-lg font-bold leading-7 text-gray-900 sm:truncate">
+
+        <div className="space-y-1">
+          <h1 className="text-lg sm:text-xl font-bold leading-7 text-gray-900 truncate">
             Org: {meeting.organisation.name || "Organization"}
           </h1>
-          <h3 className="text-lg font-bold leading-7 text-gray-900 sm:truncate">
+          <h3 className="text-md sm:text-lg font-semibold leading-6 text-gray-700 truncate">
             {meeting.topic || 'Meeting Details'}
           </h3>
-          <div className="mt-2 flex items-center">
-            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+
+          <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className={`px-2 py-1 text-xs sm:text-sm inline-flex leading-5 font-semibold rounded-full 
               ${status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 
                 status === 'started' ? 'bg-green-100 text-green-800' : 
                 'bg-gray-100 text-gray-800'}`}>
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </span>
+
             {/* Transcription Status Badge */}
-            <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+            <span className={`px-2 py-1 text-xs sm:text-sm inline-flex leading-5 font-semibold rounded-full
               ${transcriptionStatus === 'completed'
                 ? 'bg-green-100 text-green-800'
                 : transcriptionStatus === 'not_found'
@@ -704,26 +707,28 @@ export default function MeetingDetails() {
                 ? 'Not Transcribed'
                 : 'In Progress'}
             </span>
-            <span className="ml-3 text-sm text-gray-500">
+
+            {/* <span className="text-sm text-gray-500 truncate">
               Meeting ID: {meeting.meeting_id || meeting.id}
-            </span>
+            </span> */}
           </div>
         </div>
       </div>
 
-      {transcriptionStatus === 'pending' || transcriptionStatus === 'processing' ? (
+      {/* Transcription In Progress */}
+      {(transcriptionStatus === 'pending' || transcriptionStatus === 'processing') && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 rounded-md shadow mb-6">
-          <p className="font-medium">Transcription in progress.</p>
-          <p className="text-sm mt-1">
+          <p className="font-medium text-sm sm:text-base">Transcription in progress.</p>
+          <p className="text-xs sm:text-sm mt-1">
             You'll receive a notification once it’s complete. Please check back later.
           </p>
         </div>
-      ) : null}
+      )}
 
-      {/* Show auto-transcript save prompt if needed */}
+      {/* Auto-transcript save prompt */}
       {transcriptionStatus === 'completed' && autoTranscribed && !userConfirmed && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-md">
-          <p className="text-sm text-gray-700">
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-md shadow-sm sm:flex sm:justify-between sm:items-center">
+          <p className="text-sm text-gray-700 break-words sm:flex-1">
             This transcript was auto-generated.
             {hoursLeft !== null && hoursLeft > 0 && (
               <> You have approximately <strong>{hoursLeft} hour{hoursLeft !== 1 && 's'}</strong> left to keep it.</>
@@ -731,7 +736,7 @@ export default function MeetingDetails() {
           </p>
           <button
             onClick={handleKeepTranscript}
-            className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-2 sm:mt-0 sm:ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Save Transcript
           </button>
@@ -741,42 +746,53 @@ export default function MeetingDetails() {
       {/* Meeting Information */}
       <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
         <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Meeting Information</h3>
+          <h3 className="text-lg sm:text-xl leading-6 font-medium text-gray-900">Meeting Information</h3>
         </div>
         <div className="border-t border-gray-200">
-          <dl>
+          <dl className="divide-y divide-gray-200">
+            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm sm:text-base font-medium text-gray-500">Meeting ID</dt>
+              <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2 break-all">
+                {meeting.meeting_id || meeting.id}
+              </dd>
+            </div>
+
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt className="text-sm font-medium text-gray-500">Start Time</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dt className="text-sm sm:text-base font-medium text-gray-500">Start Time</dt>
+              <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2">
                 {formatMeetingDateTime(meeting.start_time)}
               </dd>
             </div>
+
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt className="text-sm font-medium text-gray-500">Duration</dt>
-              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <dt className="text-sm sm:text-base font-medium text-gray-500">Duration</dt>
+              <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2">
                 {meeting.duration ? `${meeting.duration} minutes` : 'N/A'}
               </dd>
             </div>
+
             {meeting.host && (
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Host</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                <dt className="text-sm sm:text-base font-medium text-gray-500">Host</dt>
+                <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2 break-words">
                   {meeting.host.full_name || meeting.host.email || 'N/A'}
                 </dd>
               </div>
             )}
+
             {meeting.agenda && (
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Agenda</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                <dt className="text-sm sm:text-base font-medium text-gray-500">Agenda</dt>
+                <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2">
                   {meeting.agenda}
                 </dd>
               </div>
             )}
+
             {meeting.join_url && !isMeetingPast(meeting) && (
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Join URL</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                <dt className="text-sm sm:text-base font-medium text-gray-500">Join URL</dt>
+                <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2 break-all">
                   <a 
                     href={meeting.join_url} 
                     target="_blank" 
@@ -792,9 +808,7 @@ export default function MeetingDetails() {
         </div>
       </div>
 
-      
 
-      
 
       {/* Action Buttons */}
       {isMeetingPast(meeting) && (
@@ -802,138 +816,118 @@ export default function MeetingDetails() {
           {transcriptionStatus === 'completed' && (
             <div className="px-4 py-5 sm:px-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900">Transcription Actions</h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                {hasTranscript() 
+              <p className="mt-1 max-w-2xl text-sm text-gray-500 break-words">
+                {hasTranscript()
                   ? 'Meeting has been transcribed. You can re-transcribe to update the content.'
                   : 'Transcribe the meeting recording and generate insights.'
                 }
               </p>
             </div>
           )}
-          {isUploadOnly ? (
-            // Show Upload & Transcribe logic only if no recordings
-            <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-              <div className="flex space-x-3">
-                {cooldownLeft > 0 ? (
-                  <p className="text-sm text-yellow-600">
-                    We’re still processing your meeting. Please wait <strong>{cooldownLeft} minute{cooldownLeft !== 1 && 's'}</strong> before uploading a file.
+
+          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-2 sm:space-y-0">
+              {isUploadOnly ? (
+                cooldownLeft > 0 ? (
+                  <p className="text-sm text-yellow-600 break-words">
+                    We’re still processing your meeting. Please wait <strong>{cooldownLeft} minute{cooldownLeft !== 1 ? 's' : ''}</strong> before uploading a file.
                   </p>
                 ) : (
-                  <>
-
-                  <button
-                    onClick={() => setShowUploadModal(true)}
-                    disabled={transcribing || isTranscriptionOngoing }
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    {hasTranscript() ? 'Upload & Re-transcribe' : 'Upload & Transcribe'}
-                  </button>
-
-                  {!(transcribing || isTranscriptionOngoing) && (
-                    !speakersUpdated ? (
-                      <button
-                        onClick={() => setShowEditModal(true)}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Edit Speakers
-                      </button>
-                    ) : (
-                      <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
-                        <svg className="-ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Speakers Updated
-                      </span>
-                    )
-                  )}                                                              
-                  
-                  </>
-                  
-                  
-                )}
-              </div>
-            </div>
-          ) : (
-            // Show default Zoom-based buttons
-            <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-              <div className="flex space-x-3">
-                <button
-                  onClick={handleTranscribe}
-                  disabled={transcribing || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {transcribing ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      {hasTranscript() ? 'Re-transcribing...' : 'Transcribing...'}
-                    </>
-                  ) : (
-                    <>
-                      <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                      </svg>
-                      {hasTranscript() ? 'Re-transcribe Meeting' : 'Start Transcription'}
-                    </>
-                  )}
-                </button>
-
-                <button
-                  onClick={fetchTranscript}
-                  disabled={transcriptLoading || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {transcriptLoading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      Refresh Transcript
-                    </>
-                  )}
-                </button>
-
-                {!(transcribing || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)) && (
-                  !speakersUpdated ? (
+                  <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0">
                     <button
-                      onClick={() => setShowEditModal(true)}
+                      onClick={() => setShowUploadModal(true)}
+                      disabled={transcribing || isTranscriptionOngoing}
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
-                      Edit Speakers
+                      {hasTranscript() ? 'Upload & Re-transcribe' : 'Upload & Transcribe'}
                     </button>
-                  ) : (
-                    <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
-                      <svg className="-ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      Speakers Updated
-                    </span>
-                  )
-                )}
-              </div>
+
+                    {!(transcribing || isTranscriptionOngoing) && (
+                      !speakersUpdated ? (
+                        <button
+                          onClick={() => setShowEditModal(true)}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                          </svg>
+                          Edit Speakers
+                        </button>
+                      ) : (
+                        <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                          <svg className="-ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          Speakers Updated
+                        </span>
+                      )
+                    )}
+                  </div>
+                )
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0">
+                  <button
+                    onClick={handleTranscribe}
+                    disabled={transcribing || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {transcribing ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {hasTranscript() ? 'Re-transcribing...' : 'Transcribing...'}
+                      </>
+                    ) : (
+                      <>
+                        <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        {hasTranscript() ? 'Re-transcribe Meeting' : 'Start Transcription'}
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={fetchTranscript}
+                    disabled={transcriptLoading || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {transcriptLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refresh Transcript
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
         </div>
       )}
+
+
+      
+
+      
+
+      
 
       {/* Meeting Status Info for Future/Current Meetings */}
       {!isMeetingPast(meeting) && (
@@ -986,14 +980,14 @@ export default function MeetingDetails() {
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           {/* Tab Navigation */}
           <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-            {meeting_insights && (
+            <nav className="-mb-px flex space-x-6 overflow-x-auto no-scrollbar">
+              {meeting_insights && (
                 <button
-                  onClick={() => setActiveTab('insights')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'insights'
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  onClick={() => setActiveTab("insights")}
+                  className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "insights"
+                      ? "border-indigo-500 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
                   AI Insights
@@ -1001,11 +995,11 @@ export default function MeetingDetails() {
               )}
               {transcript && (
                 <button
-                  onClick={() => setActiveTab('transcript')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'transcript'
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  onClick={() => setActiveTab("transcript")}
+                  className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "transcript"
+                      ? "border-indigo-500 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
                   Transcript
@@ -1013,220 +1007,128 @@ export default function MeetingDetails() {
               )}
               {meeting_insights && (
                 <button
-                  onClick={() => setActiveTab('speaker_summary')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'speaker_summary'
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  onClick={() => setActiveTab("speaker_summary")}
+                  className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "speaker_summary"
+                      ? "border-indigo-500 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
                 >
                   Speaker Summary
                 </button>
               )}
-              
-
               {meeting_sentiment_summary && (
-                  <button
-                    onClick={() => setActiveTab('meeting_sentiment')}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === 'meeting_sentiment'
-                        ? 'border-indigo-500 text-indigo-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Overall Meeting Sentiment
-                  </button>
+                <button
+                  onClick={() => setActiveTab("meeting_sentiment")}
+                  className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "meeting_sentiment"
+                      ? "border-indigo-500 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Overall Meeting Sentiment
+                </button>
               )}
-              
             </nav>
           </div>
 
           {/* Tab Content */}
           <div className="px-4 py-5 sm:px-6">
-
             {/* AI Insights Tab */}
-            {activeTab === 'insights' && meeting_insights && (
+            {activeTab === "insights" && meeting_insights && (
               <div>
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">AI-Generated Insights</h3>
+                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                  AI-Generated Insights
+                </h3>
                 <div className="bg-green-50 p-4 rounded-lg">
-                  {typeof meeting_insights === 'object' ? (
+                  {typeof meeting_insights === "object" ? (
                     <div className="space-y-4">
                       {Object.entries(meeting_insights).map(([key, value]) => (
                         <div key={key}>
                           <h4 className="font-semibold text-gray-900 capitalize mb-2">
-                            {key.replace(/_/g, ' ')}
+                            {key.replace(/_/g, " ")}
                           </h4>
                           {renderInsightValue(value)}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap">{meeting_insights}</p>
+                    <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                      {meeting_insights}
+                    </p>
                   )}
                 </div>
               </div>
             )}
-            
+
             {/* Transcript Tab */}
-            {activeTab === 'transcript' && Array.isArray(transcript) && (
+            {activeTab === "transcript" && Array.isArray(transcript) && (
               <div>
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Meeting Transcript</h3>
-                <div className="bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto space-y-4">
-                {transcript.map((utterance, idx) => {
-                  const formatTime = (ms) => {
-                    const totalSeconds = Math.floor(ms / 1000);
-                    const hours = Math.floor(totalSeconds / 3600);
-                    const minutes = Math.floor((totalSeconds % 3600) / 60);
-                    const seconds = totalSeconds % 60;
-                    return [hours, minutes, seconds]
-                      .map((val) => String(val).padStart(2, '0'))
-                      .join(':');
-                  };
+                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                  Meeting Transcript
+                </h3>
+                <div className="bg-gray-50 p-4 rounded-lg max-h-[70vh] sm:max-h-96 overflow-y-auto space-y-4">
+                  {transcript.map((utterance, idx) => {
+                    const formatTime = (ms) => {
+                      const totalSeconds = Math.floor(ms / 1000);
+                      const hours = Math.floor(totalSeconds / 3600);
+                      const minutes = Math.floor((totalSeconds % 3600) / 60);
+                      const seconds = totalSeconds % 60;
+                      return [hours, minutes, seconds]
+                        .map((val) => String(val).padStart(2, "0"))
+                        .join(":");
+                    };
 
-                  return (
-                    <div key={idx}>
-                      <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                        <span className="font-semibold text-indigo-700">
-                          Speaker {utterance.speaker}
-                        </span>
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        <span className="text-gray-950">[{formatTime(utterance.start)}]</span>
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        {utterance.text}
-                      </p>
-                    </div>
-                  );
-                })}
-
+                    return (
+                      <div key={idx}>
+                        <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                          <span className="font-semibold text-indigo-700">
+                            Speaker {utterance.speaker}
+                          </span>
+                          &nbsp;&nbsp;
+                          <span className="text-gray-950">
+                            [{formatTime(utterance.start)}]
+                          </span>
+                          &nbsp;&nbsp;
+                          {utterance.text}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {/* Speaker Summary Tab */}
-
-            {activeTab === 'speaker_summary' && (
+            {activeTab === "speaker_summary" && (
               <>
                 {speaker_summary_table ? (
-                  // Full version with all details
-                  <div className='mb-3'>
-                    <div>
-                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Speaker Summary</h3>
-
-                      {/* Dropdown */}
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Select Speaker:</label>
-                        <select
-                          value={selectedSpeaker}
-                          onChange={(e) => setSelectedSpeaker(e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                        >
-                          <option value="" disabled>Select a speaker</option>
-                          {Object.keys(speaker_summaries).map((speakerKey) => (
-                            <option key={speakerKey} value={speakerKey}>{speakerKey}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Speaker summary text */}
-                      {selectedSpeaker && (
-                        <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                          <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                            {speaker_summaries[selectedSpeaker]}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Pie Chart */}
-                      {selectedSpeaker && (
-                        <div className="max-w-md mx-auto">
-                          <SpeakerPieChart
-                            data={speaker_summary_table.find((entry) =>
-                              selectedSpeaker.toLowerCase().includes(entry.Speaker.toLowerCase())
-                            )}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-10">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Comparative Sentiment Analysis</h3>
-
-                      <div className="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Speaker</th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">Pos %</th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">Neu %</th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-red-600 uppercase tracking-wider">Neg %</th>
-                              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Overall</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-100">
-                            {speaker_summary_table.map((entry, idx) => (
-                              <tr key={idx} className="hover:bg-gray-50 transition">
-                                <td className="px-4 py-2 text-sm text-gray-800 font-medium">{entry.Speaker}</td>
-                                <td className="px-4 py-2 text-sm text-green-700">{entry['Pos %']}</td>
-                                <td className="px-4 py-2 text-sm text-blue-700">{entry['Neu %']}</td>
-                                <td className="px-4 py-2 text-sm text-red-700">{entry['Neg %']}</td>
-                                <td className="px-4 py-2 text-sm">
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium
-                                    ${entry.Overall === 'Positive'
-                                      ? 'bg-green-100 text-green-800'
-                                      : entry.Overall === 'Negative'
-                                      ? 'bg-red-100 text-red-800'
-                                      : 'bg-blue-100 text-blue-800'}`}>
-                                    {entry.Overall}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    <div className="mt-10">
-                      {/* <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Visual Sentiment Analysis</h3> */}
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Positive Contribution Pie Chart */}
-                        <div>
-                          <h4 className="text-md font-semibold text-gray-800 mb-2">Positive Contribution to Group Sentiment</h4>
-                          <PositiveContributionPieChart data={speaker_summary_table} />
-                        </div>
-
-                        {/* Sentiment Distribution Bar Chart */}
-                        <div>
-                          <h4 className="text-md font-semibold text-gray-800 mb-2">Sentiment Distribution by Speaker</h4>
-                          <SentimentDistributionBarChart data={speaker_summary_table} />
-                        </div>
-                      </div>
-                    </div>
-
-                    
-                  </div>
-                ) : speaker_summaries ? (
-                  // Only speaker summaries
-                  <div className='mb-3'>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Speaker Summary</h3>
+                  <div className="mb-3">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                      Speaker Summary
+                    </h3>
 
                     {/* Dropdown */}
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Select Speaker:</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Select Speaker:
+                      </label>
                       <select
                         value={selectedSpeaker}
                         onChange={(e) => setSelectedSpeaker(e.target.value)}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                       >
-                        <option value="" disabled>Select a speaker</option>
+                        <option value="" disabled>
+                          Select a speaker
+                        </option>
                         {Object.keys(speaker_summaries).map((speakerKey) => (
-                          <option key={speakerKey} value={speakerKey}>{speakerKey}</option>
+                          <option key={speakerKey} value={speakerKey}>
+                            {speakerKey}
+                          </option>
                         ))}
                       </select>
                     </div>
 
-                    {/* Speaker summary text */}
                     {selectedSpeaker && (
                       <div className="bg-blue-50 p-4 rounded-lg mb-6">
                         <p className="text-sm text-gray-800 whitespace-pre-wrap">
@@ -1234,25 +1136,110 @@ export default function MeetingDetails() {
                         </p>
                       </div>
                     )}
+
+                    {selectedSpeaker && (
+                      <div className="max-w-full sm:max-w-md mx-auto">
+                        <SpeakerPieChart
+                          data={speaker_summary_table.find((entry) =>
+                            selectedSpeaker
+                              .toLowerCase()
+                              .includes(entry.Speaker.toLowerCase())
+                          )}
+                        />
+                      </div>
+                    )}
+
+                    {/* Comparative Table */}
+                    <div className="mt-10 overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                              Speaker
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">
+                              Pos %
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                              Neu %
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-red-600 uppercase tracking-wider">
+                              Neg %
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                              Overall
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-100">
+                          {speaker_summary_table.map((entry, idx) => (
+                            <tr key={idx} className="hover:bg-gray-50 transition">
+                              <td className="px-4 py-2 text-sm text-gray-800 font-medium">
+                                {entry.Speaker}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-green-700">
+                                {entry["Pos %"]}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-blue-700">
+                                {entry["Neu %"]}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-red-700">
+                                {entry["Neg %"]}
+                              </td>
+                              <td className="px-4 py-2 text-sm">
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                    entry.Overall === "Positive"
+                                      ? "bg-green-100 text-green-800"
+                                      : entry.Overall === "Negative"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-blue-100 text-blue-800"
+                                  }`}
+                                >
+                                  {entry.Overall}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Charts */}
+                    <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div>
+                        <h4 className="text-md font-semibold text-gray-800 mb-2">
+                          Positive Contribution to Group Sentiment
+                        </h4>
+                        <PositiveContributionPieChart data={speaker_summary_table} />
+                      </div>
+                      <div>
+                        <h4 className="text-md font-semibold text-gray-800 mb-2">
+                          Sentiment Distribution by Speaker
+                        </h4>
+                        <SentimentDistributionBarChart data={speaker_summary_table} />
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 italic mt-4">No speaker summaries available.</p>
+                  <p className="text-sm text-gray-500 italic mt-4">
+                    No speaker summaries available.
+                  </p>
                 )}
               </>
             )}
 
-
-            {/* meeting sentiment Tab */}
-            {activeTab === 'meeting_sentiment' && meeting_sentiment_summary && Array.isArray(transcript) && (
-              <div>
-                <SentimentSummaryTable summary={meeting_sentiment_summary} />
-              </div>
-            )}
-
-
-            
+            {/* Meeting Sentiment Tab */}
+            {activeTab === "meeting_sentiment" &&
+              meeting_sentiment_summary &&
+              Array.isArray(transcript) && (
+                <div>
+                  <SentimentSummaryTable summary={meeting_sentiment_summary} />
+                </div>
+              )}
           </div>
         </div>
+
       )}
 
       
@@ -1298,90 +1285,100 @@ export default function MeetingDetails() {
 
 
       {showUploadModal && (
-        <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity z-50 flex items-center justify-center">
-          <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-xl p-4 sm:p-6">
             {/* Icon Header */}
             <div className="flex items-center justify-center mb-4">
-              <div className="bg-blue-100 rounded-full p-0">
-                <img src="/icons/ab-upload-icon.png" alt="Edit" className="w-12 h-12" />
+              <div className="bg-blue-100 rounded-full p-2 sm:p-3">
+                <img
+                  src="/icons/ab-upload-icon.png"
+                  alt="Upload"
+                  className="w-10 h-10 sm:w-12 sm:h-12"
+                />
               </div>
             </div>
 
             {/* Title */}
-            <h2 className="text-lg font-semibold text-center text-gray-900 mb-2">Upload Recording File</h2>
-            <p className="text-sm text-gray-600 text-center mb-4">Choose an audio or video file to transcribe.</p>
+            <h2 className="text-base sm:text-lg font-semibold text-center text-gray-900 mb-2">
+              Upload Recording File
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600 text-center mb-4">
+              Choose an audio or video file to transcribe.
+            </p>
 
             {/* File Input */}
             <input
               type="file"
               onChange={handleFileChange}
               accept="audio/*,video/*"
-              className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="block w-full text-xs sm:text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                        file:mr-2 sm:file:mr-4 file:py-1 sm:file:py-2 file:px-2 sm:file:px-4 file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
 
             {/* Actions */}
-            <div className="mt-6 flex justify-end space-x-3">
-            <button
-              onClick={handleUploadTranscribe}
-              disabled={transcribing || isTranscriptionOngoing}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset- disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {transcribing ? (
-                <>
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
+            <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+              <button
+                onClick={handleUploadTranscribe}
+                disabled={transcribing || isTranscriptionOngoing}
+                className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {transcribing ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="-ml-1 mr-2 h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
                       stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="-ml-1 mr-2 h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  {hasTranscript() ? 'Re-Upload' : 'Upload'}
-                </>
-              )}
-            </button>
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    {hasTranscript() ? 'Re-Upload' : 'Upload'}
+                  </>
+                )}
+              </button>
+
               <button
                 onClick={() => setShowUploadModal(false)}
                 disabled={transcribing}
-                className="inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+                className="inline-flex justify-center items-center px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
               >
                 Cancel
               </button>
             </div>
           </div>
         </div>
-
       )}
+
 
       <EditSpeakersModal
         isOpen={showEditModal}
@@ -1395,7 +1392,7 @@ export default function MeetingDetails() {
 
 
 
-    </div>
+      </div>
 
       
   );

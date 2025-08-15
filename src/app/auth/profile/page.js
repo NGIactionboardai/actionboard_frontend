@@ -78,81 +78,75 @@ function ProfilePage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-8">
-          <div className="flex items-center space-x-6">
+        <div className="px-4 py-6 sm:px-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-4 sm:space-y-0">
+            
             {/* Avatar */}
-            <div className="flex-shrink-0">
-              <div className="h-24 w-24 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+            <div className="flex-shrink-0 self-center sm:self-auto">
+              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
                 {getUserInitials()}
               </div>
             </div>
             
             {/* User Info */}
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
                 {getUserDisplayName()}
               </h1>
-              <p className="text-gray-600 mb-4">{user.email}</p>
+              <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">{user.email}</p>
               
               {/* Action Buttons */}
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center sm:justify-start">
                 {user.has_password ? (
                   <button
                     onClick={() => setIsChangePasswordOpen(true)}
-                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
+                    className="inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 bg-indigo-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
                   >
-                    <Lock className="w-4 h-4 mr-2" />
+                    <Lock className="w-4 h-4 mr-1 sm:mr-2" />
                     Change Password
                   </button>
                 ) : (
                   <button
                     onClick={() => setIsAddPasswordOpen(true)}
-                    className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
+                    className="inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 bg-indigo-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
                   >
-                    <Lock className="w-4 h-4 mr-2" />
+                    <Lock className="w-4 h-4 mr-1 sm:mr-2" />
                     Add Password
                   </button>
                 )}
-                
-                {/* <Link
-                  href="/settings"
-                  className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
-                </Link> */}
               </div>
             </div>
           </div>
         </div>
       </div>
 
+
       {/* Profile Information */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
+        <div className="px-4 py-5 sm:px-6 sm:py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 text-center sm:text-left">
+              Profile Information
+            </h2>
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className="text-sm px-3 py-2 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
             >
               Edit
             </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* First Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                First Name
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">First Name</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   value={user.first_name || user.firstName || ''}
                   readOnly
-                  className="w-full pl-11 pr-4 py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                  className="w-full pl-11 pr-4 py-2 sm:py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
                   placeholder="Not provided"
                 />
               </div>
@@ -160,16 +154,14 @@ function ProfilePage() {
 
             {/* Last Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Last Name
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Last Name</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   value={user.last_name || user.lastName || ''}
                   readOnly
-                  className="w-full pl-11 pr-4 py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                  className="w-full pl-11 pr-4 py-2 sm:py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
                   placeholder="Not provided"
                 />
               </div>
@@ -177,16 +169,14 @@ function ProfilePage() {
 
             {/* Email */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="email"
                   value={user.email || ''}
                   readOnly
-                  className="w-full pl-11 pr-4 py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                  className="w-full pl-11 pr-4 py-2 sm:py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
                   placeholder="Not provided"
                 />
               </div>
@@ -194,32 +184,28 @@ function ProfilePage() {
 
             {/* Date of Birth */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date of Birth
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Date of Birth</label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   value={formatDate(user.date_of_birth)}
                   readOnly
-                  className="w-full pl-11 pr-4 py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                  className="w-full pl-11 pr-4 py-2 sm:py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
                 />
               </div>
             </div>
 
             {/* Country */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Country
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Country</label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   value={user.country || 'Not provided'}
                   readOnly
-                  className="w-full pl-11 pr-4 py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                  className="w-full pl-11 pr-4 py-2 sm:py-3 text-sm border-2 border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -229,10 +215,12 @@ function ProfilePage() {
 
       {/* Account Status */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Account Status</h2>
+        <div className="px-4 py-5 sm:px-6 sm:py-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">
+            Account Status
+          </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {/* Account Active */}
             <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -265,8 +253,9 @@ function ProfilePage() {
         </div>
       </div>
 
+
       {/* Security Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-6 py-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Security & Privacy</h2>
           
@@ -301,7 +290,7 @@ function ProfilePage() {
               )}
             </div>
 
-            {/* <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center space-x-3">
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -317,10 +306,10 @@ function ProfilePage() {
               >
                 Setup
               </Link>
-            </div> */}
+            </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <ChangePasswordModal
         isOpen={isChangePasswordOpen}
