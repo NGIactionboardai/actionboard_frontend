@@ -194,21 +194,21 @@ export default function EditEventModal({
                   </div>
 
                   {/* Time Pickers */}
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     {[
                       { label: 'From', hour: startHour, setHour: setStartHour, minute: startMinute, setMinute: setStartMinute, ampm: startAmpm, setAmpm: setStartAmpm },
                       { label: 'To', hour: endHour, setHour: setEndHour, minute: endMinute, setMinute: setEndMinute, ampm: endAmpm, setAmpm: setEndAmpm }
                     ].map(({ label, hour, setHour, minute, setMinute, ampm, setAmpm }) => (
-                      <div className="flex flex-col w-1/2" key={label}>
+                      <div className="flex flex-col sm:w-1/2 w-full" key={label}>
                         <label className="text-sm mb-1">{label}</label>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <input
                             type="number"
                             min={1}
                             max={12}
                             value={hour}
                             onChange={(e) => setHour(e.target.value)}
-                            className="w-full border rounded px-2 py-1 text-sm"
+                            className="flex-1 min-w-[60px] border rounded px-2 py-1 text-sm"
                           />
                           <input
                             type="number"
@@ -216,12 +216,12 @@ export default function EditEventModal({
                             max={59}
                             value={minute}
                             onChange={(e) => setMinute(e.target.value)}
-                            className="w-full border rounded px-2 py-1 text-sm"
+                            className="flex-1 min-w-[60px] border rounded px-2 py-1 text-sm"
                           />
                           <select
                             value={ampm}
                             onChange={(e) => setAmpm(e.target.value)}
-                            className="w-full border rounded px-2 py-1 text-sm"
+                            className="flex-1 min-w-[70px] border rounded px-2 py-1 text-sm"
                           >
                             <option>AM</option>
                             <option>PM</option>

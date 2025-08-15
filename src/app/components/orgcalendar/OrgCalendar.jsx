@@ -21,6 +21,9 @@ import OrgSearchEventsComponent from './OrgSearchEventsComponent';
 import OrgEventReportsComponent from './OrgEventReportsComponent';
 import { getZoomConnectionStatus, selectZoomIsConnected } from '@/redux/auth/zoomSlice';
 import axios from 'axios';
+import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
+
+
 
 
 
@@ -58,6 +61,9 @@ export default function OrgCalendar({ orgId }) {
     const calendarRef = useRef(null);
     const [activeTab, setActiveTab] = useState('dayGridMonth');
     const [calendarTitle, setCalendarTitle] = useState('');
+
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    
 
     const authToken = useSelector((state) => state.auth?.token);
 
@@ -426,6 +432,7 @@ export default function OrgCalendar({ orgId }) {
     const handleDateClick = (date) => {
       calendarRef.current.getApi().gotoDate(date);
       calendarRef.current.getApi().changeView('timeGridDay');
+      setIsSidebarOpen(false)
     };
   
     const handleViewChange = (view) => {
@@ -717,8 +724,21 @@ export default function OrgCalendar({ orgId }) {
       </Transition>
 
         <div className="flex flex-1 overflow-hidden">
+
+          {/* Overlay for mobile */}
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity z-30 md:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            ></div>
+          )}
+
+
           {/* Sidebar */}
-          <div className="w-56 bg-gray-50 border-r border-gray-200 p-4 hidden md:block overflow-y-auto">
+          <div
+            className={`fixed md:static top-20 left-0 h-full w-64 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto z-40 transform transition-transform duration-300 ease-in-out
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+          >
             <div className="mb-6">
               {renderMiniCalendar()}
             </div>
@@ -756,17 +776,27 @@ export default function OrgCalendar({ orgId }) {
               </div>
 
           </div>
+
+          {/* Floating Toggle Button for Mobile */}
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="md:hidden fixed bottom-6 right-6 bg-indigo-600 text-white p-3 rounded-full shadow-lg hover:bg-indigo-700 transition z-50"
+          >
+            {isSidebarOpen ? <X size={20} /> : <CalendarIcon size={20} />}
+          </button>
+
   
           {/* Main Content */}
           <div className="flex-1 flex flex-col overflow-hidden bg-white">
-            <div className="p-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-              <div>
-                {/* <h1 className="text-lg text-gray-500 font-medium mb-1">
-                  Organization: <span className="text-gray-800 font-semibold">{orgName}</span>
-                </h1> */}
 
-                <h2 className="text-xl font-bold text-gray-900">{orgName} Calendar</h2>
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              
+              {/* Left: Org info */}
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                  {orgName} Calendar
+                </h2>
 
                 <p className="text-xs text-gray-500 mt-1">
                   Org ID: <span className="font-mono">{orgId}</span>
@@ -780,67 +810,85 @@ export default function OrgCalendar({ orgId }) {
                   })}
                 </p>
               </div>
-                <div className="flex items-center space-x-2">
-                  <button 
-                    onClick={() => {
-                      const api = calendarRef.current.getApi();
-                      api.changeView('timeGridDay', new Date());
-                      setActiveTab('timeGridDay');
-                      updateTitle();
-                    }}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                  >
-                    Today
-                  </button>
 
-                  <button
-                    onClick={() => {
-                      const now = new Date();
-                      const rounded = new Date(Math.ceil(now.getTime() / (30 * 60 * 1000)) * (30 * 60 * 1000)); // round to next 30 min
-                      const end = new Date(rounded.getTime() + 30 * 60 * 1000); // 30 min event
+              {/* Right: Buttons */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => {
+                    const api = calendarRef.current.getApi();
+                    api.changeView('timeGridDay', new Date());
+                    setActiveTab('timeGridDay');
+                    updateTitle();
+                  }}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors w-full sm:w-auto"
+                >
+                  Today
+                </button>
 
-                      setAddEventStart(rounded.toISOString());
-                      setAddEventEnd(end.toISOString());
-                      setIsAddModalOpen(true);
-                    }}
-                    className="px-5 py-2 text-sm font-semibold text-white rounded-md transition-colors"
-                    style={{
-                      backgroundColor: '#2C3E50',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1E2B37')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2C3E50')}
-                  >
-                    + Add Event
-                  </button>
+                <button
+                  onClick={() => {
+                    const now = new Date();
+                    const rounded = new Date(
+                      Math.ceil(now.getTime() / (30 * 60 * 1000)) * (30 * 60 * 1000)
+                    );
+                    const end = new Date(rounded.getTime() + 30 * 60 * 1000);
 
-                </div>
-
-
+                    setAddEventStart(rounded.toISOString());
+                    setAddEventEnd(end.toISOString());
+                    setIsAddModalOpen(true);
+                  }}
+                  className="px-5 py-2 text-sm font-semibold text-white rounded-md transition-colors w-full sm:w-auto"
+                  style={{ backgroundColor: '#2C3E50' }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = '#1E2B37')
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = '#2C3E50')
+                  }
+                >
+                  + Add Event
+                </button>
               </div>
+
             </div>
+          </div>
   
             <div className="flex-1 overflow-auto p-4">
 
-            <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
-              {/* Left: View switcher */}
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => changeView('dayGridMonth')} className={tabBtnClass('dayGridMonth')}>Month</button>
-                <button onClick={() => changeView('timeGridWeek')} className={tabBtnClass('timeGridWeek')}>Week</button>
-                <button onClick={() => changeView('timeGridDay')} className={tabBtnClass('timeGridDay')}>Day</button>
-                <button onClick={() => changeView('listWeek')} className={tabBtnClass('listWeek')}>List</button>
-                <button onClick={() => setActiveTab('search')} className={tabBtnClass('search')}>Search</button>
-                <button onClick={() => setActiveTab('reports')} className={tabBtnClass('reports')}>Reports</button>
-              </div>
+            <div className="flex flex-col sm:flex-row flex-wrap sm:items-center sm:justify-between mb-4 gap-3">
+                  {/* Left: View switcher */}
+                  <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                    <button onClick={() => changeView('dayGridMonth')} className={tabBtnClass('dayGridMonth')}>Month</button>
+                    <button onClick={() => changeView('timeGridWeek')} className={tabBtnClass('timeGridWeek')}>Week</button>
+                    <button onClick={() => changeView('timeGridDay')} className={tabBtnClass('timeGridDay')}>Day</button>
+                    <button onClick={() => changeView('listWeek')} className={tabBtnClass('listWeek')}>List</button>
+                    <button onClick={() => setActiveTab('search')} className={tabBtnClass('search')}>Search</button>
+                    <button onClick={() => setActiveTab('reports')} className={tabBtnClass('reports')}>Reports</button>
+                  </div>
 
-              {/* Center: Title */}
-              <div className="text-lg font-semibold text-gray-800">{calendarTitle}</div>
+                  {/* Center: Title */}
+                  <div className="text-lg font-semibold text-gray-800 text-center sm:text-left">
+                    {calendarTitle}
+                  </div>
 
-              {/* Right: Navigation */}
-              <div className="space-x-2">
-                <button onClick={goPrev} className="text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">Prev</button>
-                <button onClick={goToday} className="text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">Today</button>
-                <button onClick={goNext} className="text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">Next</button>
-              </div>
+                  {/* Right: Navigation */}
+                  <div className="flex gap-2 justify-center sm:justify-end">
+                    <button
+                        onClick={goPrev}
+                        className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                      >
+                        <ChevronLeft size={16} />
+                        Prev
+                      </button>
+
+                      <button
+                        onClick={goNext}
+                        className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                      >
+                        Next
+                        <ChevronRight size={16} />
+                    </button>
+                  </div>
             </div>
 
             {activeTab === 'search' && (

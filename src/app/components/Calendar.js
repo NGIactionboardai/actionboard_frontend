@@ -19,6 +19,7 @@ import { useMeetingsModal } from '../hooks/useMeetings';
 import { getZoomConnectionStatus, selectZoomIsConnected, selectZoomSuccessMessage } from '@/redux/auth/zoomSlice';
 import ZoomConfig from './ZoomConfig';
 import axios from 'axios';
+import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
   
 
@@ -54,6 +55,7 @@ export default function Calendar() {
     const calendarRef = useRef(null);
     const [activeTab, setActiveTab] = useState('dayGridMonth');
     const [calendarTitle, setCalendarTitle] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const authToken = useSelector((state) => state.auth?.token);
 
@@ -407,6 +409,7 @@ export default function Calendar() {
     const handleDateClick = (date) => {
       calendarRef.current.getApi().gotoDate(date);
       calendarRef.current.getApi().changeView('timeGridDay');
+      setIsSidebarOpen(false)
     };
   
     const handleViewChange = (view) => {
@@ -691,15 +694,25 @@ export default function Calendar() {
             </div>
           </div>
         </Dialog>
-      </Transition>
+        </Transition>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden relative">
+
+          {/* Overlay for mobile */}
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity z-30 md:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            ></div>
+          )}
+
           {/* Sidebar */}
-          <div className="w-56 bg-gray-50 border-r border-gray-200 p-4 hidden md:block overflow-y-auto">
-            <div className="mb-6">
-              {renderMiniCalendar()}
-            </div>
-  
+          <div
+            className={`fixed md:static top-20 left-0 h-full w-64 bg-gray-50 border-r border-gray-200 p-4 overflow-y-auto z-40 transform transition-transform duration-300 ease-in-out
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+          >
+            <div className="mb-6">{renderMiniCalendar()}</div>
+
             <div>
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                 Organizations
@@ -707,7 +720,10 @@ export default function Calendar() {
               {loadingOrgs ? (
                 <div className="space-y-2">
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex items-center px-2 py-1.5 animate-pulse">
+                    <div
+                      key={i}
+                      className="flex items-center px-2 py-1.5 animate-pulse"
+                    >
                       <div className="w-2.5 h-2.5 rounded-full bg-gray-300 mr-2.5 flex-shrink-0"></div>
                       <div className="h-3 w-24 bg-gray-300 rounded"></div>
                     </div>
@@ -715,38 +731,60 @@ export default function Calendar() {
                 </div>
               ) : (
                 organizations.map((org) => (
-                  <div key={org.id} className="flex items-center px-2 py-1.5 rounded hover:bg-gray-100 cursor-pointer transition-colors">
-                    <div 
-                      className="w-2.5 h-2.5 rounded-full mr-2.5 flex-shrink-0" 
+                  <div
+                    key={org.id}
+                    className="flex items-center px-2 py-1.5 rounded hover:bg-gray-100 cursor-pointer transition-colors"
+                  >
+                    <div
+                      className="w-2.5 h-2.5 rounded-full mr-2.5 flex-shrink-0"
                       style={{ backgroundColor: orgColors[org.name] }}
                     ></div>
-                    <span className="text-sm text-gray-700 truncate">{org.name}</span>
+                    <span className="text-sm text-gray-700 truncate">
+                      {org.name}
+                    </span>
                   </div>
                 ))
               )}
             </div>
           </div>
+
+          {/* Floating Toggle Button for Mobile */}
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="md:hidden fixed bottom-6 right-6 bg-indigo-600 text-white p-3 rounded-full shadow-lg hover:bg-indigo-700 transition z-50"
+          >
+            {isSidebarOpen ? <X size={20} /> : <CalendarIcon size={20} />}
+          </button>
   
           {/* Main Content */}
           <div className="flex-1 flex flex-col overflow-hidden bg-white">
+
             <div className="p-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-xl font-semibold text-gray-800">Personal Calendar</h1>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {currentDate.toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric' })}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                {/* Title + Date */}
+                <div className="flex flex-col">
+                  <h1 className="text-lg sm:text-xl font-semibold text-gray-800">
+                    Personal Calendar
+                  </h1>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    {currentDate.toLocaleDateString('default', {
+                      weekday: 'long',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
                   </p>
                 </div>
-                
-                <div className="flex items-center space-x-2">
-                  <button 
+
+                {/* Buttons */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
                     onClick={() => {
                       const api = calendarRef.current.getApi();
                       api.changeView('timeGridDay', new Date());
                       setActiveTab('timeGridDay');
                       updateTitle();
                     }}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors w-full sm:w-auto"
                   >
                     Today
                   </button>
@@ -754,164 +792,185 @@ export default function Calendar() {
                   <button
                     onClick={() => {
                       const now = new Date();
-                      const rounded = new Date(Math.ceil(now.getTime() / (30 * 60 * 1000)) * (30 * 60 * 1000)); // round to next 30 min
-                      const end = new Date(rounded.getTime() + 30 * 60 * 1000); // 30 min event
+                      const rounded = new Date(
+                        Math.ceil(now.getTime() / (30 * 60 * 1000)) * (30 * 60 * 1000)
+                      );
+                      const end = new Date(
+                        rounded.getTime() + 30 * 60 * 1000
+                      );
 
                       setAddEventStart(rounded.toISOString());
                       setAddEventEnd(end.toISOString());
                       setIsAddModalOpen(true);
                     }}
-                    className="px-5 py-2 text-sm font-semibold text-white rounded-md transition-colors"
-                    style={{
-                      backgroundColor: '#2C3E50',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1E2B37')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2C3E50')}
+                    className="px-5 py-2 text-sm font-semibold text-white rounded-md transition-colors w-full sm:w-auto"
+                    style={{ backgroundColor: '#2C3E50' }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = '#1E2B37')
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = '#2C3E50')
+                    }
                   >
                     + Add Event
                   </button>
-
                 </div>
-
 
               </div>
             </div>
   
             <div className="flex-1 overflow-auto p-4">
 
-            <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
-              {/* Left: View switcher */}
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => changeView('dayGridMonth')} className={tabBtnClass('dayGridMonth')}>Month</button>
-                <button onClick={() => changeView('timeGridWeek')} className={tabBtnClass('timeGridWeek')}>Week</button>
-                <button onClick={() => changeView('timeGridDay')} className={tabBtnClass('timeGridDay')}>Day</button>
-                <button onClick={() => changeView('listWeek')} className={tabBtnClass('listWeek')}>List</button>
-                <button onClick={() => setActiveTab('search')} className={tabBtnClass('search')}>Search</button>
-                <button onClick={() => setActiveTab('reports')} className={tabBtnClass('reports')}>Reports</button>
+              <div className="flex flex-col sm:flex-row flex-wrap sm:items-center sm:justify-between mb-4 gap-3">
+                  {/* Left: View switcher */}
+                  <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                    <button onClick={() => changeView('dayGridMonth')} className={tabBtnClass('dayGridMonth')}>Month</button>
+                    <button onClick={() => changeView('timeGridWeek')} className={tabBtnClass('timeGridWeek')}>Week</button>
+                    <button onClick={() => changeView('timeGridDay')} className={tabBtnClass('timeGridDay')}>Day</button>
+                    <button onClick={() => changeView('listWeek')} className={tabBtnClass('listWeek')}>List</button>
+                    <button onClick={() => setActiveTab('search')} className={tabBtnClass('search')}>Search</button>
+                    <button onClick={() => setActiveTab('reports')} className={tabBtnClass('reports')}>Reports</button>
+                  </div>
+
+                  {/* Center: Title */}
+                  <div className="text-lg font-semibold text-gray-800 text-center sm:text-left">
+                    {calendarTitle}
+                  </div>
+
+                  {/* Right: Navigation */}
+                  <div className="flex gap-2 justify-center sm:justify-end">
+                    <button
+                      onClick={goPrev}
+                      className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                    >
+                      <ChevronLeft size={16} />
+                      Prev
+                    </button>
+
+                    <button
+                      onClick={goNext}
+                      className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                    >
+                      Next
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+
               </div>
 
-              {/* Center: Title */}
-              <div className="text-lg font-semibold text-gray-800">{calendarTitle}</div>
+              {activeTab === 'search' && (
+                <div className="p-4 bg-white shadow rounded">
+                  <h2 className="text-xl font-semibold mb-2">Search Events</h2>
+                  <SearchEventsComponent
+                    makeApiCall={makeApiCall}
+                    getAuthHeaders={getAuthHeaders}
+                    handleEventClick={handleEventClick}
+                    orgColors={orgColors}
+                  />
+                </div>
+              )}
 
-              {/* Right: Navigation */}
-              <div className="space-x-2">
-                <button onClick={goPrev} className="text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">Prev</button>
-                <button onClick={goToday} className="text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">Today</button>
-                <button onClick={goNext} className="text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">Next</button>
-              </div>
-            </div>
+              {activeTab === 'reports' && (
+                <div className="p-4 bg-white shadow rounded">
+                  <h2 className="text-xl font-semibold mb-2">Event Reports</h2>
+                  <EventReportsComponent
+                    makeApiCall={makeApiCall}
+                    getAuthHeaders={getAuthHeaders}
+                    orgColors={orgColors}
+                  />
+                </div>
+              )}
 
-            {activeTab === 'search' && (
-              <div className="p-4 bg-white shadow rounded">
-                <h2 className="text-xl font-semibold mb-2">Search Events</h2>
-                <SearchEventsComponent
-                  makeApiCall={makeApiCall}
-                  getAuthHeaders={getAuthHeaders}
-                  handleEventClick={handleEventClick}
-                  orgColors={orgColors}
-                />
-              </div>
-            )}
-
-            {activeTab === 'reports' && (
-              <div className="p-4 bg-white shadow rounded">
-                <h2 className="text-xl font-semibold mb-2">Event Reports</h2>
-                <EventReportsComponent
-                  makeApiCall={makeApiCall}
-                  getAuthHeaders={getAuthHeaders}
-                  orgColors={orgColors}
-                />
-              </div>
-            )}
-
-            {['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'].includes(activeTab) && (
-                <FullCalendar
-                  ref={calendarRef}
-                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                  initialView={activeTab}
-                  headerToolbar={false}
-                  viewDidMount={(view) => {
-                    setActiveTab(view.view.type);
-                    updateTitle();
-                  }}
-                  datesSet={() => {
-                    updateTitle(); // every navigation
-                  }}
-                  height="100%"
-                  selectable={true}
-                  select={handleCalendarSelect}
-                  nowIndicator={true}
-                  editable={true}
-                  eventResizableFromStart={true}
-                  eventDrop={handleEventDrop}
-                  eventResize={handleEventResize}
-                  dayMaxEvents={1} // This limits visible events to 1 before showing "+X more"
-                  eventDisplay="block"
-                  events={loadingEvents ? skeletonEvents : apiEvents}
-                  eventContent={(arg) => {
-                    const isSkeleton = arg.event.extendedProps.isSkeleton;
-                  
-                    return (
-                      <div className="fc-event-main-frame">
-                        <div className={`fc-event-title-container ${isSkeleton ? 'animate-pulse' : ''}`}>
-                          <div className="fc-event-title fc-sticky p-1">
-                            <div className={`font-medium text-sm truncate ${isSkeleton ? 'bg-gray-200 h-3 w-24 rounded' : ''}`}>
-                              {!isSkeleton && arg.event.title}
-                            </div>
-                            {!isSkeleton && (
-                              <div className="text-xs font-light mt-0.5 opacity-90 truncate">
-                                {arg.event.extendedProps.organization}
+              {['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'].includes(activeTab) && (
+                  <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                    initialView={activeTab}
+                    headerToolbar={false}
+                    viewDidMount={(view) => {
+                      setActiveTab(view.view.type);
+                      updateTitle();
+                    }}
+                    datesSet={() => {
+                      updateTitle(); // every navigation
+                    }}
+                    height="100%"
+                    selectable={true}
+                    select={handleCalendarSelect}
+                    nowIndicator={true}
+                    editable={true}
+                    eventResizableFromStart={true}
+                    eventDrop={handleEventDrop}
+                    eventResize={handleEventResize}
+                    dayMaxEvents={1} // This limits visible events to 1 before showing "+X more"
+                    eventDisplay="block"
+                    events={loadingEvents ? skeletonEvents : apiEvents}
+                    eventContent={(arg) => {
+                      const isSkeleton = arg.event.extendedProps.isSkeleton;
+                    
+                      return (
+                        <div className="fc-event-main-frame">
+                          <div className={`fc-event-title-container ${isSkeleton ? 'animate-pulse' : ''}`}>
+                            <div className="fc-event-title fc-sticky p-1">
+                              <div className={`font-medium text-sm truncate ${isSkeleton ? 'bg-gray-200 h-3 w-24 rounded' : ''}`}>
+                                {!isSkeleton && arg.event.title}
                               </div>
-                            )}
+                              {!isSkeleton && (
+                                <div className="text-xs font-light mt-0.5 opacity-90 truncate">
+                                  {arg.event.extendedProps.organization}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  }}
-                  // This ensures the popover shows all events properly
-                  moreLinkContent={(arg) => {
-                    return `+${arg.num} more`;
-                  }}
-                  // Optional: Customize the popover appearance
-                  dayMaxEventRows={true}
-                  popoverContent={(arg) => {
-                    return (
-                      <div className="p-2">
-                        {arg.events.map((event) => (
-                          <div 
-                            key={event.id}
-                            className="mb-2 p-2 rounded"
-                            style={{
-                              backgroundColor: event.backgroundColor,
-                              borderColor: event.borderColor,
-                              color: event.textColor
-                            }}
-                          >
-                            <div className="font-medium">{event.title}</div>
-                            <div className="text-xs opacity-90">{event.extendedProps.organization}</div>
-                            {event.extendedProps.description && (
-                              <div className="text-xs mt-1 opacity-80">{event.extendedProps.description}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  }}
-                  eventClick={(info) => {
-                    if (info.event.extendedProps.isSkeleton) return; // prevent modal open
-                    handleEventClick(info);
-                  }}
-                  windowResize={(arg) => {
-                    if (window.innerWidth < 768 && currentView !== 'timeGridDay') {
-                      arg.view.calendar.changeView('timeGridDay');
-                    }
-                  }}
-                />
-            )}
-            
-              
+                      );
+                    }}
+                    // This ensures the popover shows all events properly
+                    moreLinkContent={(arg) => {
+                      return `+${arg.num} more`;
+                    }}
+                    // Optional: Customize the popover appearance
+                    dayMaxEventRows={true}
+                    popoverContent={(arg) => {
+                      return (
+                        <div className="p-2">
+                          {arg.events.map((event) => (
+                            <div 
+                              key={event.id}
+                              className="mb-2 p-2 rounded"
+                              style={{
+                                backgroundColor: event.backgroundColor,
+                                borderColor: event.borderColor,
+                                color: event.textColor
+                              }}
+                            >
+                              <div className="font-medium">{event.title}</div>
+                              <div className="text-xs opacity-90">{event.extendedProps.organization}</div>
+                              {event.extendedProps.description && (
+                                <div className="text-xs mt-1 opacity-80">{event.extendedProps.description}</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }}
+                    eventClick={(info) => {
+                      if (info.event.extendedProps.isSkeleton) return; // prevent modal open
+                      handleEventClick(info);
+                    }}
+                    windowResize={(arg) => {
+                      if (window.innerWidth < 768 && currentView !== 'timeGridDay') {
+                        arg.view.calendar.changeView('timeGridDay');
+                      }
+                    }}
+                  />
+              )}
 
-              <AddEventModal
+              
+            </div>
+          </div>
+
+          <AddEventModal
                 isZoomConnected={isZoomConnected}
                 isOpen={isAddModalOpen}
                 onClose={() => {
@@ -1019,12 +1078,8 @@ export default function Calendar() {
                   setEventBeingEdited(null);
                 }}
               />
-
-              
-            
-            </div>
-          </div>
         </div>
+
       </div>
     );
   }
