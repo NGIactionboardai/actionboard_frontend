@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { userLogout, selectIsAuthenticated, selectUser, selectAuthLoading } from '../../../redux/auth/authSlices';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import axios from 'axios';
+import { selectUserOrganizations } from '@/redux/auth/organizationSlice';
 
 
 export default function Navbar() {
@@ -28,6 +29,7 @@ export default function Navbar() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   const authLoading = useSelector(selectAuthLoading);
+  const userOrganizations = useSelector(selectUserOrganizations);
 
   const dropdownRef = useRef(null);
 
@@ -194,7 +196,7 @@ export default function Navbar() {
                             >
                               All organizations
                             </Link>
-                          {orgs.map((org) => (
+                          {userOrganizations.map((org) => (
                             <Link
                               key={org.org_id}
                               href={`/meetings/${org.org_id}`}
@@ -228,7 +230,7 @@ export default function Navbar() {
                           >
                             Personal
                           </Link>
-                          {orgs.map((org) => (
+                          {userOrganizations.map((org) => (
                             <Link
                               key={org.org_id}
                               href={`/calendar/${org.org_id}`}
