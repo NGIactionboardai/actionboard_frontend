@@ -214,7 +214,7 @@ function ProfilePage() {
       </div>
 
       {/* Account Status */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white mb-9 rounded-lg shadow-sm border border-gray-200">
         <div className="px-4 py-5 sm:px-6 sm:py-6">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">
             Account Status
