@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { userLogout, selectIsAuthenticated, selectUser, selectAuthLoading } from '../../../redux/auth/authSlices';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import axios from 'axios';
-import { selectUserOrganizations } from '@/redux/auth/organizationSlice';
+import { getUserOrganizations, selectUserOrganizations } from '@/redux/auth/organizationSlice';
 
 
 export default function Navbar() {
@@ -113,6 +113,10 @@ export default function Navbar() {
       fetchOrgs();
     }
   }, [isAuthenticated]);
+
+  // useEffect(() => {
+  //     dispatch(getUserOrganizations());
+  // }, [dispatch]);
 
   // ✅ Now it's safe to check
   // if (!hasMounted) return null;
