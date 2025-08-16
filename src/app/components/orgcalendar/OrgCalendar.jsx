@@ -1118,6 +1118,25 @@ export default function OrgCalendar({ orgId }) {
             </div>
           </div>
         </div>
+        <style jsx global>{`
+          @media (max-width: 640px) {
+            /* Month view: make day cells taller */
+            .fc-daygrid-day-frame {
+              min-height: 110px !important;
+            }
+            .fc-daygrid-event {
+              white-space: normal;
+            }
+
+            /* TimeGrid views: make slots taller */
+            .fc-timegrid-slot {
+              height: 50px !important; /* increase from default 30px */
+            }
+            .fc-timegrid-slot-lane {
+              height: 60px !important;
+            }
+          }
+        `}</style>
       </div>
     );
 }

@@ -911,12 +911,12 @@ export default function Calendar() {
                       return (
                         <div className="fc-event-main-frame">
                           <div className={`fc-event-title-container ${isSkeleton ? 'animate-pulse' : ''}`}>
-                            <div className="fc-event-title fc-sticky p-1">
-                              <div className={`font-medium text-sm truncate ${isSkeleton ? 'bg-gray-200 h-3 w-24 rounded' : ''}`}>
+                            <div className="fc-event-title fc-sticky p-1 sm:p-1.5">
+                              <div className={`font-medium text-xs sm:text-sm truncate ${isSkeleton ? 'bg-gray-200 h-3 w-20 rounded' : ''}`}>
                                 {!isSkeleton && arg.event.title}
                               </div>
                               {!isSkeleton && (
-                                <div className="text-xs font-light mt-0.5 opacity-90 truncate">
+                                <div className="text-[10px] sm:text-xs font-light mt-0.5 opacity-90 truncate">
                                   {arg.event.extendedProps.organization}
                                 </div>
                               )}
@@ -1079,6 +1079,26 @@ export default function Calendar() {
                 }}
               />
         </div>
+
+        <style jsx global>{`
+          @media (max-width: 640px) {
+            /* Month view: make day cells taller */
+            .fc-daygrid-day-frame {
+              min-height: 110px !important;
+            }
+            .fc-daygrid-event {
+              white-space: normal;
+            }
+
+            /* TimeGrid views: make slots taller */
+            .fc-timegrid-slot {
+              height: 50px !important; /* increase from default 30px */
+            }
+            .fc-timegrid-slot-lane {
+              height: 60px !important;
+            }
+          }
+        `}</style>
 
       </div>
     );
