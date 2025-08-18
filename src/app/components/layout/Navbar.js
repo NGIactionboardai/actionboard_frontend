@@ -163,8 +163,8 @@ export default function Navbar() {
         <div className="flex justify-between h-20">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-            <img src="/ab-main-logo.png" alt="AB Logo" className="h-12 w-12 rounded-full bg-white p-1" />
-            <span className="text-white italic font-bold text-2xl ml-5">ActionBoard AI</span>
+            <img src="/main-logo.png" alt="AB Logo" className="h-12 w-12 rounded-full bg-white p-1" />
+            <span className="text-white italic font-bold text-2xl ml-5">Nous Meeting</span>
             </Link>
           </div>
           

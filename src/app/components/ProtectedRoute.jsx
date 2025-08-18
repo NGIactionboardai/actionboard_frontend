@@ -10,7 +10,9 @@ const PUBLIC_PATHS = [
   '/auth/login',
   '/auth/register',
   '/terms',
-  '/privacy-policy', // optional: allow api routes pass through, remove if not needed
+  '/privacy-policy',
+  '/help',
+  '/feedback-form'
 ];
 
 export default function ProtectedRoute({ children }) {

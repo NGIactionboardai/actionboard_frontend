@@ -17,6 +17,8 @@ import {
 import GoogleLoginButton from '@/app/components/auth/GoogleLoginButton';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
+import TermsModal from '@/app/components/auth/TermsModal';
+import PrivacyModal from '@/app/components/auth/PrivacyModal';
 
 countries.registerLocale(enLocale);
 
@@ -46,6 +48,9 @@ export default function RegistrationPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   
   // Password validation rules
   const passwordRequirements = [
@@ -243,7 +248,7 @@ export default function RegistrationPage() {
             <User className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-gray-600">Join Actionboard AI today</p>
+          <p className="text-gray-600">Join Nous Meeting today</p>
         </div>
 
         {/* Main Form Card */}
@@ -535,6 +540,7 @@ export default function RegistrationPage() {
             </div>
 
             {/* Terms and Conditions */}
+
             <div>
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
@@ -552,13 +558,21 @@ export default function RegistrationPage() {
                 />
                 <span className="text-sm text-gray-700 leading-relaxed">
                   I agree to the{' '}
-                  <a href="#" className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200 underline">
-                    Terms of Service
-                  </a>{' '}
+                  <button
+                    type="button"
+                    onClick={() => setIsTermsOpen(true)}
+                    className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200 underline"
+                  >
+                    Terms of Use
+                  </button>{' '}
                   and{' '}
-                  <a href="#" className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200 underline">
+                  <button
+                    type="button"
+                    onClick={() => setIsPrivacyOpen(true)}
+                    className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200 underline"
+                  >
                     Privacy Policy
-                  </a>
+                  </button>
                 </span>
               </label>
               {errors.terms && (
@@ -610,6 +624,12 @@ export default function RegistrationPage() {
           </p>
         </div>
       </div>
+
+      {/* Terms Modal */}
+      <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
+
+      {/* Privacy Modal */}
+      <PrivacyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
     </div>
   );
 }

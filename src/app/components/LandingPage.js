@@ -19,7 +19,7 @@ const  LandingPage = () => {
             </span>
           </h1>
           <p className="text-lg text-gray-700">
-            ActionBoard AI turns your meetings into actionable transcripts, live notes and intelligent summaries.
+            Nous Meeting turns your meetings into actionable transcripts, live notes and intelligent summaries.
           </p>
           <Link
             href="/auth/register"

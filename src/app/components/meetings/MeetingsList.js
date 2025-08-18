@@ -120,7 +120,7 @@ const MeetingsList = ({
           const transcriptLabel = (() => {
             if (transcriptStatus === 'completed') return 'Transcribed';
             if (transcriptStatus === 'pending' || transcriptStatus === 'processing') return 'Processing';
-            if (transcriptStatus === 'not_found') return 'Not Transcribed';
+            if (transcriptStatus === 'not_found' || transcriptStatus === 'failed') return 'Not Transcribed';
             return 'Unknown';
           })();
 

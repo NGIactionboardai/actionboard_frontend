@@ -35,8 +35,8 @@ export default function LoadingPage() {
 
           {/* Logo */}
           <img
-            src="/ab-main-logo.png"
-            alt="ActionBoard AI Logo"
+            src="/main-logo.png"
+            alt="Nous Meeting Logo"
             className="relative w-24 h-24 rounded-full bg-white p-2 shadow-md mx-auto"
           />
         </div>

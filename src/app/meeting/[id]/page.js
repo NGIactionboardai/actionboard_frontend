@@ -705,6 +705,8 @@ export default function MeetingDetails() {
                 ? 'Transcribed'
                 : transcriptionStatus === 'not_found'
                 ? 'Not Transcribed'
+                : transcriptionStatus === 'failed'
+                ? 'Not Transcribed'
                 : 'In Progress'}
             </span>
 
@@ -871,7 +873,7 @@ export default function MeetingDetails() {
                 <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0">
                   <button
                     onClick={handleTranscribe}
-                    disabled={transcribing || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)}
+                    disabled={transcribing || isTranscriptionOngoing || (autoTranscribed && !userConfirmed) }
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {transcribing ? (

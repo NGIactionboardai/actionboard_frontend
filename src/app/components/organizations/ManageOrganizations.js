@@ -244,7 +244,7 @@ const ManageOrganizations = ({
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl sm:text-3xl font-bold pb-1 mb-3 sm:mb-5 leading-snug text-gray-900">
-            Welcome to Actionboard AI
+            Welcome to Nous Meeting
           </h2>
           <h4 className="text-lg sm:text-xl font-bold pb-1 leading-snug text-gray-900">
             {title}

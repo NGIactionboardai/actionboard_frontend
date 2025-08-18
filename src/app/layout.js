@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 
 export const metadata = {
-  title: 'Actionboard AI',
+  title: 'Nous Meeting',
   description: 'An AI-powered platform for meeting transcription and summarization',
   icons: {
     icon: [
