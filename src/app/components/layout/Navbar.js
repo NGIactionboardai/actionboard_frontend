@@ -7,6 +7,7 @@ import { userLogout, selectIsAuthenticated, selectUser, selectAuthLoading } from
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import axios from 'axios';
 import { getUserOrganizations, selectUserOrganizations } from '@/redux/auth/organizationSlice';
+import { HelpCircle } from 'lucide-react';
 
 
 export default function Navbar() {
@@ -290,16 +291,30 @@ export default function Navbar() {
                               </svg>
                               Profile
                             </Link>
-                            {/* <Link
-                              href="/favorite-meetings"
+                            <Link
+                              href="/help"
                               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                               onClick={() => setDropdownOpen(false)}
                             >
-                              <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                              </svg>
-                              Favorite Meetings
-                            </Link> */}
+                              {/* <svg
+                                  className="mr-3 h-5 w-5 text-gray-400"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M12 18h.01M12 14a4 4 0 10-4-4m4 4v2m0-6a4 4 0 114-4"
+                                  />
+                                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+                                </svg> */}
+
+                                <HelpCircle className="mr-3 h-5 w-5 text-gray-400" />
+                              Help
+                            </Link>
                             <Link
                               href="/configure-meeting-tools"
                               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -393,7 +408,7 @@ export default function Navbar() {
                     <MobileNavLinkDark href="/organizations" onClick={() => setMobileMenuOpen(false)}>
                       All Organizations
                     </MobileNavLinkDark>
-                    {orgs.map((org) => (
+                    {userOrganizations.map((org) => (
                       <MobileNavLinkDark key={org.org_id} href={`/meetings/${org.org_id}`} onClick={() => setMobileMenuOpen(false)}>
                         {org.name}
                       </MobileNavLinkDark>
@@ -406,7 +421,7 @@ export default function Navbar() {
                   <summary className="cursor-pointer text-white font-medium py-2">Calendar</summary>
                   <div className="ml-3 space-y-1">
                     <MobileNavLinkDark href="/calendar" onClick={() => setMobileMenuOpen(false)}>Personal</MobileNavLinkDark>
-                    {orgs.map((org) => (
+                    {userOrganizations.map((org) => (
                       <MobileNavLinkDark key={org.org_id} href={`/calendar/${org.org_id}`} onClick={() => setMobileMenuOpen(false)}>
                         {org.name}
                       </MobileNavLinkDark>
