@@ -296,21 +296,6 @@ export default function Navbar() {
                               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                               onClick={() => setDropdownOpen(false)}
                             >
-                              {/* <svg
-                                  className="mr-3 h-5 w-5 text-gray-400"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 18h.01M12 14a4 4 0 10-4-4m4 4v2m0-6a4 4 0 114-4"
-                                  />
-                                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-                                </svg> */}
 
                                 <HelpCircle className="mr-3 h-5 w-5 text-gray-400" />
                               Help
@@ -429,6 +414,12 @@ export default function Navbar() {
                   </div>
                 </details>
 
+
+                {/* Help */}
+                <MobileNavLinkDark href="/help" onClick={() => setMobileMenuOpen(false)}>
+                  Help
+                </MobileNavLinkDark>
+
                 {/* Configure */}
                 <MobileNavLinkDark href="/configure-meeting-tools" onClick={() => setMobileMenuOpen(false)}>
                   Configure Meeting Platforms
@@ -438,6 +429,7 @@ export default function Navbar() {
                 <MobileNavLinkDark href="/auth/profile" onClick={() => setMobileMenuOpen(false)}>
                   Profile
                 </MobileNavLinkDark>
+
 
                 {/* Logout */}
                 <button 
