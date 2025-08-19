@@ -53,79 +53,88 @@ const HelpPage = () => {
   
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
-      <div className="max-w-4xl mx-auto space-y-12">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 sm:p-6 lg:p-10">
+      <div className="max-w-5xl mx-auto space-y-10 sm:space-y-12">
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-gray-900">Help & Support</h1>
-          <p className="text-gray-600 mt-2">Find guidance, FAQs, and report issues</p>
+        <div className="text-center px-2">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900">
+            Help & Support
+          </h1>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">
+            Find guidance, FAQs, and report issues
+          </p>
         </div>
-
+  
         {/* User Manual */}
         <section>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">User Manual</h2>
-        <div className="bg-white shadow rounded-lg p-6 space-y-3 text-gray-700">
-            <p className="mb-2">
-            Here’s a quick overview of what you can do with ActionBoard:
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
+            User Manual
+          </h2>
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6 space-y-3 text-gray-700">
+            <p className="mb-2 text-sm sm:text-base">
+              Here’s a quick overview of what you can do with ActionBoard:
             </p>
-            <ul className="list-disc pl-6 space-y-2">
-                <li>Create organizations workspaces.</li>
-                <li>Schedule and manage meetings directly inside ActionBoard.</li>
-                <li>Connect with Zoom for transcription, recording, and meeting sync.</li>
-                <li>View meeting summaries, action items, and speaker sentiment analytics.</li>
-                <li>Use the calendar to track all events and generate reports.</li>
+            <ul className="list-disc pl-5 sm:pl-6 space-y-2 text-sm sm:text-base">
+              <li>Create organizations workspaces.</li>
+              <li>Schedule and manage meetings directly inside ActionBoard.</li>
+              <li>Connect with Zoom for transcription, recording, and meeting sync.</li>
+              <li>View meeting summaries, action items, and speaker sentiment analytics.</li>
+              <li>Use the calendar to track all events and generate reports.</li>
             </ul>
-
+  
             {/* Download Button */}
             <div className="mt-6">
-                <a
-                    href="/manuals/Nousmeeting_User_Manual.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-5 py-3 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition-colors"
-                >
-                    Download Full User Manual (PDF)
-                </a>
+              <a
+                href="/manuals/Nousmeeting_User_Manual.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 sm:px-5 py-2.5 sm:py-3 bg-indigo-600 text-white text-sm sm:text-base rounded-lg shadow hover:bg-indigo-700 transition-colors"
+              >
+                Download Full User Manual (PDF)
+              </a>
             </div>
-        </div>
+          </div>
         </section>
-
+  
         {/* FAQs */}
         <section>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">FAQs</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
+            FAQs
+          </h2>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
               <details
                 key={i}
-                className="bg-white rounded-lg shadow p-4 cursor-pointer"
+                className="bg-white rounded-lg shadow p-3 sm:p-4 cursor-pointer"
               >
-                <summary className="font-semibold text-gray-800">
+                <summary className="font-semibold text-gray-800 text-sm sm:text-base">
                   {faq.q}
                 </summary>
-                <p className="mt-2 text-gray-600">{faq.a}</p>
+                <p className="mt-2 text-gray-600 text-sm sm:text-base">{faq.a}</p>
               </details>
             ))}
           </div>
         </section>
-
+  
         {/* Bug Report */}
         <section className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Need more help?</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
+            Need more help?
+          </h2>
           <button
             onClick={() => setIsBugModalOpen(true)}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700"
+            className="px-5 sm:px-6 py-2.5 sm:py-3 bg-indigo-600 text-white text-sm sm:text-base rounded-lg shadow hover:bg-indigo-700 transition-colors"
           >
             Report a Bug
           </button>
         </section>
       </div>
-
+  
       {/* Bug Report Modal */}
       <BugReportModal isOpen={isBugModalOpen} onClose={() => setIsBugModalOpen(false)} />
-
-      
     </div>
   );
+  
 };
 
 export default HelpPage;

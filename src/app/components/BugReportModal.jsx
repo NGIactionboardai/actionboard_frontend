@@ -5,7 +5,6 @@ import { Dialog, Transition, Listbox } from '@headlessui/react';
 import { X, Check, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import SeverityDropdown from './SeverityDropdown';
 
 const platforms = ['Chrome', 'Firefox', 'Safari', 'Edge', 'Opera', 'Brave'];
 const categories = ['Crash', 'Login', 'Calendar', 'Meeting', 'Other'];
