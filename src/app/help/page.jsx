@@ -79,7 +79,7 @@ const HelpPage = () => {
             {/* Download Button */}
             <div className="mt-6">
                 <a
-                    href="/manuals/ActionBoard_User_Manual.pdf"
+                    href="/manuals/Nousmeeting_User_Manual.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-5 py-3 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition-colors"
