@@ -11,12 +11,12 @@ const TermsPage = () => {
         <div className="prose prose-gray max-w-none text-justify">
           <p className="font-bold uppercase">
             PLEASE READ THESE TERMS OF USE ("TERMS") CAREFULLY BEFORE USING THIS WEBSITE OR
-            APPLICATION. BY ACCESSING OR USING THE ACTIONBOARD AI WEBSITE OR APPLICATION,
-            INCLUDING ALL SUBPAGES ("ACTIONBOARD AI"), YOU FULLY UNDERSTAND, ACKNOWLEDGE, AND
+            APPLICATION. BY ACCESSING OR USING THE NOUS MEETING WEBSITE OR APPLICATION,
+            INCLUDING ALL SUBPAGES ("NOUS MEETING"), YOU FULLY UNDERSTAND, ACKNOWLEDGE, AND
             AGREE TO BE BOUND BY THESE TERMS.
           </p>
 
-          <h2 className="font-bold mt-8">I. USE OF ACTIONBOARD AI</h2>
+          <h2 className="font-bold mt-8">I. USE OF NOUS MEETING</h2>
 
           <div className="ml-4">
             <h3 className="font-bold mt-6">A. Lawful Use</h3>
