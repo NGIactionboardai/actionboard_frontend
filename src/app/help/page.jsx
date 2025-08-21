@@ -18,8 +18,8 @@ const HelpPage = () => {
       a: 'Yes. Navigate to Configure Meeting Tools > Zoom. From there, connect your Zoom account and manage the integration, including enabling automatic recording and transcription.',
     },
     {
-      q: 'Do I need Zoom for ActionBoard to work?',
-      a: 'No, ActionBoard works without Zoom, but Zoom integration unlocks features like meeting creation, transcription, AI Meeting insights etc',
+      q: 'Do I need Zoom for Nous Meeting to work?',
+      a: 'No, Nous Meeting works without Zoom, but Zoom integration unlocks features like meeting creation, transcription, AI Meeting insights etc',
     },
     {
       q: 'Where can I find my meeting reports?',
@@ -39,15 +39,15 @@ const HelpPage = () => {
     },
     {
       q: 'What happens if my session expires?',
-      a: 'If your session expires, ActionBoard will refresh it automatically in the background. If refresh fails, you’ll be redirected to the login page.',
+      a: 'If your session expires, Nous Meeting will refresh it automatically in the background. If refresh fails, you’ll be redirected to the login page.',
     },
     {
       q: 'Is my data secure?',
-      a: 'Yes. ActionBoard employs encryption and secure storage for all your meeting data, including transcripts and reports. Data is never sold or shared with third parties.',
+      a: 'Yes. Nous Meeting employs encryption and secure storage for all your meeting data, including transcripts and reports. Data is never sold or shared with third parties.',
     },
     {
-      q: 'What platforms does ActionBoard support?',
-      a: 'ActionBoard is currently supports only zoom',
+      q: 'What platforms does Nous Meeting support?',
+      a: 'Nous Meeting is currently supports only zoom',
     },
   ];
   
@@ -72,11 +72,11 @@ const HelpPage = () => {
           </h2>
           <div className="bg-white shadow rounded-lg p-4 sm:p-6 space-y-3 text-gray-700">
             <p className="mb-2 text-sm sm:text-base">
-              Here’s a quick overview of what you can do with ActionBoard:
+              Here’s a quick overview of what you can do with Nous Meeting:
             </p>
             <ul className="list-disc pl-5 sm:pl-6 space-y-2 text-sm sm:text-base">
               <li>Create organizations workspaces.</li>
-              <li>Schedule and manage meetings directly inside ActionBoard.</li>
+              <li>Schedule and manage meetings directly inside Nous Meeting.</li>
               <li>Connect with Zoom for transcription, recording, and meeting sync.</li>
               <li>View meeting summaries, action items, and speaker sentiment analytics.</li>
               <li>Use the calendar to track all events and generate reports.</li>

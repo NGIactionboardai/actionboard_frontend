@@ -74,7 +74,22 @@ const FeedbackPage = () => {
     }
   };
 
-  const ratingEmojis = ['😞', '😕', '😐', '😊', '🤩'];
+  const ratingOptions = [
+    { value: 1, label: '1 - Poor' },
+    { value: 2, label: '2 - Fair' },
+    { value: 3, label: '3 - Good' },
+    { value: 4, label: '4 - Very Good' },
+    { value: 5, label: '5 - Excellent' },
+  ];
+
+  const featuresOptions = [
+    'Smart Calendar',
+    'Seamless Meeting Scheduling',
+    'AI-Powered Summaries',
+    'Cross-Platform Sync',
+    'Beautiful UI/UX',
+    'Other',
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 sm:p-6 flex items-center justify-center">
@@ -84,7 +99,7 @@ const FeedbackPage = () => {
           Share Your Feedback
         </h1>
         <p className="text-gray-600 text-center mb-8">
-          Help us improve ActionBoard by sharing your experience ✨
+          Help us improve Nous Meeting by sharing your experience ✨
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -122,26 +137,48 @@ const FeedbackPage = () => {
             <h2 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">
               Overall Experience
             </h2>
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                name="rating"
-                min="1"
-                max="5"
-                value={form.rating}
-                onChange={handleChange}
-                className="w-full accent-indigo-600"
-              />
-              <span className="text-2xl">{ratingEmojis[form.rating - 1]}</span>
+            <div className="flex flex-col gap-2">
+              {ratingOptions.map((opt) => (
+                <label key={opt.value} className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="radio"
+                    name="rating"
+                    value={opt.value}
+                    checked={Number(form.rating) === opt.value}
+                    onChange={handleChange}
+                    className="text-indigo-600 focus:ring-indigo-500"
+                  />
+                  {opt.label}
+                </label>
+              ))}
             </div>
             {errors.rating && <p className="text-red-500 text-xs mt-1">{errors.rating}</p>}
-            <p className="text-sm text-gray-500 mt-1">1 = Poor, 5 = Excellent</p>
           </div>
 
-          {/* Section: Text Questions */}
+          {/* Section: Text + Dropdown */}
           <div className="space-y-6">
+            {/* Likes dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                What do you like most about Nous Meeting?
+              </label>
+              <select
+                name="likes"
+                value={form.likes}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition bg-white"
+              >
+                <option value="">Select an option</option>
+                {featuresOptions.map((feature, idx) => (
+                  <option key={idx} value={feature}>
+                    {feature}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Other text inputs */}
             {[
-              { label: 'What do you like most about ActionBoard?', name: 'likes' },
               { label: 'What do you find confusing or difficult?', name: 'difficulties' },
               { label: 'Features you wish were added/improved', name: 'features' },
               { label: 'Any other comments/suggestions', name: 'comments' },
