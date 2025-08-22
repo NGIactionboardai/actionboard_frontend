@@ -12,7 +12,9 @@ import SentimentDistributionBarChart from '@/app/components/meetings/SentimentDi
 import SentimentMeter from '@/app/components/meetings/SentimentMeter';
 import SentimentSummaryTable from '@/app/components/meetings/SentimentSummaryTable';
 import axios from 'axios';
-
+import { format } from "date-fns";
+import { generateMeetingPDF } from '@/app/utils/pdfGenerator';
+import { FileDown } from 'lucide-react';
 
 
 
@@ -190,6 +192,32 @@ export default function MeetingDetails() {
           setSpeaker_summaries(data.transcript.meeting_insights?.speaker_summaries || null);
           setSpeaker_summary_table(data.transcript.per_speaker_sentiment?.speaker_summary_table || null);
           setSentiment_summaries(data.transcript.sentiment_summaries || null);
+
+          // Normalize meeting insights (remove speaker_summaries)
+          if (data.transcript.meeting_insights) {
+            const { speaker_summaries, ...insightsWithoutSpeakers } =
+              data.transcript.meeting_insights;
+
+            // Old structure: structured_summary is a string
+            // New structure: structured_summary is an object
+            let normalizedInsights = insightsWithoutSpeakers;
+
+            if (
+              typeof insightsWithoutSpeakers.structured_summary === "string"
+            ) {
+              normalizedInsights = {
+                ...insightsWithoutSpeakers,
+                structured_summary: {
+                  minutes: insightsWithoutSpeakers.structured_summary,
+                },
+              };
+            }
+
+            setMeeting_insights(normalizedInsights);
+          } else {
+            setMeeting_insights(null);
+          }
+
         } else {
           setTranscript(data.transcript);
         }
@@ -482,29 +510,12 @@ export default function MeetingDetails() {
   const getMeetingStatus = (meeting) => {
 
     return meeting?.status
-    // if (!meeting?.start_time) return 'scheduled';
-    
-    // const now = new Date();
-    // const startTime = new Date(meeting.start_time);
-    // const endTime = new Date(startTime.getTime() + (meeting.duration * 60000));
-    
-    // if (now < startTime) return 'scheduled';
-    // if (now >= startTime && now <= endTime) return 'started';
-    // return 'ended';
   };
 
   const isMeetingPast = (meeting) => {
 
     if (meeting?.status === 'ended') return true
     else return false
-
-    // if (!meeting?.start_time) return false;
-    
-    // const now = new Date();
-    // const startTime = new Date(meeting.start_time);
-    // const endTime = new Date(startTime.getTime() + (meeting.duration * 60000));
-    
-    // return now > endTime;
   };
 
   const isMeetingFuture = (meeting) => {
@@ -517,89 +528,51 @@ export default function MeetingDetails() {
     return transcript || summary || meeting_insights;
   };
 
-  // const renderInsightValue = (value) => {
-  //   if (Array.isArray(value)) {
-  //     return (
-  //       <ul className="list-disc list-inside space-y-1">
-  //         {value.map((item, index) => (
-  //           <li key={index} className="text-sm text-gray-700">{item}</li>
-  //         ))}
-  //       </ul>
-  //     );
-  //   } else if (typeof value === 'object' && value !== null) {
-  //     return (
-  //       <div className="space-y-2">
-  //         {Object.entries(value).map(([subKey, subValue]) => (
-  //           <div key={subKey}>
-  //             <span className="font-medium text-gray-800 capitalize">
-  //               {subKey.replace(/_/g, ' ')}:
-  //             </span>
-  //             <div className="ml-2 mt-1">{renderInsightValue(subValue)}</div>
-  //           </div>
-  //         ))}
-  //       </div>
-  //     );
-  //   }
-  //   return <p className="text-sm text-gray-700">{value}</p>;
-  // };
 
-  const renderInsightValue = (value) => {
-    if (Array.isArray(value)) {
-      return (
-        <ul className="list-disc list-inside space-y-1">
-          {value.map((item, index) => (
-            <li key={index} className="text-sm text-gray-700">{item}</li>
-          ))}
-        </ul>
-      );
-    } else if (typeof value === 'object' && value !== null) {
-      return (
-        <div className="space-y-2">
-          {Object.entries(value).map(([subKey, subValue]) => (
-            <div key={subKey}>
-              <span className="font-medium text-gray-800 capitalize">
-                {subKey.replace(/_/g, ' ')}:
-              </span>
-              <div className="ml-2 mt-1">{renderInsightValue(subValue)}</div>
-            </div>
-          ))}
-        </div>
-      );
-    } else if (typeof value === 'string') {
-      // Handle structured summary with proper formatting
-      if (value.includes('## ') || value.includes('- ')) {
+  const renderInsightValue = (value, key = "") => {
+    // keep a counter for numbered headings
+    let headingCount = 0;
+  
+    if (typeof value === "string") {
+      if (value.includes("## ") || value.includes("- ")) {
         return (
           <div className="prose prose-sm max-w-none">
-            {value.split('\n').map((line, index) => {
+            {value.split("\n").map((line, index) => {
               const trimmedLine = line.trim();
-              
-              // Handle main headings (##)
-              if (trimmedLine.startsWith('## ')) {
+  
+              // Headings
+              if (trimmedLine.startsWith("## ")) {
+                headingCount += 1; // increment each time we see a heading
                 return (
-                  <h4 key={index} className="text-base font-semibold text-gray-900 mt-4 mb-2 first:mt-0">
-                    {trimmedLine.replace('## ', '')}
+                  <h4
+                    key={index}
+                    className="text-base font-semibold text-gray-900 mt-4 mb-2 first:mt-0"
+                  >
+                    {`${headingCount}. ${trimmedLine.replace("## ", "")}`}
                   </h4>
                 );
               }
-              
-              // Handle bullet points (-)
-              if (trimmedLine.startsWith('- ')) {
+  
+              // Bullets
+              if (trimmedLine.startsWith("- ")) {
                 return (
                   <div key={index} className="ml-4 mb-1">
                     <span className="inline-flex items-start">
                       <span className="text-gray-400 mr-2 mt-1.5 flex-shrink-0">•</span>
-                      <span className="text-sm text-gray-700">{trimmedLine.replace('- ', '')}</span>
+                      <span className="text-sm text-gray-700">
+                        {trimmedLine.replace("- ", "")}
+                      </span>
                     </span>
                   </div>
                 );
               }
-              
-              // Handle empty lines
-              if (trimmedLine === '') {
+  
+              // Empty line spacing
+              if (trimmedLine === "") {
                 return <div key={index} className="h-2"></div>;
               }
-              
-              // Handle regular text
+  
+              // Regular paragraph
               return (
                 <p key={index} className="text-sm text-gray-700 mb-2">
                   {trimmedLine}
@@ -609,13 +582,42 @@ export default function MeetingDetails() {
           </div>
         );
       }
-      
-      // For regular text without special formatting
       return <p className="text-sm text-gray-700 whitespace-pre-wrap">{value}</p>;
     }
-    
+  
+    // fallback for other cases...
+    if (Array.isArray(value)) {
+      return (
+        <ul className="list-disc list-inside space-y-1">
+          {value.map((item, index) => (
+            <li key={index} className="text-sm text-gray-700">
+              {typeof item === "object" ? JSON.stringify(item) : item}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+  
+    if (typeof value === "object" && value !== null) {
+      return (
+        <div className="space-y-2">
+          {Object.entries(value).map(([subKey, subValue]) => (
+            <div key={subKey}>
+              <span className="font-medium text-gray-800 capitalize">
+                {subKey.replace(/_/g, " ")}:
+              </span>
+              <div className="ml-2 mt-1">
+                {renderInsightValue(subValue, subKey)}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+  
     return <p className="text-sm text-gray-700">{value}</p>;
   };
+   
 
   if (loading) {
     return (
@@ -1039,29 +1041,137 @@ export default function MeetingDetails() {
             {/* AI Insights Tab */}
             {activeTab === "insights" && meeting_insights && (
               <div>
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                  AI-Generated Insights
-                </h3>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  {typeof meeting_insights === "object" ? (
-                    <div className="space-y-4">
-                      {Object.entries(meeting_insights).map(([key, value]) => (
-                        <div key={key}>
-                          <h4 className="font-semibold text-gray-900 capitalize mb-2">
-                            {key.replace(/_/g, " ")}
-                          </h4>
-                          {renderInsightValue(value)}
-                        </div>
-                      ))}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                    AI-Generated Insights
+                  </h3>
+                  <button
+                    onClick={() => generateMeetingPDF(meeting, meeting_insights, speaker_summaries)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    <span>Download PDF</span>
+                  </button>
+                </div>
+
+                <div className="bg-green-50 p-4 rounded-lg space-y-8">
+
+
+                  {/* 🔹 Old Structure: structured_summary is string */}
+                  {typeof meeting_insights?.structured_summary === "string" && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                        Structured Summary
+                      </h4>
+                      <div className="prose prose-sm max-w-none">
+                        {renderInsightValue(meeting_insights.structured_summary)}
+                      </div>
                     </div>
-                  ) : (
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                      {meeting_insights}
-                    </p>
+                  )}
+
+                  {/* 🔹 New Structure: structured_summary is object */}
+                  {typeof meeting_insights?.structured_summary === "object" && (
+                    <div className="space-y-8">
+
+                      {/* Meeting Summary */}
+                      {meeting_insights.structured_summary.summary_text && (
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                            Meeting Summary
+                          </h4>
+                          <div className="prose prose-sm max-w-none">
+                            {renderInsightValue(meeting_insights.structured_summary.summary_text)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Minutes of the Meeting */}
+                      {meeting_insights.structured_summary.minutes && (
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                            Minutes of the Meeting
+                          </h4>
+
+
+                          {/* 🔹 Date & Attendees */}
+                          <div className='mb-6'>
+                            {/* <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                              Meeting Information
+                            </h4> */}
+
+                            {/* Date */}
+                            <p className="text-sm text-gray-700">
+                              <span className="font-medium">Date:</span>{" "}
+                              {meeting?.end_time
+                                ? format(new Date(meeting.end_time), "MMMM d, yyyy, h:mm a")
+                                : "N/A"}
+                            </p>
+
+                            {/* Attendees */}
+                            {speaker_summaries && (
+                              <div className="mt-2 flex flex-wrap items-center gap-2">
+                                {/* Label */}
+                                <span className="text-sm font-medium text-gray-800">Attendees:</span>
+
+                                {/* Tags */}
+                                {Object.keys(speaker_summaries).map((speaker, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-800"
+                                  >
+                                    {speaker}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="prose prose-sm max-w-none">
+                            {renderInsightValue(meeting_insights.structured_summary.minutes)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Items */}
+                      {meeting_insights.structured_summary.action_items?.length > 0 && (
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                            Action Items
+                          </h4>
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full border border-gray-200 text-sm text-left">
+                              <thead className="bg-gray-100">
+                                <tr>
+                                  <th className="px-3 py-2 font-medium text-gray-700 border-b">Task</th>
+                                  <th className="px-3 py-2 font-medium text-gray-700 border-b">Responsible Person</th>
+                                  <th className="px-3 py-2 font-medium text-gray-700 border-b">Deadline</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {meeting_insights.structured_summary.action_items.map((item, index) => (
+                                  <tr key={index} className="hover:bg-gray-50">
+                                    <td className="px-3 py-2 border-b text-gray-700">
+                                      {item.Task?.replace("- Task: ", "")}
+                                    </td>
+                                    <td className="px-3 py-2 border-b text-gray-700">
+                                      {item["Responsible Person"]?.replace("Owner: ", "")}
+                                    </td>
+                                    <td className="px-3 py-2 border-b text-gray-700">
+                                      {item.Deadline?.replace("Deadline: ", "")}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
             )}
+
 
             {/* Transcript Tab */}
             {activeTab === "transcript" && Array.isArray(transcript) && (
