@@ -1,113 +1,180 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
+// import InterRegular from "@/assets/fonts/Inter-Regular-normal.js"; // generated base64
 
 export const generateMeetingPDF = (meeting, meeting_insights, speaker_summaries) => {
   const doc = new jsPDF();
 
+  // Add custom font (optional)
+  // doc.addFileToVFS("Inter-Regular.ttf", InterRegular);
+  // doc.addFont("Inter-Regular.ttf", "Inter", "normal");
+  // doc.setFont("Inter");
+
   const pageHeight = doc.internal.pageSize.getHeight();
+  const pageWidth = doc.internal.pageSize.getWidth();
   const marginTop = 20;
   const marginBottom = 20;
   let y = marginTop;
 
+  const paintBackground = () => {
+    doc.setFillColor(240, 253, 244); // #F0FDF4
+    doc.rect(0, 0, pageWidth, pageHeight, "F");
+  };
+
   const addNewPage = () => {
     doc.addPage();
+    paintBackground();
     y = marginTop;
   };
 
+  // Paint background for first page
+  paintBackground();
+
   // --- Title ---
   doc.setFontSize(16);
-  doc.text("Meeting Summary, Minutes, and Action Items", 14, y);
-  y += 12;
-
-  // --- Date & Attendees ---
-  doc.setFontSize(12);
+  doc.setFont(undefined, "bold");
   doc.text(
-    `Date: ${
-      meeting?.end_time
-        ? format(new Date(meeting.end_time), "MMMM d, yyyy, h:mm a")
-        : "N/A"
-    }`,
-    14,
-    y
+    "AI Insights",
+    doc.internal.pageSize.getWidth() / 2, // center X
+    y,
+    { align: "center" }
   );
-  y += 8;
-
-  if (speaker_summaries) {
-    const attendeesText = `Attendees: ${Object.keys(speaker_summaries).join(", ")}`;
-    const wrapped = doc.splitTextToSize(attendeesText, 180);
-    if (y + wrapped.length * 6 > pageHeight - marginBottom) addNewPage();
-    doc.text(wrapped, 14, y);
-    y += wrapped.length * 6 + 6;
-  }
+  y += 14;
 
   // --- Meeting Summary ---
   if (meeting_insights?.structured_summary?.summary_text) {
     doc.setFontSize(14);
-    if (y + 8 > pageHeight - marginBottom) addNewPage();
+    doc.setFont(undefined, "bold");
     doc.text("Meeting Summary", 14, y);
-    y += 8;
+    y += 10;
 
     doc.setFontSize(11);
-    const summaryLines = doc.splitTextToSize(
-      meeting_insights.structured_summary.summary_text,
-      180
-    );
-    if (y + summaryLines.length * 6 > pageHeight - marginBottom) addNewPage();
-    doc.text(summaryLines, 14, y);
-    y += summaryLines.length * 6 + 10;
+    doc.setFont(undefined, "normal");
+
+    const lines = meeting_insights.structured_summary.summary_text.split("\n");
+    let currentHeading = "";
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+
+      if (trimmed.startsWith("## ")) {
+        currentHeading = trimmed.replace("## ", "");
+        if (y + 8 > pageHeight - marginBottom) addNewPage();
+        doc.setFont(undefined, "bold");
+        doc.text(currentHeading, 14, y);
+        doc.setFont(undefined, "normal");
+        y += 8;
+      } else if (trimmed.startsWith("- ")) {
+        // Normal bullet points
+        const bullet = `• ${trimmed.replace("- ", "")}`;
+        const wrapped = doc.splitTextToSize(bullet, 170);
+        if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
+        doc.text(wrapped, 20, y);
+        y += wrapped.length * 7;
+      } else if (trimmed !== "") {
+        const wrapped = doc.splitTextToSize(trimmed, 180);
+        if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
+
+        // Force bullets for these headings
+        if (
+          currentHeading.includes("Key Discussion Themes") ||
+          currentHeading.includes("High-Level Outcomes")
+        ) {
+          doc.text(`• ${wrapped}`, 20, y);
+        } else {
+          doc.text(wrapped, 14, y);
+        }
+
+        y += wrapped.length * 7;
+      } else {
+        y += 5;
+      }
+    });
+
+    y += 12;
   }
 
-  // --- Minutes of the Meeting ---
+  // --- Minutes ---
   if (meeting_insights?.structured_summary?.minutes) {
     doc.setFontSize(14);
-    if (y + 8 > pageHeight - marginBottom) addNewPage();
+    doc.setFont(undefined, "bold");
     doc.text("Minutes of the Meeting", 14, y);
+    y += 10;
+
+    // Date
+    doc.setFontSize(12);
+    doc.setFont(undefined, "normal");
+    doc.text(
+      `Date: ${
+        meeting?.end_time
+          ? format(new Date(meeting.end_time), "MMMM d, yyyy, h:mm a")
+          : "N/A"
+      }`,
+      14,
+      y
+    );
     y += 8;
+
+    // Attendees
+    if (speaker_summaries) {
+      const attendeesText = `Attendees: ${Object.keys(speaker_summaries).join(", ")}`;
+      const wrapped = doc.splitTextToSize(attendeesText, 180);
+      if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
+      doc.text(wrapped, 14, y);
+      y += wrapped.length * 7 + 8;
+    }
 
     doc.setFontSize(11);
     const lines = meeting_insights.structured_summary.minutes.split("\n");
     let sectionNum = 0;
+    let currentHeading = "";
 
     lines.forEach((line) => {
       const trimmed = line.trim();
 
       if (trimmed.startsWith("## ")) {
         sectionNum++;
-        const heading = `${sectionNum}. ${trimmed.replace("## ", "")}`;
-        const neededHeight = 6;
-        if (y + neededHeight > pageHeight - marginBottom) addNewPage();
+        currentHeading = trimmed.replace("## ", "");
+        const heading = `${sectionNum}. ${currentHeading}`;
+        if (y + 8 > pageHeight - marginBottom) addNewPage();
         doc.setFont(undefined, "bold");
         doc.text(heading, 14, y);
         doc.setFont(undefined, "normal");
-        y += neededHeight;
+        y += 8;
       } else if (trimmed.startsWith("- ")) {
         const bullet = `• ${trimmed.replace("- ", "")}`;
-        const wrapped = doc.splitTextToSize(bullet, 180);
-        const neededHeight = wrapped.length * 6;
-        if (y + neededHeight > pageHeight - marginBottom) addNewPage();
+        const wrapped = doc.splitTextToSize(bullet, 170);
+        if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
         doc.text(wrapped, 20, y);
-        y += neededHeight;
+        y += wrapped.length * 7;
       } else if (trimmed !== "") {
         const wrapped = doc.splitTextToSize(trimmed, 180);
-        const neededHeight = wrapped.length * 6;
-        if (y + neededHeight > pageHeight - marginBottom) addNewPage();
-        doc.text(wrapped, 14, y);
-        y += neededHeight;
+        if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
+        // Force bullet for "Key Discussion Themes" & "High-Level Outcomes"
+        if (
+          currentHeading.includes("Key Discussion Themes") ||
+          currentHeading.includes("High-Level Outcomes")
+        ) {
+          doc.text(`• ${wrapped}`, 20, y);
+        } else {
+          doc.text(wrapped, 14, y);
+        }
+        y += wrapped.length * 7;
       } else {
-        y += 4;
+        y += 5;
       }
     });
 
-    y += 10;
+    y += 12;
   }
 
   // --- Action Items ---
   if (meeting_insights?.structured_summary?.action_items?.length > 0) {
     doc.setFontSize(14);
-    if (y + 8 > pageHeight - marginBottom) addNewPage();
-    doc.text("Revised Action Items with Deadlines", 14, y);
-    y += 8;
+    doc.setFont(undefined, "bold");
+    doc.text("Action Items", 14, y);
+    y += 10;
 
     autoTable(doc, {
       startY: y,
@@ -122,12 +189,12 @@ export const generateMeetingPDF = (meeting, meeting_insights, speaker_summaries)
       alternateRowStyles: { fillColor: [250, 250, 250] },
       margin: { top: y },
       didDrawPage: (data) => {
-        y = data.cursor?.y ? data.cursor.y + 10 : marginTop;
+        y = data.cursor?.y ? data.cursor.y + 12 : marginTop;
       },
     });
   }
 
-  // --- Footer (Generated by Nous Meeting) ---
+  // --- Footer ---
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
@@ -135,12 +202,11 @@ export const generateMeetingPDF = (meeting, meeting_insights, speaker_summaries)
     doc.setTextColor(120);
     doc.text(
       `Generated by Nous Meeting · Page ${i} of ${pageCount}`,
-      doc.internal.pageSize.getWidth() / 2,
-      doc.internal.pageSize.getHeight() - 10,
+      pageWidth / 2,
+      pageHeight - 10,
       { align: "center" }
     );
   }
 
-  // Save PDF
   doc.save(`Meeting_${meeting?.id || "insights"}.pdf`);
 };
