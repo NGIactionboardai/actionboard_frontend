@@ -10,8 +10,21 @@ export default function ZoomDocPage() {
       title: "How to Add?",
       items: [
         {
-          text: "Click the Zoom icon",
-          img: "/doc-url/doc-img-01.png",
+            text: (
+              <>
+                Go to this {" "}
+                <a
+                  href="https://actionboard-ai.vercel.app/configure-meeting-tools"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Configure Meeting Platform
+                </a>{" "}
+                page and click the Zoom icon.
+              </>
+            ),
+            img: "/doc-url/doc-img-01.png",
         },
         {
           text: "Then click on Connect to Zoom.",
