@@ -12,7 +12,8 @@ const PUBLIC_PATHS = [
   '/terms',
   '/privacy-policy',
   '/help',
-  '/feedback-form'
+  '/feedback-form',
+  '/zoom-connection-doc'
 ];
 
 export default function ProtectedRoute({ children }) {
