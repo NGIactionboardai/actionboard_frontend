@@ -80,7 +80,7 @@ export default function ZoomDocPage() {
           </div>
         ))}
 
-        {/* Footer */}
+        {/* Footer  */}
         <div className="mt-16 border-t pt-6 text-center text-gray-500 text-sm">
           © {new Date().getFullYear()} Nous Meeting – Zoom App Guide
         </div>
