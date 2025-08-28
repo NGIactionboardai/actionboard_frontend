@@ -74,6 +74,13 @@ export default function EditEventModal({
     return dt.toISOString();
   };
 
+  const toLocalDateInputValue = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -187,8 +194,13 @@ export default function EditEventModal({
                     </span>
                     <input
                       type="date"
-                      value={selectedDate.toISOString().slice(0, 10)}
-                      onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                      value={toLocalDateInputValue(selectedDate)}
+                      onChange={(e) => {
+                        const [year, month, day] = e.target.value.split('-').map(Number);
+                        const newDate = new Date(selectedDate);
+                        newDate.setFullYear(year, month - 1, day);
+                        setSelectedDate(newDate);
+                      }}
                       className="border rounded px-2 py-1 text-sm"
                     />
                   </div>
@@ -236,7 +248,7 @@ export default function EditEventModal({
                   </p>
 
                   {/* Event Type (disabled) */}
-                  <div className="flex flex-col space-y-2">
+                  {/* <div className="flex flex-col space-y-2">
                     <label className="text-sm font-medium text-gray-700">Event Type</label>
                     <select
                       className="border rounded-md px-3 py-2 text-sm"
@@ -246,10 +258,10 @@ export default function EditEventModal({
                       <option value="personal">Personal</option>
                       <option value="organization">Organization</option>
                     </select>
-                  </div>
+                  </div> */}
 
                   {/* Organization (disabled) */}
-                  {eventType === 'organization' && (
+                  {/* {eventType === 'organization' && (
                     <select
                       className="w-full border rounded-md px-3 py-2 text-sm"
                       value={selectedOrg}
@@ -258,7 +270,7 @@ export default function EditEventModal({
                       <option value="">Select organization</option>
                       <option value={selectedOrg}>{eventToEdit?.organisation_name}</option>
                     </select>
-                  )}
+                  )} */}
 
                   {/* Actions */}
                   <div className="flex justify-end space-x-2 pt-4">
