@@ -180,7 +180,7 @@ const MeetingsList = ({
                         }}
                         className="w-full sm:w-auto px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-[#f9f1fc] hover:bg-[#f0e6f7] transition"
                       >
-                        Join
+                        Start
                       </button>
                     )}
                     <button

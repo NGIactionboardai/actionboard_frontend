@@ -89,7 +89,7 @@ export default function JoinBtnInstructionModal({ isOpen, onClose, meeting }) {
                 {/* Join URL */}
                 <div className="mt-6 border-t pt-4 space-y-3">
                   <div className="text-sm">
-                    <div className="font-medium text-gray-800">Join URL</div>
+                    <div className="font-medium text-gray-800">Start URL</div>
                     <div className="flex items-center justify-between mt-1 bg-gray-100 rounded px-3 py-2 text-sm">
                       <span
                         className="text-gray-700 truncate max-w-[70%] block"
@@ -118,7 +118,7 @@ export default function JoinBtnInstructionModal({ isOpen, onClose, meeting }) {
                       onClick={handleJoinNow}
                       className="px-4 py-2 text-sm text-white rounded-md bg-indigo-600 hover:bg-indigo-700"
                     >
-                      Join now
+                      Start now
                     </button>
                   </div>
                 </div>
