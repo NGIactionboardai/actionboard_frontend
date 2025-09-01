@@ -557,15 +557,12 @@ const [selectedLang, setSelectedLang] = useState("en"); // default English
               }
   
               // Bullets
-              if (trimmedLine.startsWith("- ")) {
+              if (trimmedLine.startsWith("- ") || trimmedLine.startsWith("• ")) {
                 return (
-                  <div key={index} className="ml-4 mb-1">
-                    <span className="inline-flex items-start">
-                      <span className="text-gray-400 mr-2 mt-1.5 flex-shrink-0">•</span>
-                      <span className="text-sm text-gray-700">
-                        {trimmedLine.replace("- ", "")}
-                      </span>
-                    </span>
+                  <div key={index} className="list-disc list-inside text-sm  text-gray-700 pl-2">
+                    <li className='ml-3'>
+                    {trimmedLine.replace(/^(-\s|•\s?)/, "")}
+                    </li>
                   </div>
                 );
               }

@@ -24,6 +24,7 @@ const CompleteProfilePage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [dobError, setDobError] = useState('');
 
   // Build ordered list: [{code, name}]
   const countryOptions = useMemo(() => {
@@ -42,14 +43,48 @@ const CompleteProfilePage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'date_of_birth') {
+      validateDob(value);
+    }
+  };
+
+  const validateDob = (value) => {
+    if (!value) {
+      setDobError('Date of birth is required');
+      return false;
+    }
+    const dob = new Date(value);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    if (dob > today) {
+      setDobError('Date of birth cannot be in the future');
+      return false;
+    } else if (age < 13) {
+      setDobError('You must be at least 13 years old');
+      return false;
+    } else if (age > 120) {
+      setDobError('Please enter a valid date of birth');
+      return false;
+    }
+    setDobError('');
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!formData.country || !formData.date_of_birth) {
-      setError('Both fields are required.');
+  
+
+    if (!formData.country) {
+      setError('Country is required.');
+      return;
+    }
+    if (!validateDob(formData.date_of_birth)) {
       return;
     }
 
@@ -132,6 +167,7 @@ const CompleteProfilePage = () => {
                 className="w-full border-2 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 border-gray-200 hover:border-gray-300"
                 required
               />
+              {dobError && <p className="mt-1 text-sm text-red-600">{dobError}</p>}
             </div>
 
             {/* Submit Button */}

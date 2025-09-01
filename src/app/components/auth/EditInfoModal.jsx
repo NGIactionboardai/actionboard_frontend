@@ -18,6 +18,7 @@ export default function EditInfoModal({ isOpen, onClose }) {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [dobError, setDobError] = useState("");
 
   // Normalize incoming country (if user.country might be a name or a code)
   const normalizeToCode = (value) => {
@@ -56,20 +57,54 @@ export default function EditInfoModal({ isOpen, onClose }) {
       });
       setError('');
       setLoading(false);
+      setDobError('');
     }
   }, [isOpen, user]);
 
   const handleChange = (e) => {
     setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
+    if (e.target.name === "date_of_birth") {
+       validateDob(e.target.value);
+    }
   };
 
   const handleCountrySelect = (e) => {
     setForm((s) => ({ ...s, country: e.target.value }));
   };
+  const validateDob = (value) => {
+   if (!value) {
+     setDobError("Date of birth is required");
+     return false;
+   }
+   const dob = new Date(value);
+   const today = new Date();
+   let age = today.getFullYear() - dob.getFullYear();
+   const monthDiff = today.getMonth() - dob.getMonth();
+   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+     age--;
+   }
+
+   if (dob > today) {
+     setDobError("Date of birth cannot be in the future");
+     return false;
+   } else if (age < 13) {
+     setDobError("You must be at least 13 years old");
+     return false;
+   } else if (age > 120) {
+     setDobError("Please enter a valid date of birth");
+     return false;
+   }
+   setDobError("");
+   return true;
+  };
 
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
+    if (!validateDob(form.date_of_birth)) {
+      setLoading(false);
+      return;
+    }
     try {
       // send country as ISO code (form.country)
       const { data } = await editUserInfo(form);
@@ -178,7 +213,7 @@ export default function EditInfoModal({ isOpen, onClose }) {
                     className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
 
-                  {error && <p className="text-red-500 text-sm">{error}</p>}
+                  {dobError && <p className="mt-1 text-sm text-red-600">{dobError}</p>}
                 </div>
 
                 <div className="mt-6 flex justify-end space-x-2">

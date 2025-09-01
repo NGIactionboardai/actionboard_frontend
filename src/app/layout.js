@@ -8,6 +8,9 @@ import AuthHydrator from './components/AuthHydrator';
 import { Toaster } from 'react-hot-toast';
 import InterceptorLoader from './components/InterceptorLoader';
 import ProtectedRoute from './components/ProtectedRoute';
+// import 'rsuite/dist/rsuite.min.css';
+import 'rsuite/dist/rsuite-no-reset.min.css';
+
 
 const inter = Inter({ subsets: ['latin'] });
 
