@@ -1,16 +1,13 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
-// import InterRegular from "@/assets/fonts/Inter-Regular-normal.js"; // generated base64
+// import { isValidStructuredSummary } from "./validators"; // <-- assuming you export it
 
 export const generateMeetingPDF = (meeting, meeting_insights, speaker_summaries) => {
+  const structured = meeting_insights?.structured_summary;
+
+
   const doc = new jsPDF();
-
-  // Add custom font (optional)
-  // doc.addFileToVFS("Inter-Regular.ttf", InterRegular);
-  // doc.addFont("Inter-Regular.ttf", "Inter", "normal");
-  // doc.setFont("Inter");
-
   const pageHeight = doc.internal.pageSize.getHeight();
   const pageWidth = doc.internal.pageSize.getWidth();
   const marginTop = 20;
@@ -34,16 +31,12 @@ export const generateMeetingPDF = (meeting, meeting_insights, speaker_summaries)
   // --- Title ---
   doc.setFontSize(16);
   doc.setFont(undefined, "bold");
-  doc.text(
-    "AI Insights",
-    doc.internal.pageSize.getWidth() / 2, // center X
-    y,
-    { align: "center" }
-  );
+  doc.text("AI-Generated Insights", pageWidth / 2, y, { align: "center" });
   y += 14;
 
   // --- Meeting Summary ---
-  if (meeting_insights?.structured_summary?.summary_text) {
+  const summary = structured.summary_text;
+  if (summary) {
     doc.setFontSize(14);
     doc.setFont(undefined, "bold");
     doc.text("Meeting Summary", 14, y);
@@ -52,51 +45,52 @@ export const generateMeetingPDF = (meeting, meeting_insights, speaker_summaries)
     doc.setFontSize(11);
     doc.setFont(undefined, "normal");
 
-    const lines = meeting_insights.structured_summary.summary_text.split("\n");
-    let currentHeading = "";
+    // Meeting Objective
+    if (summary.meeting_objective) {
+      doc.setFont(undefined, "bold");
+      doc.text("Meeting Objective:", 14, y);
+      y += 7;
+      doc.setFont(undefined, "normal");
+      const wrapped = doc.splitTextToSize(summary.meeting_objective, 180);
+      doc.text(wrapped, 14, y);
+      y += wrapped.length * 7 + 5;
+    }
 
-    lines.forEach((line) => {
-      const trimmed = line.trim();
-
-      if (trimmed.startsWith("## ")) {
-        currentHeading = trimmed.replace("## ", "");
-        if (y + 8 > pageHeight - marginBottom) addNewPage();
-        doc.setFont(undefined, "bold");
-        doc.text(currentHeading, 14, y);
-        doc.setFont(undefined, "normal");
-        y += 8;
-      } else if (trimmed.startsWith("- ")) {
-        // Normal bullet points
-        const bullet = `• ${trimmed.replace("- ", "")}`;
-        const wrapped = doc.splitTextToSize(bullet, 170);
+    // High-level Outcomes
+    if (summary.high_level_outcomes?.length > 0) {
+      doc.setFont(undefined, "bold");
+      doc.text("High-level Outcomes:", 14, y);
+      y += 7;
+      doc.setFont(undefined, "normal");
+      summary.high_level_outcomes.forEach((outcome) => {
+        const wrapped = doc.splitTextToSize(`• ${outcome}`, 170);
         if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
         doc.text(wrapped, 20, y);
         y += wrapped.length * 7;
-      } else if (trimmed !== "") {
-        const wrapped = doc.splitTextToSize(trimmed, 180);
+      });
+      y += 5;
+    }
+
+    // Key Discussion Themes
+    if (summary.key_discussion_themes?.length > 0) {
+      doc.setFont(undefined, "bold");
+      doc.text("Key Discussion Themes:", 14, y);
+      y += 7;
+      doc.setFont(undefined, "normal");
+      summary.key_discussion_themes.forEach((theme) => {
+        const wrapped = doc.splitTextToSize(`• ${theme}`, 170);
         if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
-
-        // Force bullets for these headings
-        if (
-          currentHeading.includes("Key Discussion Themes") ||
-          currentHeading.includes("High-Level Outcomes")
-        ) {
-          doc.text(`• ${wrapped}`, 20, y);
-        } else {
-          doc.text(wrapped, 14, y);
-        }
-
+        doc.text(wrapped, 20, y);
         y += wrapped.length * 7;
-      } else {
-        y += 5;
-      }
-    });
-
-    y += 12;
+      });
+      y += 5;
+    }
+    y += 10;
   }
 
   // --- Minutes ---
-  if (meeting_insights?.structured_summary?.minutes) {
+  const minutes = structured.minutes;
+  if (minutes) {
     doc.setFontSize(14);
     doc.setFont(undefined, "bold");
     doc.text("Minutes of the Meeting", 14, y);
@@ -117,60 +111,40 @@ export const generateMeetingPDF = (meeting, meeting_insights, speaker_summaries)
     y += 8;
 
     // Attendees
-    if (speaker_summaries) {
-      const attendeesText = `Attendees: ${Object.keys(speaker_summaries).join(", ")}`;
+    if (structured.attendees?.length > 0) {
+      const attendeesText = `Attendees: ${structured.attendees.join(", ")}`;
       const wrapped = doc.splitTextToSize(attendeesText, 180);
       if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
       doc.text(wrapped, 14, y);
       y += wrapped.length * 7 + 8;
     }
 
-    doc.setFontSize(11);
-    const lines = meeting_insights.structured_summary.minutes.split("\n");
-    let sectionNum = 0;
-    let currentHeading = "";
-
-    lines.forEach((line) => {
-      const trimmed = line.trim();
-
-      if (trimmed.startsWith("## ")) {
-        sectionNum++;
-        currentHeading = trimmed.replace("## ", "");
-        const heading = `${sectionNum}. ${currentHeading}`;
+    // Sections
+    if (minutes.sections?.length > 0) {
+      doc.setFontSize(11);
+      minutes.sections.forEach((section, index) => {
+        const heading = `${index + 1}. ${section.title}`;
         if (y + 8 > pageHeight - marginBottom) addNewPage();
         doc.setFont(undefined, "bold");
         doc.text(heading, 14, y);
+        y += 7;
         doc.setFont(undefined, "normal");
-        y += 8;
-      } else if (trimmed.startsWith("- ")) {
-        const bullet = `• ${trimmed.replace("- ", "")}`;
-        const wrapped = doc.splitTextToSize(bullet, 170);
-        if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
-        doc.text(wrapped, 20, y);
-        y += wrapped.length * 7;
-      } else if (trimmed !== "") {
-        const wrapped = doc.splitTextToSize(trimmed, 180);
-        if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
-        // Force bullet for "Key Discussion Themes" & "High-Level Outcomes"
-        if (
-          currentHeading.includes("Key Discussion Themes") ||
-          currentHeading.includes("High-Level Outcomes")
-        ) {
-          doc.text(`• ${wrapped}`, 20, y);
-        } else {
-          doc.text(wrapped, 14, y);
-        }
-        y += wrapped.length * 7;
-      } else {
-        y += 5;
-      }
-    });
 
-    y += 12;
+        section.points.forEach((point) => {
+          const wrapped = doc.splitTextToSize(`• ${point}`, 170);
+          if (y + wrapped.length * 7 > pageHeight - marginBottom) addNewPage();
+          doc.text(wrapped, 20, y);
+          y += wrapped.length * 7;
+        });
+
+        y += 5;
+      });
+    }
+    y += 10;
   }
 
   // --- Action Items ---
-  if (meeting_insights?.structured_summary?.action_items?.length > 0) {
+  if (structured.action_items?.length > 0) {
     doc.setFontSize(14);
     doc.setFont(undefined, "bold");
     doc.text("Action Items", 14, y);
@@ -179,15 +153,14 @@ export const generateMeetingPDF = (meeting, meeting_insights, speaker_summaries)
     autoTable(doc, {
       startY: y,
       head: [["Task", "Responsible Person", "Deadline"]],
-      body: meeting_insights.structured_summary.action_items.map((item) => [
-        item.Task?.replace("- Task: ", ""),
-        item["Responsible Person"]?.replace("Owner: ", ""),
-        item.Deadline?.replace("Deadline: ", ""),
+      body: structured.action_items.map((item) => [
+        item.task,
+        item.owner || "N/A",
+        item.deadline || "N/A",
       ]),
       styles: { fontSize: 11 },
       headStyles: { fillColor: [240, 240, 240], textColor: 20, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [250, 250, 250] },
-      margin: { top: y },
       didDrawPage: (data) => {
         y = data.cursor?.y ? data.cursor.y + 12 : marginTop;
       },

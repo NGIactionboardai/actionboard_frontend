@@ -268,7 +268,6 @@ export default function Meetings() {
             members={members}
             onSuccess={() => {
               setIsInviteModalOpen(false);
-              // Optional: show success toast or refetch meeting list
             }}
           />
         )}

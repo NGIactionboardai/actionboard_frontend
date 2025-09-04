@@ -15,7 +15,9 @@ import axios from 'axios';
 import { format } from "date-fns";
 import { generateMeetingPDF } from '@/app/utils/pdfGenerator';
 import { FileDown } from 'lucide-react';
-
+import EditStructuredSummary from '@/app/components/meeting/EditStructuredSummary';
+import _ from "lodash";
+import SendSummaryModal from '@/app/components/meeting/SendSummaryModal';
 
 
 
@@ -37,6 +39,7 @@ export default function MeetingDetails() {
   
   // Local state
   const [meeting, setMeeting] = useState(null);
+  const [orgId, setOrgId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [transcribing, setTranscribing] = useState(false);
@@ -63,7 +66,12 @@ export default function MeetingDetails() {
   const [speakersUpdated, setSpeakersUpdated] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [multilingualUtterence, setMultilingualUtterence] = useState(null);
-const [selectedLang, setSelectedLang] = useState("en"); // default English
+  const [selectedLang, setSelectedLang] = useState("en"); // default English
+  const [isEditingAiInsight, setIsEditingAiInsight] = useState(false);
+  const [draftSummary, setDraftSummary] = useState(null);
+
+  const [members, setMembers] = useState([]);
+  const [isSendSummaryModalOpen, setIsSendSummaryModalOpen] = useState(false);
 
 
   const [selectedSpeaker, setSelectedSpeaker] = useState('');
@@ -167,6 +175,22 @@ const [selectedLang, setSelectedLang] = useState("en"); // default English
     }
   }, [speaker_summaries, selectedSpeaker]);
 
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!orgId) return;  // token handled globally by interceptor
+  
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${orgId}/members/`);
+        setMembers(res.data.members || []);
+      } catch (err) {
+        console.error('Error fetching members', err);
+      }
+    };
+  
+    fetchMembers();
+  }, [orgId]);
+
+
   const fetchMeetingDetails = async () => {
     try {
       setLoading(true);
@@ -184,6 +208,7 @@ const [selectedLang, setSelectedLang] = useState("en"); // default English
       console.log('Meeting data received:', data);
   
       setMeeting(data);
+      setOrgId(data.organisation.org_id)
   
       if (data.transcript) {
         if (typeof data.transcript === 'object') {
@@ -191,6 +216,7 @@ const [selectedLang, setSelectedLang] = useState("en"); // default English
           setMultilingualUtterence(data.transcript.multilingual_utterances || null);
           setSummary(data.transcript.summary || null);
           setMeeting_insights(data.transcript.meeting_insights || null);
+          setDraftSummary(_.cloneDeep(data.transcript.meeting_insights?.structured_summary || {}));
           setMeeting_sentiment_summary(data.transcript.meeting_sentiment_summary || null);
           setSpeaker_summaries(data.transcript.meeting_insights?.speaker_summaries || null);
           setSpeaker_summary_table(data.transcript.per_speaker_sentiment?.speaker_summary_table || null);
@@ -617,6 +643,36 @@ const [selectedLang, setSelectedLang] = useState("en"); // default English
   
     return <p className="text-sm text-gray-700">{value}</p>;
   };
+
+  function isValidStructuredSummary(structuredSummary) {
+    if (!structuredSummary || typeof structuredSummary !== "object") return false;
+  
+    try {
+      // Check required keys
+      if (!("minutes" in structuredSummary)) return false;
+      if (!("summary_text" in structuredSummary)) return false;
+      if (!("action_items" in structuredSummary)) return false;
+  
+      // Validate types
+      if (typeof structuredSummary.summary_text !== "object") return false;
+      if (!Array.isArray(structuredSummary.action_items)) return false;
+      if (typeof structuredSummary.minutes !== "object") return false;
+  
+      // Deep check
+      if (!("sections" in structuredSummary.minutes)) return false;
+      if (
+        !("meeting_objective" in structuredSummary.summary_text) ||
+        !("high_level_outcomes" in structuredSummary.summary_text) ||
+        !("key_discussion_themes" in structuredSummary.summary_text)
+      ) {
+        return false;
+      }
+  
+      return true;
+    } catch {
+      return false;
+    }
+  }
    
 
   if (loading) {
@@ -1045,130 +1101,202 @@ const [selectedLang, setSelectedLang] = useState("en"); // default English
                   <h3 className="text-lg leading-6 font-medium text-gray-900">
                     AI-Generated Insights
                   </h3>
-                  <button
-                    onClick={() => generateMeetingPDF(meeting, meeting_insights, speaker_summaries)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
-                  >
-                    <FileDown className="w-4 h-4" />
-                    <span>Download PDF</span>
-                  </button>
-                </div>
+                  {isValidStructuredSummary(meeting_insights?.structured_summary) && (
 
-                <div className="bg-green-50 p-4 rounded-lg space-y-8">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() =>
+                            generateMeetingPDF(meeting, meeting_insights, speaker_summaries)
+                          }
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <FileDown className="w-4 h-4" />
+                          <span>Download PDF</span>
+                        </button>
 
+                        <button
+                          onClick={() => {
+                            setDraftSummary(_.cloneDeep(meeting_insights?.structured_summary || {}));
+                            setIsEditingAiInsight(true)
+                          }}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
+                        >
+                          Edit
+                        </button>
 
-                  {/* 🔹 Old Structure: structured_summary is string */}
-                  {typeof meeting_insights?.structured_summary === "string" && (
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                        Structured Summary
-                      </h4>
-                      <div className="prose prose-sm max-w-none">
-                        {renderInsightValue(meeting_insights.structured_summary)}
+                        <button
+                          onClick={() => {
+                            setIsSendSummaryModalOpen(true)
+                          }}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
+                        >
+                          Share
+                        </button>
                       </div>
-                    </div>
+                    
                   )}
-
-                  {/* 🔹 New Structure: structured_summary is object */}
-                  {typeof meeting_insights?.structured_summary === "object" && (
-                    <div className="space-y-8">
-
-                      {/* Meeting Summary */}
-                      {meeting_insights.structured_summary.summary_text && (
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                            Meeting Summary
-                          </h4>
-                          <div className="prose prose-sm max-w-none">
-                            {renderInsightValue(meeting_insights.structured_summary.summary_text)}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Minutes of the Meeting */}
-                      {meeting_insights.structured_summary.minutes && (
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                            Minutes of the Meeting
-                          </h4>
-
-
-                          {/* 🔹 Date & Attendees */}
-                          <div className='mb-6'>
-                            {/* <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                              Meeting Information
-                            </h4> */}
-
-                            {/* Date */}
-                            <p className="text-sm text-gray-700">
-                              <span className="font-medium">Date:</span>{" "}
-                              {meeting?.end_time
-                                ? format(new Date(meeting.end_time), "MMMM d, yyyy, h:mm a")
-                                : "N/A"}
-                            </p>
-
-                            {/* Attendees */}
-                            {speaker_summaries && (
-                              <div className="mt-2 flex flex-wrap items-center gap-2">
-                                {/* Label */}
-                                <span className="text-sm font-medium text-gray-800">Attendees:</span>
-
-                                {/* Tags */}
-                                {Object.keys(speaker_summaries).map((speaker, index) => (
-                                  <span
-                                    key={index}
-                                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-800"
-                                  >
-                                    {speaker}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="prose prose-sm max-w-none">
-                            {renderInsightValue(meeting_insights.structured_summary.minutes)}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Action Items */}
-                      {meeting_insights.structured_summary.action_items?.length > 0 && (
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                            Action Items
-                          </h4>
-                          <div className="overflow-x-auto">
-                            <table className="min-w-full border border-gray-200 text-sm text-left">
-                              <thead className="bg-gray-100">
-                                <tr>
-                                  <th className="px-3 py-2 font-medium text-gray-700 border-b">Task</th>
-                                  <th className="px-3 py-2 font-medium text-gray-700 border-b">Responsible Person</th>
-                                  <th className="px-3 py-2 font-medium text-gray-700 border-b">Deadline</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {meeting_insights.structured_summary.action_items.map((item, index) => (
-                                  <tr key={index} className="hover:bg-gray-50">
-                                    <td className="px-3 py-2 border-b text-gray-700">
-                                      {item.Task?.replace("- Task: ", "")}
-                                    </td>
-                                    <td className="px-3 py-2 border-b text-gray-700">
-                                      {item["Responsible Person"]?.replace("Owner: ", "")}
-                                    </td>
-                                    <td className="px-3 py-2 border-b text-gray-700">
-                                      {item.Deadline?.replace("Deadline: ", "")}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  
                 </div>
+
+                {isEditingAiInsight ? (
+                  <EditStructuredSummary
+                    meetingId={meeting.meeting_id}
+                    draftSummary={draftSummary}
+                    setDraftSummary={setDraftSummary}
+                    onCancel={() => setIsEditingAiInsight(false)}
+                    onSave={() => {
+                      setMeeting_insights((prev) => ({
+                        ...prev,
+                        structured_summary: draftSummary,
+                      }));
+                      setIsEditingAiInsight(false);
+                    }}
+                  />
+                ) : (
+                    <div className="bg-green-50 p-4 rounded-lg space-y-8">
+                      {/* 🔹 Schema Guard */}
+                      {!isValidStructuredSummary(meeting_insights?.structured_summary) ? (
+                        <div className="p-4 text-center text-sm text-red-600 bg-red-50 rounded-md">
+                          This transcript is using an older summary format. Please retranscribe to view insights.
+                        </div>
+                      ) : (
+                        <div className="space-y-8">
+                          {/* Meeting Summary */}
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                              Meeting Summary
+                            </h4>
+                            <div className="prose prose-sm max-w-none space-y-4">
+                              <h5 className="font-medium text-gray-900">Meeting Objective:</h5>
+                              <p className='text-gray-700'>
+                                {meeting_insights.structured_summary.summary_text.meeting_objective}
+                              </p>
+                              <div>
+                                <h5 className="font-medium text-gray-900">High-level Outcomes:</h5>
+                                <ul className="ml-3 list-disc list-inside text-gray-700">
+                                  {meeting_insights.structured_summary.summary_text.high_level_outcomes.map(
+                                    (outcome, index) => (
+                                      <li key={index}>{outcome}</li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+                              <div>
+                                <h5 className="font-medium text-gray-900">Key Discussion Themes:</h5>
+                                <ul className="ml-3 list-disc list-inside text-gray-700">
+                                  {meeting_insights.structured_summary.summary_text.key_discussion_themes.map(
+                                    (theme, index) => (
+                                      <li key={index}>{theme}</li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Minutes of the Meeting */}
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                              Minutes of the Meeting
+                            </h4>
+
+                            {/* Date & Attendees */}
+                            <div className="mb-6">
+                              <p className="text-sm text-gray-700">
+                                <span className="font-medium">Date:</span>{" "}
+                                {meeting?.end_time
+                                  ? format(new Date(meeting.end_time), "MMMM d, yyyy, h:mm a")
+                                  : "N/A"}
+                              </p>
+
+                              {meeting_insights.structured_summary.attendees?.length > 0 && (
+                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                  <span className="text-sm font-medium text-gray-800">
+                                    Attendees:
+                                  </span>
+                                  {meeting_insights.structured_summary.attendees.map(
+                                    (attendee, index) => (
+                                      <span
+                                        key={index}
+                                        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-800"
+                                      >
+                                        {attendee}
+                                      </span>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Minutes Sections */}
+                            <div className="space-y-4">
+                              {meeting_insights.structured_summary.minutes.sections.map(
+                                (section, index) => (
+                                  <div key={index}>
+                                    <h5 className="font-medium text-gray-900">
+                                      {index + 1}. {section.title}
+                                    </h5>
+                                    <ul className="ml-3 list-disc list-inside text-gray-700">
+                                      {section.points.map((point, idx) => (
+                                        <li key={idx}>{point}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )
+                              )}
+                            </div>
+
+                          </div>
+
+                          {/* Action Items */}
+                          {meeting_insights.structured_summary.action_items.length > 0 && (
+                            <div>
+                              <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                Action Items
+                              </h4>
+                              <div className="overflow-x-auto">
+                                <table className="min-w-full border border-gray-200 text-sm text-left">
+                                  <thead className="bg-gray-100">
+                                    <tr>
+                                      <th className="px-3 py-2 font-medium text-gray-700 border-b">
+                                        Task
+                                      </th>
+                                      <th className="px-3 py-2 font-medium text-gray-700 border-b">
+                                        Responsible Person
+                                      </th>
+                                      <th className="px-3 py-2 font-medium text-gray-700 border-b">
+                                        Deadline
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {meeting_insights.structured_summary.action_items.map(
+                                      (item, index) => (
+                                        <tr key={index} className="hover:bg-gray-50">
+                                          <td className="px-3 py-2 border-b text-gray-700">
+                                            {item.task}
+                                          </td>
+                                          <td className="px-3 py-2 border-b text-gray-700">
+                                            {item.owner || "N/A"}
+                                          </td>
+                                          <td className="px-3 py-2 border-b text-gray-700">
+                                            {item.deadline}
+                                          </td>
+                                        </tr>
+                                      )
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                )}
+
+                
+                
               </div>
             )}
 
@@ -1566,6 +1694,17 @@ const [selectedLang, setSelectedLang] = useState("en"); // default English
         onUpdateSuccess={async () => {
           await checkTranscriptionStatus();
           await fetchTranscript();
+        }}
+      />
+
+      <SendSummaryModal
+        isOpen={isSendSummaryModalOpen}
+        onClose={() => setIsSendSummaryModalOpen(false)}
+        meeting={meeting}
+        orgId={orgId}
+        members={members}
+        onSuccess={() => {
+          setIsSendSummaryModalOpen(false);
         }}
       />
 
