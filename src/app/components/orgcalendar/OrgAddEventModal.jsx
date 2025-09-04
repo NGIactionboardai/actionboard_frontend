@@ -36,6 +36,9 @@ export default function OrgAddEventModal({
   const [endMinute, setEndMinute] = useState('00');
   const [endAmpm, setEndAmpm] = useState('AM');
 
+  const [eventType, setEventType] = useState('organization');
+  const [selectedOrg, setSelectedOrg] = useState(orgId || "");
+
 
   useEffect(() => {
     if (initialDate) {
