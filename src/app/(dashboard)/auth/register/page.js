@@ -13,7 +13,7 @@ import {
   selectAuthError,
   selectSuccessMessage,
   selectAuthLoading
-} from '../../../redux/auth/authSlices';
+} from '../../../../redux/auth/authSlices';
 import GoogleLoginButton from '@/app/components/auth/GoogleLoginButton';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';

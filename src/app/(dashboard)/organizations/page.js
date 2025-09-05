@@ -3,20 +3,22 @@
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { selectIsAuthenticated } from '../../redux/auth/authSlices';
-import Calendar from '../components/Calendar';
-import withProfileCompletionGuard from '../components/withProfileCompletionGuard';
+import { selectIsAuthenticated } from '../../../redux/auth/authSlices'; // Adjust path as needed
+import ManageOrganizations from '../../components/organizations/ManageOrganizations';
+import withProfileCompletionGuard from '../../components/withProfileCompletionGuard';
 
-function CalendarPage() {
+const OrganizationsPage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const router = useRouter();
 
   useEffect(() => {
+    // Redirect to login if not authenticated
     if (!isAuthenticated) {
-      router.push('/auth/login'); 
+      router.push('/auth/login'); // or router.push('/') for home page
     }
   }, [isAuthenticated, router]);
 
+  // Show loading or redirect message while checking auth
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -28,11 +30,10 @@ function CalendarPage() {
     );
   }
 
-  return (
-    <main className="p-0">
-      <Calendar />
-    </main>
-  );
-}
+  // Only render if authenticated
+  return <ManageOrganizations />;
+};
 
-export default withProfileCompletionGuard(CalendarPage)
+// export default OrganizationsPage;
+
+export default withProfileCompletionGuard(OrganizationsPage)

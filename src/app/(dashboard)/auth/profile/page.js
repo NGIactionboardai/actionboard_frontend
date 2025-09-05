@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { User, Mail, Calendar, MapPin, Lock, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
-import { selectUser } from '../../../redux/auth/authSlices'; // Adjust path as needed
+import { selectUser } from '../../../../redux/auth/authSlices'; // Adjust path as needed
 import ChangePasswordModal from '@/app/components/auth/ChangePasswordModal';
 import AddPasswordModal from '@/app/components/auth/AddPasswordModal';
 import EditInfoModal from '@/app/components/auth/EditInfoModal';

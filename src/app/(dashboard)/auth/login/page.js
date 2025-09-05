@@ -15,7 +15,7 @@ import {
   selectSuccessMessage,
   selectAuthLoading,
   selectIsAuthenticated
-} from '../../../redux/auth/authSlices';
+} from '../../../../redux/auth/authSlices';
 import GoogleLoginButton from '@/app/components/auth/GoogleLoginButton';
 
 export default function LoginPage() {

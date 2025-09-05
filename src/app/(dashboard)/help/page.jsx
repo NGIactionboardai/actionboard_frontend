@@ -5,7 +5,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { X } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import BugReportModal from '../components/BugReportModal';
+import BugReportModal from '../../components/BugReportModal';
 
 const HelpPage = () => {
   const [isBugModalOpen, setIsBugModalOpen] = useState(false);

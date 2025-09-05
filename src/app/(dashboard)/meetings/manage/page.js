@@ -15,7 +15,7 @@ import {
   selectOrganizationError,
   selectOrganizationSuccessMessage,
   selectCurrentOrganization
-} from '../../../redux/auth/organizationSlice';
+} from '../../../../redux/auth/organizationSlice';
 
 export default function ManageOrganizations() {
   const dispatch = useDispatch();

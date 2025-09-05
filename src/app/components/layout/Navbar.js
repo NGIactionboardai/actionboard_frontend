@@ -100,24 +100,25 @@ export default function Navbar() {
     };
   }, []);
 
-  useEffect(() => {
-    const fetchOrgs = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/organisations/my-organisations/`);
-        setOrgs(res.data || []);
-      } catch (err) {
-        console.error('Error fetching organizations:', err);
-      }
-    };
-  
-    if (isAuthenticated) {
-      fetchOrgs();
-    }
-  }, [isAuthenticated]);
-
   // useEffect(() => {
-  //     dispatch(getUserOrganizations());
-  // }, [dispatch]);
+  //   const fetchOrgs = async () => {
+  //     try {
+  //       const res = await axios.get(`${API_BASE_URL}/organisations/my-organisations/`);
+  //       setOrgs(res.data || []);
+  //     } catch (err) {
+  //       console.error('Error fetching organizations:', err);
+  //     }
+  //   };
+  
+  //   if (isAuthenticated) {
+  //     fetchOrgs();
+  //   }
+  // }, []);
+
+  useEffect(() => {
+      console.log("Dispatched organization")
+      dispatch(getUserOrganizations());
+  }, [dispatch]);
 
   // ✅ Now it's safe to check
   // if (!hasMounted) return null;

@@ -1097,45 +1097,44 @@ export default function MeetingDetails() {
             {/* AI Insights Tab */}
             {activeTab === "insights" && meeting_insights && (
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">
                     AI-Generated Insights
                   </h3>
+
                   {isValidStructuredSummary(meeting_insights?.structured_summary) && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() =>
+                          generateMeetingPDF(meeting, meeting_insights, speaker_summaries)
+                        }
+                        className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        <FileDown className="w-4 h-4" />
+                        <span className="hidden xs:inline">Download PDF</span>
+                        <span className="xs:hidden">PDF</span>
+                      </button>
 
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() =>
-                            generateMeetingPDF(meeting, meeting_insights, speaker_summaries)
-                          }
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          <FileDown className="w-4 h-4" />
-                          <span>Download PDF</span>
-                        </button>
+                      <button
+                        onClick={() => {
+                          setDraftSummary(_.cloneDeep(meeting_insights?.structured_summary || {}));
+                          setIsEditingAiInsight(true);
+                        }}
+                        className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
+                      >
+                        Edit
+                      </button>
 
-                        <button
-                          onClick={() => {
-                            setDraftSummary(_.cloneDeep(meeting_insights?.structured_summary || {}));
-                            setIsEditingAiInsight(true)
-                          }}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            setIsSendSummaryModalOpen(true)
-                          }}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
-                        >
-                          Share
-                        </button>
-                      </div>
-                    
+                      <button
+                        onClick={() => {
+                          setIsSendSummaryModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
+                      >
+                        Share
+                      </button>
+                    </div>
                   )}
-                  
                 </div>
 
                 {isEditingAiInsight ? (

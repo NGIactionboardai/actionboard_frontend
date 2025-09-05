@@ -3,12 +3,12 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '../../redux/auth/authSlices';
+import { selectIsAuthenticated } from '../../../redux/auth/authSlices';
 import { selectZoomIsConnected, selectZoomSuccessMessage, setShowConnectionModal, setShowDisconnectModal } from '@/redux/auth/zoomSlice';
-import { useMeetingsModal } from '../hooks/useMeetings';
-import ZoomConfig from '../components/ZoomConfig';
-import ZoomAccountCard from '../components/ZoomAccountCard';
-import withProfileCompletionGuard from '../components/withProfileCompletionGuard';
+import { useMeetingsModal } from '../../hooks/useMeetings';
+import ZoomConfig from '../../components/ZoomConfig';
+import ZoomAccountCard from '../../components/ZoomAccountCard';
+import withProfileCompletionGuard from '../../components/withProfileCompletionGuard';
 
 function ConfigureMeetingToolsPage() {
   const dispatch = useDispatch();

@@ -7,19 +7,19 @@ import axios from 'axios';
 
 
 // Components
-import MeetingsHeader from '../../components/meetings/MeetingsHeader';
-import AlertMessages from '../../components/ui/AlertMessages';
-import MeetingsFilters from '../../components/meetings/MeetingsFilters';
-import MeetingsList from '../../components/meetings/MeetingsList';
-import ZoomConnectionModal from '../../components/modals/ZoomConnectionModal';
-import CreateMeetingModal from '../../components/CreateMeetingModal';
-import ZoomConnection from '../../components/ZoomConnection';
+import MeetingsHeader from '../../../components/meetings/MeetingsHeader';
+import AlertMessages from '../../../components/ui/AlertMessages';
+import MeetingsFilters from '../../../components/meetings/MeetingsFilters';
+import MeetingsList from '../../../components/meetings/MeetingsList';
+import ZoomConnectionModal from '../../../components/modals/ZoomConnectionModal';
+import CreateMeetingModal from '../../../components/CreateMeetingModal';
+import ZoomConnection from '../../../components/ZoomConnection';
 
 // Hooks
-import { useMeetings, useMeetingsFilters, useMeetingsModal } from '../../hooks/useMeetings';
+import { useMeetings, useMeetingsFilters, useMeetingsModal } from '../../../hooks/useMeetings';
 
 // Utils
-import { formatMeetingDateTime, getMeetingStatus, getTranscriptionStatus } from '../../utils/meetingsUtils';
+import { formatMeetingDateTime, getMeetingStatus, getTranscriptionStatus } from '../../../utils/meetingsUtils';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -29,6 +29,7 @@ import InstructionModal from '@/app/components/meetings/InstructionModal';
 import JoinBtnInstructionModal from '@/app/components/meetings/JoinBtnInstructionModal';
 import { selectZoomUserInfo } from '@/redux/auth/zoomSlice';
 import { Plus, SlidersHorizontal, X } from 'lucide-react';
+import MeetingsToolbarMobile from '@/app/components/meetings/MeetingsToolbarMobile';
 
 export default function Meetings() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -168,7 +169,7 @@ export default function Meetings() {
         {/* Header with hamburger on mobile */}
         <div className="flex items-center justify-between md:justify-start mb-4">
 
-        <button
+        {/* <button
           onClick={() => setIsSidebarOpen(prev => !prev)}
           className="xl:hidden fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-4 py-3 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
@@ -183,7 +184,7 @@ export default function Meetings() {
               <span className="text-sm font-medium">Create Meeting</span>
             </>
           )}
-        </button>
+        </button> */}
 
 
           <MeetingsHeader
@@ -192,7 +193,13 @@ export default function Meetings() {
             onZoomConnectionClick={handleZoomConnectionClick}
             onCreateMeetingClick={handleCreateMeetingClick}
           />
+
+          
         </div>
+          <MeetingsToolbarMobile
+              organizationId={organizationId}
+              onCreateMeetingClick={handleCreateMeetingClick}
+          />
 
         <AlertMessages
           successMessage={successMessage}

@@ -43,22 +43,25 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
       <div>
         <h4 className="font-semibold text-lg mb-2">Meeting Objective</h4>
         <textarea
-          className="w-full border rounded p-2"
+          className="w-full border rounded p-2 text-sm sm:text-base"
           value={draftSummary.summary_text?.meeting_objective || ""}
           onChange={(e) =>
             updateField("summary_text.meeting_objective", e.target.value)
           }
         />
       </div>
-
+  
       {/* High-level Outcomes */}
       <div>
         <h4 className="font-semibold text-lg mb-2">High-level Outcomes</h4>
         {draftSummary.summary_text?.high_level_outcomes?.map((outcome, idx) => (
-          <div key={idx} className="flex items-center gap-2 mb-2">
+          <div
+            key={idx}
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-2"
+          >
             <input
               type="text"
-              className="flex-1 border rounded p-2"
+              className="flex-1 border rounded p-2 text-sm sm:text-base"
               value={outcome}
               onChange={(e) => {
                 const updated = [...draftSummary.summary_text.high_level_outcomes];
@@ -67,11 +70,12 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
               }}
             />
             <button
-              className="px-2 py-1 text-xs bg-red-500 text-white rounded-lg"
+              className="px-3 py-2 text-xs sm:text-sm bg-red-500 text-white rounded-lg"
               onClick={() => {
-                const updated = draftSummary.summary_text.high_level_outcomes.filter(
-                  (_, i) => i !== idx
-                );
+                const updated =
+                  draftSummary.summary_text.high_level_outcomes.filter(
+                    (_, i) => i !== idx
+                  );
                 updateField("summary_text.high_level_outcomes", updated);
               }}
             >
@@ -80,7 +84,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           </div>
         ))}
         <button
-          className="mt-2 px-3 py-1 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
+          className="mt-2 px-3 py-2 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
           onClick={() =>
             updateField("summary_text.high_level_outcomes", [
               ...(draftSummary.summary_text?.high_level_outcomes || []),
@@ -91,15 +95,18 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           + Add Outcome
         </button>
       </div>
-
+  
       {/* Key Discussion Themes */}
       <div>
         <h4 className="font-semibold text-lg mb-2">Key Discussion Themes</h4>
         {draftSummary.summary_text?.key_discussion_themes?.map((theme, idx) => (
-          <div key={idx} className="flex items-center gap-2 mb-2">
+          <div
+            key={idx}
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-2"
+          >
             <input
               type="text"
-              className="flex-1 border rounded p-2"
+              className="flex-1 border rounded p-2 text-sm sm:text-base"
               value={theme}
               onChange={(e) => {
                 const updated = [...draftSummary.summary_text.key_discussion_themes];
@@ -108,11 +115,12 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
               }}
             />
             <button
-              className="px-2 py-1 text-xs bg-red-500 text-white rounded-lg"
+              className="px-3 py-2 text-xs sm:text-sm bg-red-500 text-white rounded-lg"
               onClick={() => {
-                const updated = draftSummary.summary_text.key_discussion_themes.filter(
-                  (_, i) => i !== idx
-                );
+                const updated =
+                  draftSummary.summary_text.key_discussion_themes.filter(
+                    (_, i) => i !== idx
+                  );
                 updateField("summary_text.key_discussion_themes", updated);
               }}
             >
@@ -121,7 +129,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           </div>
         ))}
         <button
-          className="mt-2 px-3 py-1 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
+          className="mt-2 px-3 py-2 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
           onClick={() =>
             updateField("summary_text.key_discussion_themes", [
               ...(draftSummary.summary_text?.key_discussion_themes || []),
@@ -132,16 +140,16 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           + Add Theme
         </button>
       </div>
-
+  
       {/* Minutes Sections */}
       <div>
         <h4 className="font-semibold text-lg mb-2">Minutes Sections</h4>
         {draftSummary.minutes?.sections?.map((section, idx) => (
           <div key={idx} className="border rounded p-3 mb-3 bg-gray-50">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-2">
               <input
                 type="text"
-                className="flex-1 border rounded p-2 font-medium"
+                className="flex-1 border rounded p-2 text-sm sm:text-base font-medium"
                 value={section.title}
                 onChange={(e) => {
                   const updated = [...draftSummary.minutes.sections];
@@ -150,7 +158,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
                 }}
               />
               <button
-                className="px-2 py-1 text-xs bg-red-500 text-white rounded-lg"
+                className="px-3 py-2 text-xs sm:text-sm bg-red-500 text-white rounded-lg"
                 onClick={() => {
                   const updated = draftSummary.minutes.sections.filter(
                     (_, i) => i !== idx
@@ -161,12 +169,15 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
                 Remove Section
               </button>
             </div>
-
+  
             {section.points.map((point, pIdx) => (
-              <div key={pIdx} className="flex items-center gap-2 mb-1">
+              <div
+                key={pIdx}
+                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-1"
+              >
                 <input
                   type="text"
-                  className="flex-1 border rounded p-2"
+                  className="flex-1 border rounded p-2 text-sm sm:text-base"
                   value={point}
                   onChange={(e) => {
                     const updated = [...draftSummary.minutes.sections];
@@ -175,7 +186,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
                   }}
                 />
                 <button
-                  className="px-2 py-1 text-xs bg-red-400 text-white rounded-lg"
+                  className="px-3 py-2 text-xs sm:text-sm bg-red-400 text-white rounded-lg"
                   onClick={() => {
                     const updated = [...draftSummary.minutes.sections];
                     updated[idx].points = updated[idx].points.filter(
@@ -189,7 +200,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
               </div>
             ))}
             <button
-              className="mt-2 px-3 py-1 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
+              className="mt-2 px-3 py-2 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
               onClick={() => {
                 const updated = [...draftSummary.minutes.sections];
                 updated[idx].points.push("");
@@ -212,24 +223,24 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           + Add Minutes Section
         </button>
       </div>
-
+  
       {/* Action Items */}
       <div>
         <h4 className="font-semibold text-lg mb-3">Action Items</h4>
-
+  
         {draftSummary.action_items?.length > 0 && (
-          <div className="grid grid-cols-4 gap-3 text-sm font-medium text-gray-600 mb-2 px-1">
+          <div className="hidden sm:grid grid-cols-4 gap-3 text-sm font-medium text-gray-600 mb-2 px-1">
             <span>Task</span>
             <span>Responsible Person</span>
             <span>Deadline</span>
             <span></span>
           </div>
         )}
-
+  
         {draftSummary.action_items?.map((item, idx) => (
           <div
             key={idx}
-            className="grid grid-cols-4 gap-3 items-center mb-2 p-2 border rounded-lg bg-gray-50"
+            className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center mb-2 p-2 border rounded-lg bg-gray-50"
           >
             <input
               type="text"
@@ -265,7 +276,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
               }}
             />
             <button
-              className="ml-auto px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded-lg"
+              className="px-3 py-2 text-xs sm:text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg"
               onClick={() => {
                 const updated = draftSummary.action_items.filter((_, i) => i !== idx);
                 updateField("action_items", updated);
@@ -275,7 +286,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
             </button>
           </div>
         ))}
-
+  
         <button
           className="mt-3 px-3 py-2 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
           onClick={() =>
@@ -288,9 +299,9 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           + Add Action Item
         </button>
       </div>
-
+  
       {/* Save / Cancel */}
-      <div className="flex gap-3 mt-6">
+      <div className="flex flex-col sm:flex-row gap-3 mt-6">
         <button
           onClick={handleSave}
           disabled={loading}
