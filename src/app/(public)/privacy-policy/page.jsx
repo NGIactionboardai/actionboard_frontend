@@ -3,7 +3,7 @@
 const PrivacyPolicyPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-start justify-center p-6 sm:p-10">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 sm:p-12 backdrop-blur-sm border border-gray-100">
+      <div className="mt-20 w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 sm:p-12 backdrop-blur-sm border border-gray-100">
         {/* Header */}
         <div className="text-center mb-10">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">Privacy Policy</h1>

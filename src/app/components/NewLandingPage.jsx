@@ -155,60 +155,67 @@ export default function NewLandingPage() {
         </section>
 
       {/* Features */}
-      <section
-        id="features"
-        className="space-y-24 py-16 scroll-mt-20"
-      >
+      <section id="features" className="space-y-24 py-16 scroll-mt-20">
         <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-4xl sm:text-5xl font-bold text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl sm:text-5xl font-bold text-center mb-16"
         >
-            Nous Meeting Features
+          Nous Meeting Features
         </motion.h2>
 
         {features.map((f, i) => (
-            <motion.div
+          <motion.div
             key={i}
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, delay: i * 0.2 }}
-            className={`flex flex-col ${
-                i % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
-            } items-center max-w-6xl mx-auto gap-12 px-6`}
-            >
+            className="flex flex-col items-center max-w-4xl mx-auto gap-6 px-6"
+          >
+            {/* Feature Text FIRST */}
             <motion.div
-                initial={{ opacity: 0, x: i % 2 === 0 ? -50 : 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: i * 0.2 }}
-                className="lg:w-1/2"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: i * 0.2 }}
+              className="text-center"
             >
-                <Image
-                src={f.img}
-                alt={f.title}
-                width={600}
-                height={400}
-                className="rounded-2xl shadow-lg"
-                />
+              <h2 className="text-3xl font-bold mb-3">{f.title}</h2>
+              <p className="text-gray-600 text-lg">{f.desc}</p>
             </motion.div>
 
-            <motion.div
-                initial={{ opacity: 0, x: i % 2 === 0 ? 50 : -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: i * 0.3 }}
-                className="lg:w-1/2 text-center lg:text-left"
+            {/* Feature Image SECOND */}
+            <motion.figure
+              initial={{ opacity: 0, scale: 0.96 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: i * 0.3 }}
+              className="w-full"
             >
-                <h2 className="text-3xl font-bold mb-4">{f.title}</h2>
-                <p className="text-gray-600 text-lg">{f.desc}</p>
-            </motion.div>
-            </motion.div>
+              <div className="mx-auto w-full max-w-5xl"> {/* made it wider */}
+                {/* Frame with consistent aspect ratio */}
+                <div className="relative aspect-[3/2] overflow-hidden rounded-2xl ring-1 ring-gray-200 shadow-xl">
+                  <Image
+                    src={f.img}
+                    alt={f.title}
+                    fill
+                    className="object-contain object-center p-1" 
+                    sizes="(min-width: 1280px) 1000px, (min-width: 1024px) 900px, 100vw"
+                    priority={i < 1}
+                  />
+                </div>
+              </div>
+            </motion.figure>
+
+
+          </motion.div>
         ))}
-        </section>
+      </section>
+
+
 
       {/* CTA Footer */}
       <section className="text-center py-20 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white">
@@ -220,97 +227,7 @@ export default function NewLandingPage() {
         </Button>
       </section>
 
-      {/* Site Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-12 md:py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
-          {/* Brand */}
-          <div>
-            <Link href="/" className="flex items-center space-x-2">
-              <img
-                src="/nous_logo.png"
-                alt="Nous Meeting Logo"
-                className="h-10"
-              />
-              {/* <span className="font-semibold text-lg text-gray-800">Nous Meeting</span> */}
-            </Link>
-            <p className="text-gray-600 mt-4 text-sm">
-              AI-powered transcription, summaries, and meeting insights that turn
-              conversations into action.
-            </p>
-          </div>
-
-          {/* Product */}
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
-            <ul className="space-y-3 text-gray-600 text-sm">
-              <li><Link href="/features" className="hover:text-[#0A0DC4]">Features</Link></li>
-              <li><Link href="/pricing" className="hover:text-[#0A0DC4]">Pricing</Link></li>
-              <li><Link href="/help" className="hover:text-[#0A0DC4]">Help Center</Link></li>
-              <li><Link href="/faq" className="hover:text-[#0A0DC4]">FAQ</Link></li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
-            <ul className="space-y-3 text-gray-600 text-sm">
-              <li><Link href="/about" className="hover:text-[#0A0DC4]">About Us</Link></li>
-              <li><Link href="/blog" className="hover:text-[#0A0DC4]">Blog</Link></li>
-              <li><Link href="/careers" className="hover:text-[#0A0DC4]">Careers</Link></li>
-              <li><Link href="/contact" className="hover:text-[#0A0DC4]">Contact</Link></li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
-            <ul className="space-y-3 text-gray-600 text-sm">
-              <li><Link href="/privacy-policy" className="hover:text-[#0A0DC4]">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-[#0A0DC4]">Terms of Service</Link></li>
-              <li><Link href="/cookies" className="hover:text-[#0A0DC4]">Cookie Policy</Link></li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-200 mt-8">
-          <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500">
-            <p>© {new Date().getFullYear()} Nous Meeting. All rights reserved.</p>
-
-            {/* Social Icons */}
-            <div className="flex space-x-6 mt-4 sm:mt-0 group">
-              <Link
-                href="https://twitter.com"
-                target="_blank"
-                className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
-              >
-                <Twitter className="w-5 h-5" />
-              </Link>
-              <Link
-                href="https://linkedin.com"
-                target="_blank"
-                className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
-              >
-                <Linkedin className="w-5 h-5" />
-              </Link>
-              <Link
-                href="https://github.com"
-                target="_blank"
-                className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
-              >
-                <Github className="w-5 h-5" />
-              </Link>
-              <Link
-                href="https://youtube.com"
-                target="_blank"
-                className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
-              >
-                <Youtube className="w-5 h-5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      
 
     </div>
   );

@@ -74,7 +74,7 @@ const HelpPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 sm:p-6 lg:p-10">
-      <div className="max-w-5xl mx-auto space-y-10 sm:space-y-12">
+      <div className="mt-20 max-w-5xl mx-auto space-y-10 sm:space-y-12">
         {/* Header */}
         <div className="text-center px-2">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900">
@@ -117,7 +117,7 @@ const HelpPage = () => {
         </section>
   
         {/* FAQs */}
-        <section>
+        <section id='faqs'>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
             FAQs
           </h2>

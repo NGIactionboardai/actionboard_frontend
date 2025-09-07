@@ -3,7 +3,7 @@
 const TermsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
+      <div className="mt-20 w-full max-w-4xl">
         <h1 className="text-5xl font-extrabold text-gray-900 mb-8 text-center">
           TERMS OF USE
         </h1>

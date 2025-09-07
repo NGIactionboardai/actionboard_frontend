@@ -1,5 +1,6 @@
 // src/app/(home02)/home02/layout.js
 import HomeNavbar from '@/app/components/layout/HomeNavbar';
+import NewHomeFooter from '@/app/components/layout/NewHomeFooter'; // ✅ import footer
 import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -11,9 +12,10 @@ export const metadata = {
 
 export default function HomeLayout({ children }) {
   return (
-    <div className={`${inter.className} min-h-screen bg-white`}>
+    <div className={`${inter.className} min-h-screen bg-white flex flex-col`}>
       <HomeNavbar />
-      <main>{children}</main>
+      <main className="flex-grow">{children}</main>
+      <NewHomeFooter /> {/* ✅ added footer */}
     </div>
   );
 }
