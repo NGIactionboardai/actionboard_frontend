@@ -271,20 +271,70 @@ export default function Calendar() {
       setIsAddModalOpen(true);
     };
 
+    // const handleCalendarSelect = (info) => {
+    //   let start = new Date(info.startStr);
+    //   let end = new Date(info.endStr);
+    
+    //   // Helper to get just the time portion in milliseconds since midnight
+    //   const timeOfDay = (date) => date.getHours() * 3600000 + date.getMinutes() * 60000 + date.getSeconds() * 1000 + date.getMilliseconds();
+    
+    //   if (timeOfDay(start) === timeOfDay(end)) {
+    //     end = new Date(start.getTime() + 30 * 60 * 1000); // add 30 mins to start
+    //   }
+    
+    //   setAddEventStart(start);
+    //   setAddEventEnd(end);
+    //   setIsAddModalOpen(true);
+    // };
+
+    const parseDateStrAsLocal = (s) => {
+      if (!s) return null;
+      // date-only "YYYY-MM-DD" -> construct local-midnight
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const [y, m, d] = s.split('-').map(Number);
+        return new Date(y, m - 1, d); // local midnight
+      }
+      // otherwise let Date parse (it will respect time & offset if present)
+      return new Date(s);
+    };
+    
     const handleCalendarSelect = (info) => {
-      let start = new Date(info.startStr);
-      let end = new Date(info.endStr);
+      // Prefer the Date objects if FullCalendar provided them, otherwise parse safely
+      let start = info.start instanceof Date ? new Date(info.start) : parseDateStrAsLocal(info.startStr);
+      let end = info.end instanceof Date ? new Date(info.end) : parseDateStrAsLocal(info.endStr);
     
-      // Helper to get just the time portion in milliseconds since midnight
-      const timeOfDay = (date) => date.getHours() * 3600000 + date.getMinutes() * 60000 + date.getSeconds() * 1000 + date.getMilliseconds();
+      const timeOfDay = (date) =>
+        date.getHours() * 3600000 +
+        date.getMinutes() * 60000 +
+        date.getSeconds() * 1000 +
+        date.getMilliseconds();
     
-      if (timeOfDay(start) === timeOfDay(end)) {
-        end = new Date(start.getTime() + 30 * 60 * 1000); // add 30 mins to start
+      // Always adjust for month view: force 30 min slot
+      if (info.view.type === "dayGridMonth") {
+        end = new Date(start.getTime() + 30 * 60 * 1000);
+      } else {
+        // If start === end (zero length) make it 30 minutes
+        if (start.getTime() === end.getTime()) {
+          end = new Date(start.getTime() + 30 * 60 * 1000);
+        } else {
+          // If time-of-day is equal but the span is < 24h, treat as a slot selection and give 30 mins
+          const span = end.getTime() - start.getTime();
+          if (timeOfDay(start) === timeOfDay(end) && span > 0 && span < 24 * 3600000) {
+            end = new Date(start.getTime() + 30 * 60 * 1000);
+          }
+        }
       }
     
-      setAddEventStart(start.toISOString());
-      setAddEventEnd(end.toISOString());
+      setAddEventStart(start);
+      setAddEventEnd(end);
       setIsAddModalOpen(true);
+    
+      console.log(
+        "Calendar select:",
+        { view: info.view.type, startStr: info.startStr, endStr: info.endStr, allDay: info.allDay },
+        "=> parsed start:", start.toString(),
+        "end:", end.toString()
+      );
     };
 
     const handleEventDrop = async (info) => {
