@@ -299,7 +299,6 @@ export default function Calendar() {
     };
     
     const handleCalendarSelect = (info) => {
-      // Prefer the Date objects if FullCalendar provided them, otherwise parse safely
       let start = info.start instanceof Date ? new Date(info.start) : parseDateStrAsLocal(info.startStr);
       let end = info.end instanceof Date ? new Date(info.end) : parseDateStrAsLocal(info.endStr);
     
@@ -313,10 +312,12 @@ export default function Calendar() {
       if (info.view.type === "dayGridMonth") {
         end = new Date(start.getTime() + 30 * 60 * 1000);
       } else {
+
         // If start === end (zero length) make it 30 minutes
         if (start.getTime() === end.getTime()) {
           end = new Date(start.getTime() + 30 * 60 * 1000);
         } else {
+
           // If time-of-day is equal but the span is < 24h, treat as a slot selection and give 30 mins
           const span = end.getTime() - start.getTime();
           if (timeOfDay(start) === timeOfDay(end) && span > 0 && span < 24 * 3600000) {
@@ -329,12 +330,7 @@ export default function Calendar() {
       setAddEventEnd(end);
       setIsAddModalOpen(true);
     
-      console.log(
-        "Calendar select:",
-        { view: info.view.type, startStr: info.startStr, endStr: info.endStr, allDay: info.allDay },
-        "=> parsed start:", start.toString(),
-        "end:", end.toString()
-      );
+      
     };
 
     const handleEventDrop = async (info) => {
