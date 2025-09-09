@@ -15,7 +15,7 @@ const GoogleLoginSuccessPage = () => {
       const url = new URL(window.location.href);
       const code = url.searchParams.get('code');
 
-      const redirect_uri = 'https://actionboard-ai.vercel.app/auth/google-login-success/';
+      const redirect_uri = 'https://nousmeeting.com/auth/google-login-success/';
       // const redirect_uri = 'http://localhost:3000/auth/google-login-success/';
 
 
