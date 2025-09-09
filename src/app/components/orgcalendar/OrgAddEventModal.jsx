@@ -42,22 +42,18 @@ export default function OrgAddEventModal({
 
   useEffect(() => {
     if (initialDate) {
-      const localStart = new Date(initialDate);
-      setSelectedDate(new Date(localStart));
+      const localStart = initialDate instanceof Date ? initialDate : new Date(initialDate);
+      setSelectedDate(localStart);
   
-      const hours = String(localStart.getHours()).padStart(2, '0');
-      const minutes = String(localStart.getMinutes()).padStart(2, '0');
       setStartHour(((localStart.getHours() % 12) || 12).toString().padStart(2, '0'));
-      setStartMinute(minutes);
+      setStartMinute(localStart.getMinutes().toString().padStart(2, '0'));
       setStartAmpm(localStart.getHours() >= 12 ? 'PM' : 'AM');
     }
   
     if (initialEndDate) {
-      const localEnd = new Date(initialEndDate);
-      const hours = String(localEnd.getHours()).padStart(2, '0');
-      const minutes = String(localEnd.getMinutes()).padStart(2, '0');
+      const localEnd = initialEndDate instanceof Date ? initialEndDate : new Date(initialEndDate);
       setEndHour(((localEnd.getHours() % 12) || 12).toString().padStart(2, '0'));
-      setEndMinute(minutes);
+      setEndMinute(localEnd.getMinutes().toString().padStart(2, '0'));
       setEndAmpm(localEnd.getHours() >= 12 ? 'PM' : 'AM');
     }
   }, [initialDate, initialEndDate]);
@@ -67,7 +63,7 @@ export default function OrgAddEventModal({
     setTitle('');
     setDescription('');
     setCreateZoom(false);
-    setSelectedDate(new Date());
+    // setSelectedDate(new Date());
     setStartHour('09');
     setStartMinute('00');
     setStartAmpm('AM');

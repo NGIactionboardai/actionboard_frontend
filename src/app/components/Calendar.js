@@ -93,9 +93,29 @@ export default function Calendar() {
         updateTitle();
       };
       
+      // const updateTitle = () => {
+      //   const api = calendarRef.current?.getApi();
+      //   if (api) setCalendarTitle(api.view.title);
+      // };
+
+      useEffect(() => {
+        if (activeTab === "search" || activeTab === "reports") {
+          setCalendarTitle(null);
+        } else {
+          updateTitle();
+        }
+      }, [activeTab]);
+
       const updateTitle = () => {
         const api = calendarRef.current?.getApi();
-        if (api) setCalendarTitle(api.view.title);
+      
+        if (!api) return;
+      
+        if (activeTab === "search" || activeTab === "reports") {
+          setCalendarTitle(null);
+        } else {
+          setCalendarTitle(api.view.title);
+        }
       };
 
 
@@ -1002,7 +1022,34 @@ export default function Calendar() {
                     }}
                     eventClick={(info) => {
                       if (info.event.extendedProps.isSkeleton) return; // prevent modal open
-                      handleEventClick(info);
+                    
+                      // Helper to remove common FullCalendar popover nodes (v5/v6)
+                      const closeFullCalendarPopovers = () => {
+                        // common selectors used by FullCalendar popovers
+                        document.querySelectorAll('.fc-popover, .fc-more-popover, [data-fc-popover]').forEach(el => {
+                          if (el && el.parentNode) el.parentNode.removeChild(el);
+                        });
+                        // also remove any leftover overlay/backdrop nodes if present
+                        document.querySelectorAll('.fc-popover-wrapper, .fc-more-popover-wrapper').forEach(el => {
+                          if (el && el.parentNode) el.parentNode.removeChild(el);
+                        });
+                      };
+                    
+                      // Attempt immediate removal
+                      closeFullCalendarPopovers();
+                    
+                      // Trigger an outside click (some FC versions close popover on document click)
+                      document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                      document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+                      document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                    
+                      // Small delay to allow any FC internal handlers to finish and DOM to settle,
+                      // then open your modal.
+                      setTimeout(() => {
+                        // try once more (defensive)
+                        closeFullCalendarPopovers();
+                        handleEventClick(info);
+                      }, 40); // 20-60 ms usually fine; increase if needed
                     }}
                     windowResize={(arg) => {
                       if (window.innerWidth < 768 && currentView !== 'timeGridDay') {

@@ -100,10 +100,25 @@ export default function OrgCalendar({ orgId }) {
         setActiveTab(viewType);
         updateTitle();
       };
+
+      useEffect(() => {
+        if (activeTab === "search" || activeTab === "reports") {
+          setCalendarTitle(null);
+        } else {
+          updateTitle();
+        }
+      }, [activeTab]);
       
       const updateTitle = () => {
         const api = calendarRef.current?.getApi();
-        if (api) setCalendarTitle(api.view.title);
+      
+        if (!api) return;
+      
+        if (activeTab === "search" || activeTab === "reports") {
+          setCalendarTitle(null);
+        } else {
+          setCalendarTitle(api.view.title);
+        }
       };
 
 
@@ -297,20 +312,50 @@ export default function OrgCalendar({ orgId }) {
       setIsAddModalOpen(true);
     };
 
+    const parseDateStrAsLocal = (s) => {
+      if (!s) return null;
+      // date-only "YYYY-MM-DD" -> construct local-midnight
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const [y, m, d] = s.split('-').map(Number);
+        return new Date(y, m - 1, d); // local midnight
+      }
+      // otherwise let Date parse (it will respect time & offset if present)
+      return new Date(s);
+    };
+    
     const handleCalendarSelect = (info) => {
-      let start = new Date(info.startStr);
-      let end = new Date(info.endStr);
+      let start = info.start instanceof Date ? new Date(info.start) : parseDateStrAsLocal(info.startStr);
+      let end = info.end instanceof Date ? new Date(info.end) : parseDateStrAsLocal(info.endStr);
     
-      // Helper to get just the time portion in milliseconds since midnight
-      const timeOfDay = (date) => date.getHours() * 3600000 + date.getMinutes() * 60000 + date.getSeconds() * 1000 + date.getMilliseconds();
+      const timeOfDay = (date) =>
+        date.getHours() * 3600000 +
+        date.getMinutes() * 60000 +
+        date.getSeconds() * 1000 +
+        date.getMilliseconds();
     
-      if (timeOfDay(start) === timeOfDay(end)) {
-        end = new Date(start.getTime() + 30 * 60 * 1000); // add 30 mins to start
+      // Always adjust for month view: force 30 min slot
+      if (info.view.type === "dayGridMonth") {
+        end = new Date(start.getTime() + 30 * 60 * 1000);
+      } else {
+
+        // If start === end (zero length) make it 30 minutes
+        if (start.getTime() === end.getTime()) {
+          end = new Date(start.getTime() + 30 * 60 * 1000);
+        } else {
+
+          // If time-of-day is equal but the span is < 24h, treat as a slot selection and give 30 mins
+          const span = end.getTime() - start.getTime();
+          if (timeOfDay(start) === timeOfDay(end) && span > 0 && span < 24 * 3600000) {
+            end = new Date(start.getTime() + 30 * 60 * 1000);
+          }
+        }
       }
     
-      setAddEventStart(start.toISOString());
-      setAddEventEnd(end.toISOString());
+      setAddEventStart(start);
+      setAddEventEnd(end);
       setIsAddModalOpen(true);
+    
+      
     };
 
     const handleEventDrop = async (info) => {
@@ -993,7 +1038,19 @@ export default function OrgCalendar({ orgId }) {
                   }}
                   eventClick={(info) => {
                     if (info.event.extendedProps.isSkeleton) return; // prevent modal open
-                    handleEventClick(info);
+                  
+                  
+                    // Trigger an outside click (some FC versions close popover on document click)
+                    document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+                    document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                  
+                    // Small delay to allow any FC internal handlers to finish and DOM to settle,
+                    
+                    setTimeout(() => {
+                     
+                      handleEventClick(info);
+                    }, 40); 
                   }}
                   windowResize={(arg) => {
                     if (window.innerWidth < 768 && currentView !== 'timeGridDay') {
