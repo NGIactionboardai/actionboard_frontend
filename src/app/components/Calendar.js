@@ -1051,11 +1051,11 @@ export default function Calendar() {
                         handleEventClick(info);
                       }, 40); // 20-60 ms usually fine; increase if needed
                     }}
-                    windowResize={(arg) => {
-                      if (window.innerWidth < 768 && currentView !== 'timeGridDay') {
-                        arg.view.calendar.changeView('timeGridDay');
-                      }
-                    }}
+                    // windowResize={(arg) => {
+                    //   if (window.innerWidth < 768 && currentView !== 'timeGridDay') {
+                    //     arg.view.calendar.changeView('timeGridDay');
+                    //   }
+                    // }}
                   />
               )}
 

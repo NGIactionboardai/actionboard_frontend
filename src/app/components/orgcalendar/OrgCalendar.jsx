@@ -1052,11 +1052,11 @@ export default function OrgCalendar({ orgId }) {
                       handleEventClick(info);
                     }, 40); 
                   }}
-                  windowResize={(arg) => {
-                    if (window.innerWidth < 768 && currentView !== 'timeGridDay') {
-                      arg.view.calendar.changeView('timeGridDay');
-                    }
-                  }}
+                  // windowResize={(arg) => {
+                  //   if (window.innerWidth < 768 && currentView !== 'timeGridDay') {
+                  //     arg.view.calendar.changeView('timeGridDay');
+                  //   }
+                  // }}
               />
             )}
             
