@@ -2,11 +2,15 @@
 
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-// import { getAuthHeaders } from '@/utils/auth';
+import { useSelector } from 'react-redux';
 
-const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
-
+const EditSpeakersModal = ({ 
+  isOpen, 
+  onClose, 
+  meetingId, 
+  onUpdateSuccess, 
+  utterances = [] // 👈 pass transcript here
+}) => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [speakerList, setSpeakerList] = useState([]);
@@ -16,7 +20,6 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
   const authToken = useSelector((state) => state.auth?.token);
   const [validationErrors, setValidationErrors] = useState({});
 
-
   useEffect(() => {
     if (isOpen) {
       fetchSpeakers();
@@ -24,15 +27,11 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
   }, [isOpen]);
 
   const getAuthHeaders = () => {
-    // Try Redux token first, then localStorage as fallback
     const token = authToken || localStorage.getItem('token');
-    
-    if (!token) {
-      throw new Error('No authentication token found. Please log in.');
-    }
-    
+    if (!token) throw new Error('No authentication token found. Please log in.');
+
     return {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
   };
@@ -41,18 +40,18 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
     setLoading(true);
     try {
       const res = await axios.get(
-        `${API_BASE_URL}/transcripts/zoom/list-speakers/${meetingId}/`
+        `${API_BASE_URL}/transcripts/zoom/list-speakers/${meetingId}/`,
+        { headers: getAuthHeaders() }
       );
 
       const data = res.data;
-      setSpeakerList(data.speakers);
+      setSpeakerList(data.speakers || []);
 
       const initialMap = {};
-      data.speakers.forEach((s) => {
-        initialMap[s] = s;
+      (data.speakers || []).forEach((s) => {
+        initialMap[s.name] = s.name;
       });
       setSpeakerMap(initialMap);
-
     } catch (err) {
       console.error('Error fetching speakers:', err);
     } finally {
@@ -60,36 +59,36 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
     }
   };
 
-  const handleChange = (original, value) => {
+  const handleChange = (originalName, value) => {
     setSpeakerMap((prev) => ({
       ...prev,
-      [original]: value,
+      [originalName]: value,
     }));
   };
 
   const handleSubmit = async () => {
-
     const newErrors = {};
-    speakerList.forEach((speaker) => {
-      if (!speakerMap[speaker] || speakerMap[speaker].trim() === '') {
-        newErrors[speaker] = 'This field is required';
+    speakerList.forEach((s) => {
+      if (!speakerMap[s.name] || speakerMap[s.name].trim() === '') {
+        newErrors[s.name] = 'This field is required';
       }
     });
-  
+
     if (Object.keys(newErrors).length > 0) {
       setValidationErrors(newErrors);
       return;
     }
-  
+
     setValidationErrors({});
     setSubmitting(true);
-  
+
     try {
       const res = await axios.post(
         `${API_BASE_URL}/transcripts/zoom/update-speakers/${meetingId}/`,
-        { speaker_map: speakerMap }
+        { speaker_map: speakerMap },
+        { headers: getAuthHeaders() }
       );
-  
+
       if (res.status >= 200 && res.status < 300) {
         onUpdateSuccess?.();
         onClose();
@@ -104,11 +103,19 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
     }
   };
 
+  const formatTime = (ms) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return [hours, minutes, seconds].map((val) => String(val).padStart(2, "0")).join(":");
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.3)] flex items-center justify-center p-4 sm:p-6">
-      <div className="relative w-full max-w-md sm:max-w-lg md:max-w-xl bg-white rounded-md shadow-lg border p-4 sm:p-6">
+      <div className="relative w-full max-w-5xl bg-white rounded-md shadow-lg border p-4 sm:p-6 overflow-hidden">
         
         {/* Header */}
         <div className="flex flex-col items-center mb-4 text-center">
@@ -121,33 +128,59 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
             Edit Speaker Names
           </h3>
         </div>
-  
-        {/* Content */}
-        {loading ? (
-          <p className="text-gray-600 text-sm sm:text-base text-center">Loading speakers...</p>
-        ) : (
+
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
+          
+          {/* Left: Speaker Editing */}
           <div className="space-y-4">
-            {speakerList.map((speaker, idx) => (
-              <div key={idx}>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                  Speaker {speaker}
-                </label>
-                <input
-                  type="text"
-                  value={speakerMap[speaker] || ''}
-                  onChange={(e) => handleChange(speaker, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"
-                />
-                {validationErrors[speaker] && (
-                  <p className="mt-1 text-xs sm:text-sm text-red-600">
-                    {validationErrors[speaker]}
-                  </p>
-                )}
-              </div>
-            ))}
+            {loading ? (
+              <p className="text-gray-600 text-sm sm:text-base text-center">
+                Loading speakers...
+              </p>
+            ) : (
+              speakerList.map((s, idx) => (
+                <div key={idx}>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    {s.code ? `Speaker ${s.code}` : 'Speaker'}
+                  </label>
+                  <input
+                    type="text"
+                    value={speakerMap[s.name] || ''}
+                    onChange={(e) => handleChange(s.name, e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"
+                  />
+                  {validationErrors[s.name] && (
+                    <p className="mt-1 text-xs sm:text-sm text-red-600">
+                      {validationErrors[s.name]}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
           </div>
-        )}
-  
+
+          {/* Right: Transcript Preview */}
+          <div className="bg-gray-50 p-3 rounded-md border max-h-[60vh] overflow-y-auto text-sm">
+            <h4 className="font-medium text-gray-800 mb-2">Transcript Preview</h4>
+            {utterances.length > 0 ? (
+              utterances.map((u, idx) => (
+                <div key={idx} className="mb-2">
+                  <p className="text-xs text-gray-600">
+                    <span className="font-semibold text-indigo-700">
+                      {speakerMap[u.speaker] || u.speaker}
+                    </span>{" "}
+                    <span className="text-gray-500">[{formatTime(u.start)}]</span>
+                  </p>
+                  <p className="text-gray-900">{u.text}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 italic">No transcript available.</p>
+            )}
+          </div>
+        </div>
+
         {/* Actions */}
         <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
           <button
@@ -167,7 +200,6 @@ const EditSpeakersModal = ({ isOpen, onClose, meetingId, onUpdateSuccess }) => {
       </div>
     </div>
   );
-  
 };
 
 export default EditSpeakersModal;

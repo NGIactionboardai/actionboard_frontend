@@ -289,6 +289,15 @@ export default function MeetingDetails() {
       setLoading(false);
     }
   };
+
+  const formatSpeakerLabel = (speaker) => {
+    // If the speaker is still a placeholder like "A", "B", "C" → show "Speaker A"
+    if (/^[A-Z]$/.test(speaker)) {
+      return `Speaker ${speaker}`;
+    }
+    // Otherwise, assume it's a real name → show as-is
+    return speaker;
+  };
   
 
   const getCooldownTimeLeft = (endTime, cooldownMinutes = 3) => {
@@ -906,24 +915,34 @@ export default function MeetingDetails() {
                     </button>
 
                     {!(transcribing || isTranscriptionOngoing) && (
-                      !speakersUpdated ? (
-                        <button
-                          onClick={() => setShowEditModal(true)}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                          </svg>
-                          Edit Speakers
-                        </button>
-                      ) : (
-                        <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
-                          <svg className="-ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                          </svg>
-                          Speakers Updated
-                        </span>
-                      )
+
+                      <button
+                        onClick={() => setShowEditModal(true)}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Edit Speakers
+                      </button>
+                      // !speakersUpdated ? (
+                      //   <button
+                      //     onClick={() => setShowEditModal(true)}
+                      //     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      //   >
+                      //     <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      //     </svg>
+                      //     Edit Speakers
+                      //   </button>
+                      // ) : (
+                      //   <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                      //     <svg className="-ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      //     </svg>
+                      //     Speakers Updated
+                      //   </span>
+                      // )
                     )}
                   </div>
                 )
@@ -952,7 +971,38 @@ export default function MeetingDetails() {
                     )}
                   </button>
 
-                  <button
+                  {!(transcribing || isTranscriptionOngoing) && (
+
+                    <button
+                      onClick={() => setShowEditModal(true)}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Edit Speakers
+                    </button>
+                    // !speakersUpdated ? (
+                    //   <button
+                    //     onClick={() => setShowEditModal(true)}
+                    //     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    //   >
+                    //     <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                    //     </svg>
+                    //     Edit Speakers
+                    //   </button>
+                    // ) : (
+                    //   <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                    //     <svg className="-ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    //     </svg>
+                    //     Speakers Updated
+                    //   </span>
+                    // )
+                  )}
+
+                  {/* <button
                     onClick={fetchTranscript}
                     disabled={transcriptLoading || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -973,7 +1023,7 @@ export default function MeetingDetails() {
                         Refresh Transcript
                       </>
                     )}
-                  </button>
+                  </button> */}
                 </div>
               )}
             </div>
@@ -1345,7 +1395,7 @@ export default function MeetingDetails() {
                               <div key={idx} className="py-2">
                                 <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
                                   <span className="inline-block bg-indigo-100 text-indigo-700 font-medium px-2 py-0.5 rounded-md mr-2">
-                                    Speaker {utterance.speaker}
+                                    {formatSpeakerLabel(utterance.speaker)}
                                   </span>
                                   <span className="text-xs text-gray-500">
                                     [{formatTime(utterance.start)}]
@@ -1384,7 +1434,7 @@ export default function MeetingDetails() {
                             <div key={idx}>
                               <p className="text-sm text-gray-800 whitespace-pre-wrap">
                                 <span className="font-semibold text-indigo-700">
-                                  Speaker {utterance.speaker}
+                                 {formatSpeakerLabel(utterance.speaker)}
                                 </span>
                                 &nbsp;&nbsp;
                                 <span className="text-gray-950">
@@ -1690,9 +1740,10 @@ export default function MeetingDetails() {
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         meetingId={meetingId}
+        utterances={transcript}
         onUpdateSuccess={async () => {
           await checkTranscriptionStatus();
-          await fetchTranscript();
+          await fetchMeetingDetails();
         }}
       />
 
