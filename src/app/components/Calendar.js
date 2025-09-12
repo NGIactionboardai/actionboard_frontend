@@ -20,6 +20,7 @@ import { getZoomConnectionStatus, selectZoomIsConnected, selectZoomSuccessMessag
 import ZoomConfig from './ZoomConfig';
 import axios from 'axios';
 import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
   
 
@@ -797,8 +798,9 @@ export default function Calendar() {
                 </div>
               ) : (
                 organizations.map((org) => (
-                  <div
+                  <Link
                     key={org.id}
+                    href={`/calendar/${org.org_id}`}   // ✅ navigate to org calendar
                     className="flex items-center px-2 py-1.5 rounded hover:bg-gray-100 cursor-pointer transition-colors"
                   >
                     <div
@@ -808,7 +810,7 @@ export default function Calendar() {
                     <span className="text-sm text-gray-700 truncate">
                       {org.name}
                     </span>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>

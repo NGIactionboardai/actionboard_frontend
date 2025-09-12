@@ -163,57 +163,106 @@ export default function EditInfoModal({ isOpen, onClose }) {
                 </div>
 
                 <div className="space-y-4">
-                  <input
-                    type="text"
-                    name="first_name"
-                    value={form.first_name}
-                    onChange={handleChange}
-                    placeholder="First Name"
-                    className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-
-                  <input
-                    type="text"
-                    name="last_name"
-                    value={form.last_name}
-                    onChange={handleChange}
-                    placeholder="Last Name"
-                    className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-
-                  {/* Styled native select for countries (matches other inputs) */}
-                  <div className="relative">
-                    <select
-                      name="country"
-                      value={form.country}
-                      onChange={handleCountrySelect}
-                      className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm bg-white appearance-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  {/* First Name */}
+                  <div>
+                    <label
+                      htmlFor="first_name"
+                      className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      <option value="">Select Country</option>
-                      {countryOptions.map(({ code, name }) => (
-                        <option key={code} value={code}>
-                          {name}
-                        </option>
-                      ))}
-                    </select>
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      id="first_name"
+                      name="first_name"
+                      value={form.first_name}
+                      onChange={handleChange}
+                      placeholder="Enter your first name"
+                      className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
 
-                    {/* small arrow to mimic select styling consistently */}
-                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                      <svg className="w-4 h-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                      </svg>
+                  {/* Last Name */}
+                  <div>
+                    <label
+                      htmlFor="last_name"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      id="last_name"
+                      name="last_name"
+                      value={form.last_name}
+                      onChange={handleChange}
+                      placeholder="Enter your last name"
+                      className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                  </div>
+
+                  {/* Country */}
+                  <div>
+                    <label
+                      htmlFor="country"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Country
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="country"
+                        name="country"
+                        value={form.country}
+                        onChange={handleCountrySelect}
+                        className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm bg-white appearance-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      >
+                        <option value="">Select Country</option>
+                        {countryOptions.map(({ code, name }) => (
+                          <option key={code} value={code}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Dropdown arrow */}
+                      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                        <svg
+                          className="w-4 h-4 text-gray-400"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
                     </div>
                   </div>
 
-                  <input
-                    type="date"
-                    name="date_of_birth"
-                    value={form.date_of_birth}
-                    onChange={handleChange}
-                    className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-
-                  {dobError && <p className="mt-1 text-sm text-red-600">{dobError}</p>}
+                  {/* Date of Birth */}
+                  <div>
+                    <label
+                      htmlFor="date_of_birth"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Date of Birth <span className="text-gray-600 text-sm">(dd/mm/yyyy)</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="date_of_birth"
+                      name="date_of_birth"
+                      value={form.date_of_birth}
+                      onChange={handleChange}
+                      className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                    {dobError && (
+                      <p className="mt-1 text-sm text-red-600">{dobError}</p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mt-6 flex justify-end space-x-2">

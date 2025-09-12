@@ -171,7 +171,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
               `}
               title={!isZoomConnected ? 'Connect to Zoom first' : 'View Members'}
             >
-              Member list
+              Member List
             </Link>
 
             <button
