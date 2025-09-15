@@ -1,12 +1,14 @@
 import React from 'react';
 import Navbar from './layout/Navbar';
+import NewNavbar from './layout/NewNavbar';
 // import Navbar from './Navbar'; // Adjust path as needed
 
 export default function LoadingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Navbar with full auth logic */}
-      <Navbar />
+      {/* <Navbar /> */}
+      <NewNavbar />
 
       {/* Main loading content */}
       <main className="flex-grow flex flex-col items-center justify-center px-4">
