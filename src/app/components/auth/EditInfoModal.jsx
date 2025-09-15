@@ -9,6 +9,9 @@ import { Dialog, Transition } from '@headlessui/react';
 import { X } from 'lucide-react';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { parse, format } from "date-fns";
 
 countries.registerLocale(enLocale);
 
@@ -243,22 +246,39 @@ export default function EditInfoModal({ isOpen, onClose }) {
                     </div>
                   </div>
 
+
                   {/* Date of Birth */}
                   <div>
                     <label
                       htmlFor="date_of_birth"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-700"
                     >
-                      Date of Birth <span className="text-gray-600 text-sm">(dd/mm/yyyy)</span>
+                      Date of Birth <span className="text-gray-400">(mm/dd/yyyy)</span>
                     </label>
-                    <input
-                      type="date"
+
+                    <DatePicker
                       id="date_of_birth"
-                      name="date_of_birth"
-                      value={form.date_of_birth}
-                      onChange={handleChange}
+                      selected={
+                        form.date_of_birth
+                          ? parse(form.date_of_birth, "yyyy-MM-dd", new Date()) // convert ISO string to Date
+                          : null
+                      }
+                      onChange={(date) => {
+                        handleChange({
+                          target: {
+                            name: "date_of_birth",
+                            value: date ? format(date, "yyyy-MM-dd") : "", // keep backend-friendly yyyy-mm-dd
+                          },
+                        });
+                      }}
+                      dateFormat="MM/dd/yyyy" // 👈 force mm/dd/yyyy display
+                      placeholderText="MM/DD/YYYY"
+                      showYearDropdown
+                      scrollableYearDropdown
+                      yearDropdownItemNumber={100}
                       className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
+
                     {dobError && (
                       <p className="mt-1 text-sm text-red-600">{dobError}</p>
                     )}

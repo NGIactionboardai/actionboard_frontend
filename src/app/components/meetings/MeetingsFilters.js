@@ -1,5 +1,10 @@
 'use client';
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { parse, format } from "date-fns";
+import { Calendar } from "lucide-react";
+
 const MeetingsFilters = ({
   searchTerm,
   setSearchTerm,
@@ -11,24 +16,8 @@ const MeetingsFilters = ({
   uniqueStatuses,
   loading
 }) => {
-
-  // if (loading) {
-  //   return (
-  //     <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6 p-4 animate-pulse">
-  //       <div className="flex flex-col gap-4 md:flex-row md:items-end md:gap-4">
-  //         <div className="h-10 w-full md:w-64 bg-gray-200 rounded" />
-  //         <div className="h-10 w-full md:w-40 bg-gray-200 rounded" />
-  //         <div className="h-10 w-full md:w-44 bg-gray-200 rounded" />
-  //         <div className="h-10 w-full md:w-44 bg-gray-200 rounded" />
-  //         <div className="h-10 w-full md:w-24 bg-gray-200 rounded" />
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+    <div className="bg-white shadow sm:rounded-lg mb-6">
       <div className="px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-4">
 
@@ -66,30 +55,69 @@ const MeetingsFilters = ({
             </select>
           </div>
 
-          {/* Dates */}
-          <div className="w-full sm:w-auto sm:min-w-[140px]">
-            <label htmlFor="startDate" className="block text-xs font-medium text-gray-500 mb-1">From</label>
-            <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              className="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              value={dateFilter.startDate}
-              onChange={handleDateFilterChange}
-            />
+          {/* Date range filter */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 w-full sm:w-auto">
+            {/* Start Date */}
+            <div className="w-full sm:w-40">
+              <label htmlFor="startDate" className="block text-xs font-medium text-gray-500 mb-1">From</label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <DatePicker
+                  id="startDate"
+                  selected={
+                    dateFilter.startDate
+                      ? parse(dateFilter.startDate, "yyyy-MM-dd", new Date())
+                      : null
+                  }
+                  onChange={(date) =>
+                    handleDateFilterChange({
+                      target: {
+                        name: "startDate",
+                        value: date ? format(date, "yyyy-MM-dd") : "",
+                      },
+                    })
+                  }
+                  dateFormat="MM/dd/yyyy"
+                  placeholderText="MM/DD/YYYY"
+                  showYearDropdown
+                  scrollableYearDropdown
+                  yearDropdownItemNumber={100}
+                  className="w-full pl-11 pr-4 py-2 text-sm border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            {/* End Date */}
+            <div className="w-full sm:w-40">
+              <label htmlFor="endDate" className="block text-xs font-medium text-gray-500 mb-1">To</label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <DatePicker
+                  id="endDate"
+                  selected={
+                    dateFilter.endDate
+                      ? parse(dateFilter.endDate, "yyyy-MM-dd", new Date())
+                      : null
+                  }
+                  onChange={(date) =>
+                    handleDateFilterChange({
+                      target: {
+                        name: "endDate",
+                        value: date ? format(date, "yyyy-MM-dd") : "",
+                      },
+                    })
+                  }
+                  dateFormat="MM/dd/yyyy"
+                  placeholderText="MM/DD/YYYY"
+                  showYearDropdown
+                  scrollableYearDropdown
+                  yearDropdownItemNumber={100}
+                  className="w-full pl-11 pr-4 py-2 text-sm border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="w-full sm:w-auto sm:min-w-[140px]">
-            <label htmlFor="endDate" className="block text-xs font-medium text-gray-500 mb-1">To</label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              className="block w-full py-2 px-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              value={dateFilter.endDate}
-              onChange={handleDateFilterChange}
-            />
-          </div>
 
           {/* Clear Button */}
           <div className="w-full sm:w-auto">
@@ -101,8 +129,8 @@ const MeetingsFilters = ({
               Clear
             </button>
           </div>
-          </div>
 
+        </div>
       </div>
     </div>
   );

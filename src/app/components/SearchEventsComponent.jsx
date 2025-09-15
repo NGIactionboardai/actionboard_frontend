@@ -5,6 +5,11 @@ import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { parse, format } from "date-fns";
+import { Calendar } from "lucide-react";
+
 export default function SearchEventsComponent({
   makeApiCall,
   getAuthHeaders,
@@ -118,19 +123,62 @@ export default function SearchEventsComponent({
         </select>
 
         {/* Date Range */}
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => handleStartDateChange(e.target.value)}
-          className="border rounded-md px-2 py-1 text-sm text-gray-700"
-        />
-        <input
-          type="date"
-          value={endDate}
-          min={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1)).toISOString().split('T')[0] : ''}
-          onChange={(e) => handleEndDateChange(e.target.value)}
-          className="border rounded-md px-2 py-1 text-sm text-gray-700"
-        />
+        <div className="flex gap-2 items-center">
+          {/* Start Date */}
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <DatePicker
+              selected={
+                startDate ? parse(startDate, "yyyy-MM-dd", new Date()) : null
+              }
+              onChange={(date) => {
+                if (date) {
+                  const formatted = format(date, "yyyy-MM-dd"); // backend-friendly
+                  handleStartDateChange(formatted);
+                } else {
+                  setStartDate("");
+                }
+              }}
+              dateFormat="MM/dd/yyyy"
+              placeholderText="MM/DD/YYYY"
+              showYearDropdown
+              scrollableYearDropdown
+              yearDropdownItemNumber={100}
+              className="w-full pl-9 pr-3 py-1.5 text-sm border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          {/* End Date */}
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <DatePicker
+              selected={
+                endDate ? parse(endDate, "yyyy-MM-dd", new Date()) : null
+              }
+              onChange={(date) => {
+                if (date) {
+                  const formatted = format(date, "yyyy-MM-dd"); // backend-friendly
+                  handleEndDateChange(formatted);
+                } else {
+                  setEndDate("");
+                }
+              }}
+              minDate={
+                startDate
+                  ? new Date(
+                      new Date(startDate).setDate(new Date(startDate).getDate() + 1)
+                    )
+                  : null
+              }
+              dateFormat="MM/dd/yyyy"
+              placeholderText="MM/DD/YYYY"
+              showYearDropdown
+              scrollableYearDropdown
+              yearDropdownItemNumber={100}
+              className="w-full pl-9 pr-3 py-1.5 text-sm border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+        </div>
 
         <button
           onClick={handleSearch}
@@ -145,65 +193,72 @@ export default function SearchEventsComponent({
         <div className="text-sm text-gray-500">Searching...</div>
       ) : (
         <div className="divide-y border rounded-md">
-          {results.map((event) => {
-            const orgName = event.organisation_name || 'Personal';
-            const color = orgColors?.[orgName] || '#6B7280';
+          {results.length === 0 ? (
+            <div className="p-4 text-sm text-gray-500 text-center">No results</div>
+          ) : (
+            results.map((event) => {
+              const orgName = event.organisation_name || 'Personal';
+              const color = orgColors?.[orgName] || '#6B7280';
 
-            const startDateObj = new Date(event.start);
-            const dateDisplay = startDateObj.toLocaleDateString(undefined, {
-              weekday: 'short',
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            });
+              const startDateObj = new Date(event.start);
+              const dateDisplay = startDateObj.toLocaleDateString(undefined, {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              });
 
-            const timeDisplay = `${formatTime(event.start)} - ${formatTime(event.end)}`;
+              const timeDisplay = `${formatTime(event.start)} - ${formatTime(event.end)}`;
 
-            return (
-              <div
-                key={event.id}
-                onClick={() =>
-                  handleEventClick({
-                    event: {
-                      id: event.id,
-                      title: event.title,
-                      start: new Date(event.start),
-                      end: new Date(event.end),
-                      backgroundColor: color,
-                      borderColor: color,
-                      textColor: '#ffffff',
-                      extendedProps: {
-                        description: event.description,
-                        organization: orgName,
-                        join_url: event?.meeting?.join_url || null,
+              return (
+                <div
+                  key={event.id}
+                  onClick={() =>
+                    handleEventClick({
+                      event: {
+                        id: event.id,
+                        title: event.title,
+                        start: new Date(event.start),
+                        end: new Date(event.end),
+                        backgroundColor: color,
+                        borderColor: color,
+                        textColor: '#ffffff',
+                        extendedProps: {
+                          description: event.description,
+                          organization: orgName,
+                          join_url: event?.meeting?.join_url || null,
+                        },
                       },
-                    },
-                  })
-                }
-                className="flex items-start gap-4 p-3 hover:bg-gray-50 cursor-pointer transition"
-              >
-                {/* Time + Date */}
-                <div className="w-32 text-sm text-gray-700 whitespace-nowrap">
-                  <div className="text-xs text-gray-500">{dateDisplay}</div>
-                  <div>{timeDisplay}</div>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: color }}
-                    />
-                    <span className="font-medium text-sm text-gray-900">{event.title}</span>
+                    })
+                  }
+                  className="flex items-start gap-4 p-3 hover:bg-gray-50 cursor-pointer transition"
+                >
+                  {/* Time + Date */}
+                  <div className="w-32 text-sm text-gray-700 whitespace-nowrap">
+                    <div className="text-xs text-gray-500">{dateDisplay}</div>
+                    <div>{timeDisplay}</div>
                   </div>
-                  <div className="text-xs text-gray-500">{orgName}</div>
+
+                  {/* Content */}
+                  <div className="flex-1 space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: color }}
+                      />
+                      <span className="font-medium text-sm text-gray-900">{event.title}</span>
+                    </div>
+                    <div className="text-xs text-gray-500">{orgName}</div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       )}
+
+
+
     </div>
   );
 }

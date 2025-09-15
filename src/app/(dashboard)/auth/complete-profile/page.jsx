@@ -10,6 +10,10 @@ import { editUserInfo, updateUserInfo } from '@/redux/auth/authSlices';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { parse, format } from "date-fns";
+
 // Always register English locale
 countries.registerLocale(enLocale);
 
@@ -155,19 +159,35 @@ const CompleteProfilePage = () => {
 
             {/* DOB Field */}
             <div>
-              <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700 mb-2">
-                Date of Birth
+              <label
+                htmlFor="date_of_birth"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Date of Birth <span className="text-gray-400">(mm/dd/yyyy)</span>
               </label>
-              <input
-                type="date"
+              <DatePicker
                 id="date_of_birth"
-                name="date_of_birth"
-                value={formData.date_of_birth}
-                onChange={handleChange}
+                selected={
+                  formData.date_of_birth
+                    ? parse(formData.date_of_birth, "yyyy-MM-dd", new Date())
+                    : null
+                }
+                onChange={(date) => {
+                  const isoDate = date ? format(date, "yyyy-MM-dd") : "";
+                  handleChange({ target: { name: "date_of_birth", value: isoDate } });
+                }}
+                dateFormat="MM/dd/yyyy"
+                placeholderText="MM/DD/YYYY"
+                maxDate={new Date()}
+                showYearDropdown
+                scrollableYearDropdown
+                yearDropdownItemNumber={100}
                 className="w-full border-2 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 border-gray-200 hover:border-gray-300"
                 required
               />
-              {dobError && <p className="mt-1 text-sm text-red-600">{dobError}</p>}
+              {dobError && (
+                <p className="mt-1 text-sm text-red-600">{dobError}</p>
+              )}
             </div>
 
             {/* Submit Button */}

@@ -909,23 +909,25 @@ export default function Calendar() {
                   </div>
 
                   {/* Right: Navigation */}
-                  <div className="flex gap-2 justify-center sm:justify-end">
-                    <button
-                      onClick={goPrev}
-                      className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-                    >
-                      <ChevronLeft size={16} />
-                      Prev
-                    </button>
+                  {activeTab !== "search" && activeTab !== "reports" && (
+                    <div className="flex gap-2 justify-center sm:justify-end">
+                      <button
+                        onClick={goPrev}
+                        className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                      >
+                        <ChevronLeft size={16} />
+                        Prev
+                      </button>
 
-                    <button
-                      onClick={goNext}
-                      className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-                    >
-                      Next
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
+                      <button
+                        onClick={goNext}
+                        className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                      >
+                        Next
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  )}
 
               </div>
 

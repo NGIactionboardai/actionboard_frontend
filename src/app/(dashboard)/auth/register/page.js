@@ -19,6 +19,9 @@ import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 import TermsModal from '@/app/components/auth/TermsModal';
 import PrivacyModal from '@/app/components/auth/PrivacyModal';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { parse, format } from "date-fns";
 
 countries.registerLocale(enLocale);
 
@@ -417,24 +420,42 @@ export default function RegistrationPage() {
               
               <div>
                 <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth *
+                  Date of Birth * (MM/DD/YYYY)
                 </label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="date"
+
+                  <DatePicker
                     id="dateOfBirth"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
+                    selected={
+                      formData.dateOfBirth
+                        ? parse(formData.dateOfBirth, "yyyy-MM-dd", new Date())
+                        : null
+                    }
+                    onChange={(date) => {
+                      handleInputChange({
+                        target: {
+                          name: "dateOfBirth",
+                          value: date ? format(date, "yyyy-MM-dd") : "",
+                        },
+                      });
+                    }}
+                    dateFormat="MM/dd/yyyy"
+                    placeholderText="MM/DD/YYYY"
+                    maxDate={new Date()} // 👈 same as your max attr
+                    showYearDropdown
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={100}
                     disabled={loading}
-                    max={new Date().toISOString().split('T')[0]}
                     className={`w-full pl-11 pr-4 py-3 text-sm border-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      errors.dateOfBirth ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
+                      errors.dateOfBirth
+                        ? "border-red-300 bg-red-50"
+                        : "border-gray-200 hover:border-gray-300"
                     }`}
                     required
                   />
                 </div>
+
                 {errors.dateOfBirth && (
                   <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
                     <X className="w-3 h-3" />

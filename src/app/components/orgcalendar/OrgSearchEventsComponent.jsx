@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { parse, format } from "date-fns";
+import { Calendar } from "lucide-react";
 
 export default function OrgSearchEventsComponent({
   orgId,
@@ -104,7 +108,7 @@ export default function OrgSearchEventsComponent({
           onChange={(e) => setQuery(e.target.value)}
         />
 
-        {/* Duration (disabled if dates picked) */}
+        {/* Duration */}
         <select
           value={duration}
           onChange={(e) => handleDurationChange(e.target.value)}
@@ -117,25 +121,55 @@ export default function OrgSearchEventsComponent({
         </select>
 
         {/* Start Date */}
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => handleStartDateChange(e.target.value)}
-          className="border rounded-md px-2 py-1 text-sm text-gray-700"
-        />
+        <div className="relative">
+          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <DatePicker
+            selected={startDate ? parse(startDate, "yyyy-MM-dd", new Date()) : null}
+            onChange={(date) => {
+              if (date) {
+                const formatted = format(date, "yyyy-MM-dd");
+                handleStartDateChange(formatted);
+              } else {
+                setStartDate("");
+              }
+            }}
+            dateFormat="MM/dd/yyyy"
+            placeholderText="MM/DD/YYYY"
+            showYearDropdown
+            scrollableYearDropdown
+            yearDropdownItemNumber={100}
+            className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
 
         {/* End Date */}
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => handleEndDateChange(e.target.value)}
-          min={startDate ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1))
-            .toISOString()
-            .split('T')[0] : ''}
-          className="border rounded-md px-2 py-1 text-sm text-gray-700"
-        />
-
-        
+        <div className="relative">
+          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <DatePicker
+            selected={endDate ? parse(endDate, "yyyy-MM-dd", new Date()) : null}
+            onChange={(date) => {
+              if (date) {
+                const formatted = format(date, "yyyy-MM-dd");
+                handleEndDateChange(formatted);
+              } else {
+                setEndDate("");
+              }
+            }}
+            minDate={
+              startDate
+                ? new Date(
+                    new Date(startDate).setDate(new Date(startDate).getDate() + 1)
+                  )
+                : null
+            }
+            dateFormat="MM/dd/yyyy"
+            placeholderText="MM/DD/YYYY"
+            showYearDropdown
+            scrollableYearDropdown
+            yearDropdownItemNumber={100}
+            className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
 
         <button
           onClick={handleSearch}

@@ -920,8 +920,9 @@ export default function OrgCalendar({ orgId }) {
                   </div>
 
                   {/* Right: Navigation */}
-                  <div className="flex gap-2 justify-center sm:justify-end">
-                    <button
+                  {activeTab !== "search" && activeTab !== "reports" && (
+                    <div className="flex gap-2 justify-center sm:justify-end">
+                      <button
                         onClick={goPrev}
                         className="flex items-center gap-1 text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
                       >
@@ -935,8 +936,10 @@ export default function OrgCalendar({ orgId }) {
                       >
                         Next
                         <ChevronRight size={16} />
-                    </button>
-                  </div>
+                      </button>
+                    </div>
+                  )}
+
             </div>
 
             {activeTab === 'search' && (
