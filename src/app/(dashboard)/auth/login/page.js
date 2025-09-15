@@ -260,7 +260,7 @@ export default function LoginPage() {
 
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
+              {/* <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   name="rememberMe"
@@ -270,7 +270,7 @@ export default function LoginPage() {
                   className="w-4 h-4 text-indigo-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
                 />
                 <span className="text-sm text-gray-700">Remember me</span>
-              </label>
+              </label> */}
               
               <Link
                 href="/auth/forgot-password"

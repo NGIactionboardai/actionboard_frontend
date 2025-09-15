@@ -840,7 +840,10 @@ export default function OrgCalendar({ orgId }) {
               {/* Left: Org info */}
               <div>
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  {orgName} Calendar
+                  <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
+                    {orgName} Calendar
+                  </span>
+                  
                 </h2>
 
                 <p className="text-xs text-gray-500 mt-1">

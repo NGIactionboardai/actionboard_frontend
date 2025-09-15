@@ -831,8 +831,11 @@ export default function Calendar() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 {/* Title + Date */}
                 <div className="flex flex-col">
-                  <h1 className="text-lg sm:text-xl font-semibold text-gray-800">
-                    Personal Calendar
+                  <h1 className="text-lg sm:text-xl font-semibold">
+                    <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
+                      Personal Calendar
+                    </span>
+                    
                   </h1>
                   <p className="text-xs sm:text-sm text-gray-500 mt-1">
                     {currentDate.toLocaleDateString('default', {

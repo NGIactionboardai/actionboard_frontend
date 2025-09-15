@@ -243,12 +243,14 @@ const ManageOrganizations = ({
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="flex-1 min-w-0">
-          <h2 className="text-2xl sm:text-3xl font-bold pb-1 mb-3 sm:mb-5 leading-snug text-gray-900">
+        <h2 className="text-2xl sm:text-3xl font-bold pb-1 mb-3 sm:mb-5">
+          <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
             Welcome to Nous Meeting
-          </h2>
-          <h4 className="text-lg sm:text-xl font-bold pb-1 leading-snug text-gray-900">
+          </span>
+        </h2>
+          {/* <h4 className="text-lg sm:text-xl font-bold pb-1 leading-snug text-gray-900">
             {title}
-          </h4>
+          </h4> */}
           {/* <p className="mt-1 text-sm text-gray-500">
             {description}
           </p> */}
@@ -318,6 +320,19 @@ const ManageOrganizations = ({
           </div>
         </div>
       )}
+
+      <div className="text-center mt-6">
+        <h4 className="text-lg sm:text-xl font-bold pb-1 leading-snug text-gray-900">
+          <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
+            {filteredOrganizations.length === 0
+              ? "Create your first organization"
+              : title}
+          </span>
+          {/* {filteredOrganizations.length === 0
+            ? "Create your first organization"
+            : title} */}
+        </h4>
+      </div>
 
       {/* Organizations List */}
       <div className="sm:rounded-lg">

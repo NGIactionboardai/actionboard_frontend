@@ -118,15 +118,15 @@ export default function ContactPage() {
     {
       icon: <Phone className="w-6 h-6" />,
       title: "Call Us",
-      content: "+1 (555) 123-4567",
+      content: "+1-3473698716",
       description: "Mon-Fri from 8am to 6pm",
       color: "from-purple-100 to-pink-50"
     },
     {
       icon: <MapPin className="w-6 h-6" />,
       title: "Visit Us",
-      content: "123 Innovation Drive",
-      description: "Suite 100, San Francisco, CA",
+      content: "17-101st Avenue Brooklyn",
+      description: "New York 11208 USA",
       color: "from-emerald-100 to-teal-50"
     }
   ];

@@ -14,7 +14,7 @@ import SentimentSummaryTable from '@/app/components/meetings/SentimentSummaryTab
 import axios from 'axios';
 import { format } from "date-fns";
 import { generateMeetingPDF } from '@/app/utils/pdfGenerator';
-import { FileDown } from 'lucide-react';
+import { ArrowLeft, Building2, FileDown } from 'lucide-react';
 import EditStructuredSummary from '@/app/components/meeting/EditStructuredSummary';
 import _ from "lodash";
 import SendSummaryModal from '@/app/components/meeting/SendSummaryModal';
@@ -734,55 +734,77 @@ export default function MeetingDetails() {
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
-      <div className="mb-8 space-y-2">
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
-        >
-          <svg className="mr-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-          Back
-        </button>
+      <div className="mb-8 space-y-4">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200 group cursor-pointer"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4 group-hover:-translate-x-0.5 transition-transform duration-200" />
+            Back
+          </button>
 
-        <div className="space-y-1">
-          <h1 className="text-lg sm:text-xl font-bold leading-7 text-gray-900 truncate">
-            Org: {meeting.organisation.name || "Organization"}
-          </h1>
-          <h3 className="text-md sm:text-lg font-semibold leading-6 text-gray-700 truncate">
-            {meeting.topic || 'Meeting Details'}
-          </h3>
+          <div className="space-y-3">
+            {/* Organization name with icon - subtle and secondary */}
+            <div className="flex items-center space-x-2">
+              <Building2 className="h-8 w-8 text-gray-400" />
+              <span className="text-xl sm:text-2xl font-bold text-gray-600">
+                {meeting.organisation.name || "Organization"}
+              </span>
+            </div>
 
-          <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className={`px-2 py-1 text-xs sm:text-sm inline-flex leading-5 font-semibold rounded-full 
-              ${status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 
-                status === 'started' ? 'bg-green-100 text-green-800' : 
-                'bg-gray-100 text-gray-800'}`}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </span>
+            {/* Meeting topic - primary heading */}
+            <h1 className="text-xl sm:text-2xl font-bold leading-tight text-gray-900 break-words">
+              {meeting.topic || 'Meeting Details'}
+            </h1>
 
-            {/* Transcription Status Badge */}
-            <span className={`px-2 py-1 text-xs sm:text-sm inline-flex leading-5 font-semibold rounded-full
-              ${transcriptionStatus === 'completed'
-                ? 'bg-green-100 text-green-800'
-                : transcriptionStatus === 'not_found'
-                ? 'bg-yellow-100 text-yellow-800'
-                : 'bg-indigo-100 text-indigo-800'}`}>
-              {transcriptionStatus === 'completed'
-                ? 'Transcribed'
-                : transcriptionStatus === 'not_found'
-                ? 'Not Transcribed'
-                : transcriptionStatus === 'failed'
-                ? 'Not Transcribed'
-                : 'In Progress'}
-            </span>
+            {/* Status badges */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1">
+              <span className={`px-3 py-1.5 text-xs sm:text-sm inline-flex items-center leading-4 font-medium rounded-full border transition-colors duration-200
+                ${status === 'scheduled' 
+                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                  : status === 'started' 
+                  ? 'bg-green-50 text-green-700 border-green-200' 
+                  : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full mr-2 ${
+                  status === 'scheduled' 
+                    ? 'bg-blue-400' 
+                    : status === 'started' 
+                    ? 'bg-green-400' 
+                    : 'bg-gray-400'
+                }`}></span>
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </span>
 
-            {/* <span className="text-sm text-gray-500 truncate">
-              Meeting ID: {meeting.meeting_id || meeting.id}
-            </span> */}
+              {/* Transcription Status Badge */}
+              <span className={`px-3 py-1.5 text-xs sm:text-sm inline-flex items-center leading-4 font-medium rounded-full border transition-colors duration-200
+                ${transcriptionStatus === 'completed'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : transcriptionStatus === 'not_found'
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                  : transcriptionStatus === 'failed'
+                  ? 'bg-red-50 text-red-700 border-red-200'
+                  : 'bg-indigo-50 text-indigo-700 border-indigo-200'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full mr-2 ${
+                  transcriptionStatus === 'completed'
+                    ? 'bg-emerald-400'
+                    : transcriptionStatus === 'not_found'
+                    ? 'bg-amber-400'
+                    : transcriptionStatus === 'failed'
+                    ? 'bg-red-400'
+                    : 'bg-indigo-400'
+                }`}></span>
+                {transcriptionStatus === 'completed'
+                  ? 'Transcribed'
+                  : transcriptionStatus === 'not_found'
+                  ? 'Not Transcribed'
+                  : transcriptionStatus === 'failed'
+                  ? 'Transcription Failed'
+                  : 'Transcribing...'}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+
 
       {/* Transcription In Progress */}
       {(transcriptionStatus === 'pending' || transcriptionStatus === 'processing') && (
