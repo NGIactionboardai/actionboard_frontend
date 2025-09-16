@@ -38,7 +38,7 @@ const MeetingsHeader = ({ organizationId, orgName }) => {
               </>
             ) : (
               <>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug max-w-full truncate sm:truncate">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug max-w-full break-words">
                   <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
                     Welcome to {orgName}
                   </span>
