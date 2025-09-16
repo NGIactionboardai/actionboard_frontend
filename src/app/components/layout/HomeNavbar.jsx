@@ -177,6 +177,14 @@ export default function HomeNavbar() {
                 >
                   Sign Up
                 </Link>
+
+                <Link
+                  href="/help"
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors rounded-md"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  <HelpCircle className="mr-2 h-4 w-4 text-gray-500" /> Help
+                </Link>
               </>
             )}
           </div>
@@ -280,6 +288,14 @@ export default function HomeNavbar() {
                   onClick={() => setMenuOpen(false)}
                 >
                   Sign Up
+                </Link>
+
+                <Link
+                  href="/help"
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors rounded-md"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <HelpCircle className="mr-2 h-4 w-4 text-gray-500" /> Help
                 </Link>
               </>
             )}

@@ -5,8 +5,11 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Twitter, Linkedin, Github, Youtube } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function NewLandingPage() {
+  const router = useRouter();
+
   const features = [
     {
       title: "Live Transcription",
@@ -135,7 +138,10 @@ export default function NewLandingPage() {
                 variants={heroVariants}
                 className="flex flex-wrap justify-center gap-4"
             >
-                <Button className="px-8 py-4 rounded-full text-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-lg">
+                <Button 
+                  className="px-8 py-4 cursor-pointer rounded-full text-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-lg"
+                  onClick={() => router.push("/auth/register")}
+                >
                 Get Started
                 </Button>
     
@@ -145,7 +151,7 @@ export default function NewLandingPage() {
                     .getElementById("features")
                     ?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="px-8 py-4 rounded-full text-lg bg-white text-[#0A0DC4] border border-[#0A0DC4] hover:bg-gray-100 shadow-lg"
+                className="px-8 py-4 cursor-pointer rounded-full text-lg bg-white text-[#0A0DC4] border border-[#0A0DC4] hover:bg-gray-100 shadow-lg"
                 >
                 View Features
                 </Button>

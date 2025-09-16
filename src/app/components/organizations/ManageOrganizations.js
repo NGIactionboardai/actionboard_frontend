@@ -20,6 +20,7 @@ import { Popover } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import withProfileCompletionGuard from '../withProfileCompletionGuard';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 
 
@@ -243,17 +244,28 @@ const ManageOrganizations = ({
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="flex-1 min-w-0">
-        <h2 className="text-2xl sm:text-3xl font-bold pb-1 mb-3 sm:mb-5">
+        {/* <h2 className="pb-1 mb-3 sm:mb-5 flex items-center gap-3">
+          <span className="text-2xl sm:text-5xl font-bold bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
+            Welcome to
+          </span>
+          <Image
+            src="/nous-text.png"
+            alt="nous meeting"
+            width={140}   // adjust width for desktop
+            height={60}   // adjust height proportionally
+            className="object-contain"
+            priority
+          />
+        </h2> */}
+        <h2 className="text-2xl sm:text-3xl font-bold pb-1 mb-3 sm:mb-5 flex items-center gap-2">
           <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
-            Welcome to Nous Meeting
+            Welcome to
+          </span>
+          <span className="bg-gradient-to-r from-[#8B0782] via-pink-600 to-purple-800 bg-clip-text text-transparent lowercase">
+            nous meeting
           </span>
         </h2>
-          {/* <h4 className="text-lg sm:text-xl font-bold pb-1 leading-snug text-gray-900">
-            {title}
-          </h4> */}
-          {/* <p className="mt-1 text-sm text-gray-500">
-            {description}
-          </p> */}
+          
         </div>
         {/* <div className="mt-4 flex space-x-3 md:mt-0 md:ml-4">
           <button
