@@ -115,10 +115,11 @@ const EditSpeakersModal = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.3)] flex items-center justify-center p-4 sm:p-6">
-      <div className="relative w-full max-w-5xl bg-white rounded-md shadow-lg border p-4 sm:p-6 overflow-hidden">
+      <div className="relative w-full max-w-5xl bg-white rounded-md shadow-lg border 
+                      max-h-[90vh] flex flex-col"> {/* constrain height + flex layout */}
         
         {/* Header */}
-        <div className="flex flex-col items-center mb-4 text-center">
+        <div className="flex flex-col items-center mb-4 text-center p-4 sm:p-6">
           <img
             src="/icons/ab-update-speaker.png"
             alt="Edit"
@@ -130,8 +131,8 @@ const EditSpeakersModal = ({
         </div>
 
         {/* Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
-          
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 sm:px-6 
+                        flex-1 overflow-y-auto"> 
           {/* Left: Speaker Editing */}
           <div className="space-y-4">
             {loading ? (
@@ -148,7 +149,8 @@ const EditSpeakersModal = ({
                     type="text"
                     value={speakerMap[s.name] || ''}
                     onChange={(e) => handleChange(s.name, e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+                              focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm"
                   />
                   {validationErrors[s.name] && (
                     <p className="mt-1 text-xs sm:text-sm text-red-600">
@@ -182,17 +184,25 @@ const EditSpeakersModal = ({
         </div>
 
         {/* Actions */}
-        <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-end gap-3 p-4 sm:p-6 border-t">
           <button
             onClick={onClose}
-            className="w-full sm:w-auto inline-flex justify-center px-4 py-2 bg-gray-500 text-white text-xs sm:text-sm font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+            className="w-full sm:w-auto inline-flex justify-center px-4 py-2 
+                      bg-gray-500 text-white text-xs sm:text-sm font-medium 
+                      rounded-md hover:bg-gray-600 focus:outline-none 
+                      focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full sm:w-auto inline-flex justify-center px-4 py-2 text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-xs sm:text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            className="w-full sm:w-auto inline-flex justify-center px-4 py-2 
+                      text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] 
+                      hover:from-[#080aa8] hover:to-[#6d0668] 
+                      text-xs sm:text-sm font-medium rounded-md 
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 
+                      focus:ring-indigo-500 disabled:opacity-50"
           >
             {submitting ? 'Saving...' : 'Save Changes'}
           </button>

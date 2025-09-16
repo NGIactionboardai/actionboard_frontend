@@ -244,27 +244,27 @@ const ManageOrganizations = ({
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="flex-1 min-w-0">
-        {/* <h2 className="pb-1 mb-3 sm:mb-5 flex items-center gap-3">
-          <span className="text-2xl sm:text-5xl font-bold bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
+        <h2 className="pb-1 mb-3 sm:mb-5 flex items-center gap-1">
+          <span className="text-4xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
             Welcome to
           </span>
           <Image
             src="/nous-text.png"
             alt="nous meeting"
-            width={140}   // adjust width for desktop
-            height={60}   // adjust height proportionally
-            className="object-contain"
+            width={100}   // default mobile width
+            height={45}
+            className="object-contain sm:w-[140px] sm:h-[60px] lg:w-[180px] lg:h-[75px]"
             priority
           />
-        </h2> */}
-        <h2 className="text-2xl sm:text-3xl font-bold pb-1 mb-3 sm:mb-5 flex items-center gap-2">
+        </h2>
+        {/* <h2 className="text-2xl sm:text-3xl font-bold pb-1 mb-3 sm:mb-5 flex items-center gap-2">
           <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
             Welcome to
           </span>
           <span className="bg-gradient-to-r from-[#8B0782] via-pink-600 to-purple-800 bg-clip-text text-transparent lowercase">
             nous meeting
           </span>
-        </h2>
+        </h2> */}
           
         </div>
         {/* <div className="mt-4 flex space-x-3 md:mt-0 md:ml-4">

@@ -19,6 +19,8 @@ import {
   Users,
   CheckCircle
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
@@ -29,6 +31,7 @@ export default function ContactPage() {
     subject: "",
     message: "",
   });
+  const router = useRouter();
 
   const { scrollYProgress } = useScroll();
   const heroRef = useRef(null);
@@ -265,7 +268,7 @@ export default function ContactPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white/50 backdrop-blur-sm">
+      {/* <section className="py-16 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -289,7 +292,7 @@ export default function ContactPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Contact Section */}
       <section id="contact-section" className="py-24 bg-gradient-to-b from-white to-blue-50">
@@ -514,7 +517,10 @@ export default function ContactPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button className="px-8 py-4 text-lg bg-white text-blue-700 hover:bg-gray-100 shadow-xl rounded-full">
+                <Button 
+                  className="px-8 py-4 text-lg bg-white text-blue-700 hover:bg-gray-100 shadow-xl rounded-full"
+                  onClick={() => router.push("/auth/register")}
+                >
                   Get Started
                 </Button>
               </motion.div>

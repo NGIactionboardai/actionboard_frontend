@@ -249,7 +249,7 @@ const HelpPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white/50 backdrop-blur-sm">
+      {/* <section className="py-16 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -273,12 +273,13 @@ const HelpPage = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Main Content */}
       <div id="help-content" className="max-w-7xl mx-auto px-6 py-24 space-y-24">
         {/* User Manual Section */}
         <motion.section
+          id="user-manual"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -317,16 +318,41 @@ const HelpPage = () => {
                 <li>Use the calendar to track all events and generate reports.</li>
               </ul>
 
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <a
+              <motion.div
+                className="flex flex-col sm:flex-row justify-center gap-4"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                {/* Desktop Manual */}
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   href="/manuals/Nousmeeting_User_Manual.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white rounded-lg shadow-lg hover:from-[#080aa8] hover:to-[#6d0668] transition-all duration-200"
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] 
+                            text-white rounded-lg shadow-lg hover:from-[#080aa8] hover:to-[#6d0668] 
+                            transition-all duration-200"
                 >
                   <Download className="w-5 h-5 mr-2" />
-                  Download Full User Manual (PDF)
-                </a>
+                  Desktop User Manual (PDF)
+                </motion.a>
+
+                {/* Mobile Manual */}
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href="/manuals/Nousmeeting_User_Manual_Mobile.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-600 to-purple-700 
+                            text-white rounded-lg shadow-lg hover:from-pink-700 hover:to-purple-800 
+                            transition-all duration-200"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  Mobile User Manual (PDF)
+                </motion.a>
               </motion.div>
             </CardContent>
           </Card>

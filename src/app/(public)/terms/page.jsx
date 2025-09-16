@@ -200,8 +200,8 @@ const TermsPage = () => {
             <h3 className="font-bold mt-6">G. Technical Inquiries</h3>
             <p>
               For technical inquiries, contact{" "}
-              <a href="mailto:noor.glocal@gmail.com" className="text-blue-600 underline">
-                noor.glocal@gmail.com
+              <a href="mailto:support@nousmeeting.com" className="text-blue-600 underline">
+                support@nousmeeting.com
               </a>
             </p>
           </div>
