@@ -114,8 +114,11 @@ export default function NewLandingPage() {
                 variants={heroVariants}
                 className="text-4xl sm:text-6xl font-bold mb-6 sm:whitespace-nowrap"
             >
-                <span className="bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] bg-clip-text text-transparent">
-                From Meetings to Meaning
+                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+                  From Meetings
+                </span>
+                <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-800 bg-clip-text text-transparent">
+                  to Meaning
                 </span>
             </motion.h1>
     
@@ -140,9 +143,9 @@ export default function NewLandingPage() {
             >
                 <Button 
                   className="px-8 py-4 cursor-pointer rounded-full text-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-lg"
-                  onClick={() => router.push("/auth/register")}
+                  onClick={() => router.push("/help#help-content")}
                 >
-                Get Started
+                  Get Started
                 </Button>
     
                 <Button
@@ -228,7 +231,10 @@ export default function NewLandingPage() {
         <h2 className="text-3xl sm:text-4xl font-bold mb-6">
           Ready to use Nous Meeting?
         </h2>
-        <Button className="px-8 py-4 rounded-full text-lg bg-white text-[#0A0DC4] hover:bg-gray-100 shadow-lg">
+        <Button 
+          className="px-8 py-4 rounded-full text-lg bg-white text-[#0A0DC4] hover:bg-gray-100 shadow-lg"
+          onClick={() => router.push("/help#help-content")}
+        >
           Try Now
         </Button>
       </section>
