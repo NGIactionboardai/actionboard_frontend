@@ -117,8 +117,9 @@ export default function NewLandingPage() {
                 <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
                   From Meetings
                 </span>
+
                 <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-800 bg-clip-text text-transparent">
-                  to Meaning
+                &nbsp;to Meaning
                 </span>
             </motion.h1>
     
