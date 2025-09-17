@@ -400,6 +400,7 @@ const HelpPage = () => {
 
         {/* Contact Form Section */}
         <motion.section
+          id="contact"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -549,6 +550,7 @@ const HelpPage = () => {
 
         {/* Bug Report Section */}
         <motion.section
+          id="bug-report"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -577,6 +579,7 @@ const HelpPage = () => {
             </button>
           </motion.div>
         </motion.section>
+
       </div>
 
       {/* Bug Report Modal */}

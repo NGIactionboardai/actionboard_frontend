@@ -229,9 +229,14 @@ export default function NewLandingPage() {
 
       {/* CTA Footer */}
       <section className="text-center py-20 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white">
-        <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-          Ready to use Nous Meeting?
-        </h2>
+      <h2 className="text-4xl sm:text-4xl font-bold mb-6 flex items-center justify-center gap-2">
+        <span>Ready to use</span>
+        <span className="flex flex-col justify-start items-start leading-tight text-2xl sm:text-2xl">
+          <span>nous</span>
+          <span>meeting</span>
+        </span>
+        ?
+      </h2>
         <Button 
           className="px-8 py-4 rounded-full text-lg bg-white text-[#0A0DC4] hover:bg-gray-100 shadow-lg"
           onClick={() => router.push("/help#help-content")}
