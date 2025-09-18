@@ -30,6 +30,7 @@ import JoinBtnInstructionModal from '@/app/components/meetings/JoinBtnInstructio
 import { selectZoomUserInfo } from '@/redux/auth/zoomSlice';
 import { Plus, SlidersHorizontal, X } from 'lucide-react';
 import MeetingsToolbarMobile from '@/app/components/meetings/MeetingsToolbarMobile';
+import DeleteMeetingModal from '@/app/components/meetings/DeleteMeetingModal';
 
 export default function Meetings() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -44,6 +45,8 @@ export default function Meetings() {
   const [isJoinBtnInstructionModalOpen, setIsJoinBtnInstructionModalOpen] = useState(false);
   const [showRecordingInfoModal, setShowRecordingInfoModal] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  
 
 
   // Custom hooks for state management
@@ -244,6 +247,10 @@ export default function Meetings() {
             setSelectedMeeting(meeting);
             setIsJoinBtnInstructionModalOpen(true);
           }}
+          onDeleteClick={(meeting) => {
+            setSelectedMeeting(meeting);
+            setIsDeleteModalOpen(true);
+          }}
         />
   
         {/* Modals */}
@@ -283,6 +290,14 @@ export default function Meetings() {
           <JoinBtnInstructionModal
             isOpen={isJoinBtnInstructionModalOpen}
             onClose={() => setIsJoinBtnInstructionModalOpen(false)}
+            meeting={selectedMeeting}
+          />
+        )}
+
+        {selectedMeeting && (
+          <DeleteMeetingModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
             meeting={selectedMeeting}
           />
         )}

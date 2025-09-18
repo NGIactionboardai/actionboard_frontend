@@ -378,6 +378,13 @@ const zoomSlice = createSlice({
     removeMeetingFromState: (state, action) => {
       state.meetings = state.meetings.filter(meeting => meeting.id !== action.payload);
     },
+
+    // deleteZoomMeeting: (state, action) => {
+    //   const meetingId = action.payload;
+    //   state.meetings = state.meetings.filter(
+    //     (m) => m.meeting_id !== meetingId
+    //   );
+    // },
   },
   extraReducers: (builder) => {
     // Initiate Zoom Auth
@@ -594,6 +601,7 @@ export const {
   addMeeting,
   updateMeetingInState,
   removeMeetingFromState,
+  // deleteZoomMeeting,
 } = zoomSlice.actions;
 
 // Selectors

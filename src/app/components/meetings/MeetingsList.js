@@ -17,6 +17,7 @@ const MeetingsList = ({
   getTranscriptionStatus,
   onShareClick,
   onJoinClick,
+  onDeleteClick,
 }) => {
 
   
@@ -192,6 +193,17 @@ const MeetingsList = ({
                       className="w-full sm:w-auto px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
                     >
                       Invite
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onDeleteClick(meeting);
+                      }}
+                      className="w-full sm:w-auto px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-red-300 hover:bg-red-400 transition"
+                    >
+                      Delete
                     </button>
                   </div>
 
