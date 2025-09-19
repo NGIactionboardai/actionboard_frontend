@@ -107,7 +107,7 @@ export default function BugReportModal({ isOpen, onClose }) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-xl transition-all max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex justify-between items-start mb-4">
                   <Dialog.Title className="text-lg font-bold text-gray-900">
