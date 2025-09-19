@@ -63,6 +63,8 @@ export default function MeetingDetails() {
   const [hoursLeft, setHoursLeft] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [fileError, setFileError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [speakersUpdated, setSpeakersUpdated] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [multilingualUtterence, setMultilingualUtterence] = useState(null);
@@ -361,30 +363,45 @@ export default function MeetingDetails() {
     }
   };
 
+  // handler
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    setSelectedFile(file);
+    if (!file) return;
+
+    if (!file.type.startsWith("audio/")) {
+      setFileError("Only audio files are allowed. Please upload an audio file.");
+      setSelectedFile(null);
+      event.target.value = null; // reset the input
+    } else {
+      setFileError("");
+      setSelectedFile(file);
+    }
   };
+
 
   const handleUploadTranscribe = async () => {
     if (!selectedFile) {
-      alert("Please select a file first.");
+      setFileError("Please select an audio file first."); // use modal error instead of alert
       return;
     }
   
     try {
       setTranscribing(true);
-  
-      console.log('Uploading audio file for transcription - Meeting ID:', meetingId);
+      setUploadProgress(0);
   
       const uploadUrl = `${API_BASE_URL}/transcripts/zoom/upload-audio-transcribe/${meetingId}/`;
   
       const formData = new FormData();
       formData.append('audio', selectedFile);
   
-      const response = await axios.post(uploadUrl, formData);
-  
-      console.log('Upload & Transcribe response status:', response.status);
+      const response = await axios.post(uploadUrl, formData, {
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(percent);
+          }
+        }
+      });
   
       if (response.status >= 200 && response.status < 300) {
         const data = response.data;
@@ -392,33 +409,18 @@ export default function MeetingDetails() {
   
         setShowUploadModal(false);
         setSelectedFile(null);
+        setUploadProgress(0);
   
         const initialStatus = await checkTranscriptionStatus();
-  
         if (initialStatus === 'pending' || initialStatus === 'processing') {
           pollTranscriptionStatus();
         }
       } else {
-        alert(`Upload failed with status: ${response.status}`);
+        setFileError(`Upload failed with status: ${response.status}`);
       }
     } catch (err) {
       console.error('Upload error:', err);
-  
-      if (err.response) {
-        if (err.response.status === 401) {
-          alert('Authentication failed. Please log in again.');
-        } else if (err.response.status === 403) {
-          alert('Access denied. You do not have permission.');
-        } else if (err.response.status === 502) {
-          alert('Server is temporarily unavailable. Try again shortly.');
-        } else {
-          alert(`Upload failed: ${err.response.status} - ${err.response.data}`);
-        }
-      } else if (err.message.includes('No authentication token')) {
-        alert('Please log in to upload a transcript.');
-      } else {
-        alert(`Unexpected error: ${err.message}`);
-      }
+      setFileError("Upload failed. Please try again.");
     } finally {
       setTranscribing(false);
     }
@@ -1698,17 +1700,21 @@ export default function MeetingDetails() {
               Upload Recording File
             </h2>
             <p className="text-xs sm:text-sm text-gray-600 text-center mb-4">
-              Choose an audio or video file to transcribe.
+              Choose an audio file to transcribe.
             </p>
 
             {/* File Input */}
             <input
               type="file"
               onChange={handleFileChange}
-              accept="audio/*,video/*"
+              accept="audio/*"
               className="block w-full text-xs sm:text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                         file:mr-2 sm:file:mr-4 file:py-1 sm:file:py-2 file:px-2 sm:file:px-4 file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
+
+            {fileError && (
+              <p className="mt-2 text-xs sm:text-sm text-red-600 text-center">{fileError}</p>
+            )}
 
             {/* Actions */}
             <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
@@ -1770,6 +1776,23 @@ export default function MeetingDetails() {
                 Cancel
               </button>
             </div>
+
+            {transcribing && (
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+
+            {uploadProgress > 0 && transcribing && (
+              <p className="text-xs text-gray-600 mt-1 text-center">
+                Uploading... {uploadProgress}%
+              </p>
+            )}
+
+            
           </div>
         </div>
       )}
