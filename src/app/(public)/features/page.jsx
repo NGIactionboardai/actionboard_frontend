@@ -9,8 +9,8 @@ import { useRef } from "react";
 
 const features = [
   {
-    title: "Live Transcription",
-    desc: "Capture every word with precision. Our real-time transcription engine converts spoken conversations into accurate, speaker-labeled text as your meeting unfolds—no lag, no missed moments.",
+    title: "Auto Transcription",
+    desc: "Let our AI automatically handle your meeting notes. Autotranscription runs in the background, capturing conversations with speaker labels and delivering accurate text—no setup, no effort, no missed details.",
     img: "/features/feature-01.png",
     icon: <Zap className="w-6 h-6" />,
     color: "from-blue-100 to-cyan-50",
