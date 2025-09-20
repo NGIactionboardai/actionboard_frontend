@@ -425,7 +425,7 @@ export default function AboutPage() {
       </section>
 
       {/* Team Section */}
-      <section className="py-24 bg-gradient-to-b from-blue-50 to-indigo-50">
+      {/* <section className="py-24 bg-gradient-to-b from-blue-50 to-indigo-50">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             initial="hidden"
@@ -475,7 +475,7 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Call to Action */}
       <section className="py-24 bg-gradient-to-r from-[#0A0DC4] via-[#8B0782] to-blue-800 text-white relative overflow-hidden">
