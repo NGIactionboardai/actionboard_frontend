@@ -93,7 +93,7 @@ const FeedbackPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 sm:p-6 flex items-center justify-center">
-      <div className="w-full max-w-3xl bg-white shadow-2xl rounded-2xl p-6 sm:p-10 border border-gray-100">
+      <div className="w-full mt-20 max-w-3xl bg-white shadow-2xl rounded-2xl p-6 sm:p-10 border border-gray-100">
         {/* Header */}
         <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2 text-center">
           Share Your Feedback

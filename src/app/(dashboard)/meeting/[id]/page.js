@@ -172,8 +172,11 @@ export default function MeetingDetails() {
   }, [meetingId, authToken]);
 
   useEffect(() => {
-    if (speaker_summaries && Object.keys(speaker_summaries).length > 0 && !selectedSpeaker) {
-      setSelectedSpeaker(Object.keys(speaker_summaries)[0]);
+    if (speaker_summaries && Object.keys(speaker_summaries).length > 0) {
+      // If no selection OR the current one no longer exists
+      if (!selectedSpeaker || !speaker_summaries[selectedSpeaker]) {
+        setSelectedSpeaker(Object.keys(speaker_summaries)[0]);
+      }
     }
   }, [speaker_summaries, selectedSpeaker]);
 
