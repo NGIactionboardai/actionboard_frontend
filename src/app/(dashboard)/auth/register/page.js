@@ -94,7 +94,7 @@ export default function RegistrationPage() {
   // Redirect if user is already authenticated
   useEffect(() => {
     if (auth.isAuthenticated && auth.user) {
-      router.push('/organization');
+      router.push('/organizations');
     }
   }, [auth.isAuthenticated, auth.user, router]);
 
