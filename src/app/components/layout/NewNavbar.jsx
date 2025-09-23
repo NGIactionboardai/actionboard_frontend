@@ -9,7 +9,7 @@ import axios from 'axios';
 import { getUserOrganizations, selectUserOrganizations } from '@/redux/auth/organizationSlice';
 import { HelpCircle, ChevronDown, Menu, X, Building2, Calendar, Settings, User, LogOut } from 'lucide-react';
 
-export default function NewNavbar() {
+export default function NewNavbar({ variant = "default" }) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -23,6 +23,7 @@ export default function NewNavbar() {
   const orgRef = useRef(null);
   const [orgs, setOrgs] = useState([]);
 
+
   const authToken = useSelector((state) => state.auth?.token);
 
   const dispatch = useDispatch();
@@ -32,6 +33,8 @@ export default function NewNavbar() {
   const userOrganizations = useSelector(selectUserOrganizations);
 
   const dropdownRef = useRef(null);
+
+  
 
   // All hooks are called BEFORE conditional rendering
   useEffect(() => {
@@ -104,6 +107,24 @@ export default function NewNavbar() {
       dispatch(getUserOrganizations());
   }, [dispatch]);
 
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
+  const navBg =
+  variant === "home"
+    ? (scrolled || mobileMenuOpen)
+      ? "backdrop-blur-md bg-white/95 shadow-sm"
+      : "bg-transparent"
+    : "backdrop-blur-md bg-white shadow-sm";
+
   const isActive = (path) => activePath === path;
 
   const handleSignOut = async () => {
@@ -139,7 +160,9 @@ export default function NewNavbar() {
   };
 
   return (
-    <nav className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/50 ${scrolled ? 'shadow-lg shadow-blue-500/10' : 'shadow-sm'} transition-all duration-300`}>
+    <nav
+     className={`fixed top-0 left-0 w-full z-50 transition-[background-color,backdrop-filter] duration-300 ${navBg}`}
+    >
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           <div className="flex items-center">
@@ -345,6 +368,10 @@ export default function NewNavbar() {
                   </NavLink>
                   <NavLink href="/auth/register" isActive={hasMounted && isActive('/auth/register')} isPrimary>
                     Sign Up
+                  </NavLink>
+
+                  <NavLink href="/auth/register" isActive={hasMounted && isActive('/Help')}>
+                    Help
                   </NavLink>
                 </div>
               )}
