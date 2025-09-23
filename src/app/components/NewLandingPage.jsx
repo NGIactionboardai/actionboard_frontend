@@ -144,7 +144,7 @@ export default function NewLandingPage() {
             >
                 <Button 
                   className="px-8 py-4 cursor-pointer rounded-full text-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-lg"
-                  onClick={() => router.push("/help#help-content")}
+                  onClick={() => router.push("/auth/register")}
                 >
                   Get Started
                 </Button>
