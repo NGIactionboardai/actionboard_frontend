@@ -188,6 +188,7 @@ export default function NewNavbar({ variant = "default" }) {
             <div className="flex items-center space-x-4 animate-pulse">
               <div className="w-24 h-8 bg-gray-200 rounded-lg"></div>
               <div className="w-24 h-8 bg-gray-200 rounded-lg"></div>
+              <div className="w-24 h-8 bg-gray-200 rounded-lg"></div>
             </div>
           ) : (
 
@@ -370,8 +371,12 @@ export default function NewNavbar({ variant = "default" }) {
                     Sign Up
                   </NavLink>
 
-                  <NavLink href="/auth/register" isActive={hasMounted && isActive('/Help')}>
-                    Help
+                  <NavLink href="/auth/register" isActive={hasMounted && isActive('/help')}>
+                    <span className='flex items-center'>
+
+                      <HelpCircle className="mr-2 h-4 w-4" /> Help
+                    </span>
+                    
                   </NavLink>
                 </div>
               )}
@@ -493,6 +498,11 @@ export default function NewNavbar({ variant = "default" }) {
                 </MobileNavLink>
                 <MobileNavLink href="/auth/register" onClick={() => setMobileMenuOpen(false)} isPrimary>
                   Sign Up
+                </MobileNavLink>
+                <MobileNavLink href="/help" onClick={() => setMobileMenuOpen(false)}>
+                  <span className='flex items-center'>
+                    <HelpCircle className="mr-2 h-4 w-4" /> Help
+                  </span>
                 </MobileNavLink>
               </div>
             )}
