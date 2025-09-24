@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }) {
       {/* <Navbar /> */}
       <NewNavbar />
       <ProtectedRoute>
-        <main className="p-0">{children}</main>
+        <main className="mt-20 p-0">{children}</main>
       </ProtectedRoute>
     </div>
   );
