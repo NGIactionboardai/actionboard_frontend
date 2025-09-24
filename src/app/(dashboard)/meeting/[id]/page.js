@@ -367,12 +367,18 @@ export default function MeetingDetails() {
   };
 
   // handler
+  const MAX_FILE_SIZE_MB = 50;
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     if (!file.type.startsWith("audio/")) {
       setFileError("Only audio files are allowed. Please upload an audio file.");
+      setSelectedFile(null);
+      event.target.value = null; // reset the input
+    } else if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      setFileError(`File size should be smaller than ${MAX_FILE_SIZE_MB}MB.`);
       setSelectedFile(null);
       event.target.value = null; // reset the input
     } else {
