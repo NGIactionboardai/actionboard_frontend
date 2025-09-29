@@ -28,6 +28,8 @@ const CreateMeetingModal = ({
     waiting_room: false,
     auto_recording: 'none',
     join_before_host: true,
+    audio: true,  
+    video: false, 
   });
 
   const handleMeetingFormChange = (e) => {
@@ -52,14 +54,16 @@ const CreateMeetingModal = ({
         topic: meetingForm.topic,
         start_time: new Date(meetingForm.start_time).toISOString(),
         duration: parseInt(meetingForm.duration),
-        // Add optional fields if they have values
         ...(meetingForm.agenda && { agenda: meetingForm.agenda }),
         ...(meetingForm.password && { password: meetingForm.password }),
-        // Add settings if you want to extend the backend to accept them
         settings: {
           waiting_room: meetingForm.waiting_room,
           auto_recording: meetingForm.auto_recording,
-          join_before_host: meetingForm.join_before_host
+          join_before_host: meetingForm.join_before_host,
+          audio: meetingForm.audio ? 'both' : 'none', // ✅ Zoom expects string
+          video: meetingForm.video,              // ✅ Zoom expects bool
+          // host_video: meetingForm.video,              // ✅ Zoom expects bool
+          // participant_video: meetingForm.video,       // ✅ Apply to participants
         }
       };
 
@@ -74,7 +78,9 @@ const CreateMeetingModal = ({
         password: '',
         waiting_room: false,
         auto_recording: 'none',
-        join_before_host: true
+        join_before_host: true,
+        audio: true,  
+        video: false, 
       });
       onClose();
       
@@ -100,6 +106,8 @@ const CreateMeetingModal = ({
       waiting_room: false,
       auto_recording: 'none',
       join_before_host: true,
+      audio: true,  
+      video: false, 
     });
     onClose();
   };
@@ -266,6 +274,35 @@ const CreateMeetingModal = ({
                               Enable Join Before host
                             </label>
                           </div>
+
+                          <div className="flex items-center">
+                            <input
+                              id="audio"
+                              name="audio"
+                              type="checkbox"
+                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                              checked={meetingForm.audio}
+                              onChange={handleMeetingFormChange}
+                            />
+                            <label htmlFor="audio" className="ml-2 block text-sm text-gray-900">
+                              Enable Audio (default ON)
+                            </label>
+                          </div>
+
+                          <div className="flex items-center">
+                            <input
+                              id="video"
+                              name="video"
+                              type="checkbox"
+                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                              checked={meetingForm.video}
+                              onChange={handleMeetingFormChange}
+                            />
+                            <label htmlFor="video" className="ml-2 block text-sm text-gray-900">
+                              Enable Video (default OFF)
+                            </label>
+                          </div>
+
                         </div>
                       </div>
                     </div>
