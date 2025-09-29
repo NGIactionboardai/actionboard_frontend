@@ -39,6 +39,7 @@ export default function Meetings() {
   const organizationId = params?.id;
   const [orgName, setOrgName] = useState('')
   const [members, setMembers] = useState([]);
+  const [orgError, setOrgError] = useState(null);
 
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -89,9 +90,11 @@ export default function Meetings() {
       try {
         const res = await axios.get(`${API_BASE_URL}/organisations/${organizationId}/`);
         setOrgName(res.data.name);
+        setOrgError(null);
         console.log("Organization Data:", res.data);
       } catch (error) {
         console.log("Failed to fetch organization details", error);
+        setOrgError("Organization not found or invalid.");
       }
     };
   
@@ -116,18 +119,24 @@ export default function Meetings() {
   }, [organizationId]);
 
   // If organization ID is not found, show message
-  if (!organizationId) {
+  if (!organizationId || orgError) {
     return (
       <div className="max-w-6xl mx-auto p-6">
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900">Invalid Organization</h2>
-          <p className="mt-2 text-gray-600">Organization ID is required to view meetings.</p>
-          <Link 
-            href="/"
-            className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Back to Organizations
-          </Link>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {orgError ? "Organization Not Found" : "Invalid Organization"}
+          </h2>
+          <p className="mt-2 text-gray-600">
+            {orgError || "Organization ID is required to view meetings."}
+          </p>
+          <div className="mt-6">
+            <Link 
+              href="/organizations"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Back to All Organizations
+            </Link>
+          </div>
         </div>
       </div>
     );
