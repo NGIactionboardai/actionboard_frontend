@@ -19,8 +19,10 @@ export default function SendInviteModal({
 
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
-  const authToken = useSelector((state) => state.auth.token);
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState("invite"); // "invite" | "history"
+  const [inviteHistory, setInviteHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   const filteredMembers = members.filter(
     (m) =>
@@ -44,7 +46,11 @@ export default function SendInviteModal({
   };
 
   useEffect(() => {
-    if (isOpen) setSelected([]);
+    if (isOpen) {
+      setSelected([]);
+      setViewMode("invite");
+      fetchHistory()
+    }
   }, [isOpen]);
 
   const handleSend = async () => {
@@ -62,11 +68,29 @@ export default function SendInviteModal({
 
       toast.success(res.data.detail || "Invites sent successfully!");
       onSuccess?.();
+      // Refresh history after sending
+      fetchHistory();
     } catch (err) {
       console.error("Failed to send invites:", err);
       toast.error("Failed to send invites. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHistory = async () => {
+    if (!meeting?.id) return;
+    setLoadingHistory(true);
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/meetings/invite-history/${orgId}/${meeting.id}/`
+      );
+      setInviteHistory(res.data.history || []);
+    } catch (err) {
+      console.error("Error fetching history", err);
+      toast.error("Failed to load invite history");
+    } finally {
+      setLoadingHistory(false);
     }
   };
 
@@ -113,111 +137,231 @@ export default function SendInviteModal({
                   </button>
                 </div>
 
-                {/* Meeting Link */}
-                {meeting?.join_url && (
-                  <div className="mb-4">
-                    <label className="text-sm text-gray-700 font-medium mb-1 block">
-                      Meeting Link
-                    </label>
-                    <div className="flex items-center justify-between bg-gray-100 rounded px-3 py-2 text-sm">
-                      <span
-                        className="text-gray-700 truncate max-w-[65%] block"
-                        title={meeting.join_url}
-                      >
-                        {meeting.join_url}
-                      </span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(meeting.join_url);
-                          toast.success("Copied meeting link!");
-                        }}
-                        className="text-indigo-600 hover:text-indigo-800 text-xs font-medium"
-                      >
-                        Copy
-                      </button>
-                    </div>
+                {/* Toggle as Tabs */}
+                <div className="mb-6 flex justify-center">
+                  <div className="inline-flex rounded-md border border-gray-300 bg-gray-100 p-1">
+                    <button
+                      className={`px-4 py-2 text-sm font-medium rounded-md transition ${
+                        viewMode === "invite"
+                          ? "bg-indigo-600 text-white shadow"
+                          : "text-gray-700 hover:bg-white"
+                      }`}
+                      onClick={() => setViewMode("invite")}
+                    >
+                      Invite Members
+                    </button>
+                    <button
+                      className={`px-4 py-2 text-sm font-medium rounded-md transition ${
+                        viewMode === "history"
+                          ? "bg-indigo-600 text-white shadow"
+                          : "text-gray-700 hover:bg-white"
+                      }`}
+                      onClick={() => {
+                        setViewMode("history");
+                        fetchHistory();
+                      }}
+                    >
+                      Invite History
+                    </button>
                   </div>
-                )}
-
-                {/* Search */}
-                <input
-                  type="text"
-                  placeholder="Search members..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full mb-3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-
-                {/* Select/Deselect All */}
-                <div className="flex justify-end gap-3 mb-3">
-                  <button
-                    onClick={handleSelectAll}
-                    className="text-sm text-blue-600 hover:underline font-medium"
-                  >
-                    Select All
-                  </button>
-                  <button
-                    onClick={handleDeselectAll}
-                    className="text-sm text-red-600 hover:underline font-medium"
-                  >
-                    Deselect All
-                  </button>
                 </div>
 
-                {/* Members List */}
-                <div className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                  {filteredMembers.map((m) => (
-                    <label
-                      key={m.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition cursor-pointer bg-white"
-                    >
-                      <div className="flex items-center gap-3">
+                {/* Content wrapper with fixed height */}
+                <div className="h-[500px] pr-2">
+                  {viewMode === "invite" ? (
+                      <div className="flex flex-col h-full">
+                        {/* Static Content (not scrollable) */}
+                        {meeting?.join_url && (
+                          <div className="mb-4">
+                            <label className="text-sm text-gray-700 font-medium mb-1 block">
+                              Meeting Link
+                            </label>
+                            <div className="flex items-center justify-between bg-gray-100 rounded px-3 py-2 text-sm">
+                              <span
+                                className="text-gray-700 truncate max-w-[65%] block"
+                                title={meeting.join_url}
+                              >
+                                {meeting.join_url}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(meeting.join_url);
+                                  toast.success("Copied meeting link!");
+                                }}
+                                className="text-indigo-600 hover:text-indigo-800 text-xs font-medium"
+                              >
+                                Copy
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Search */}
                         <input
-                          type="checkbox"
-                          checked={selected.includes(m.id)}
-                          onChange={() => toggleSelect(m.id)}
-                          className="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
+                          type="text"
+                          placeholder="Search members..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full mb-3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
-                        <div className="text-sm text-gray-800">
-                          <p className="font-medium">{m.name}</p>
-                          <p className="text-gray-500 text-xs">{m.email}</p>
+
+                        {/* Select/Deselect All */}
+                        <div className="flex justify-end gap-3 mb-3">
+                          <button
+                            onClick={handleSelectAll}
+                            className="text-sm text-blue-600 hover:underline font-medium"
+                          >
+                            Select All
+                          </button>
+                          <button
+                            onClick={handleDeselectAll}
+                            className="text-sm text-red-600 hover:underline font-medium"
+                          >
+                            Deselect All
+                          </button>
+                        </div>
+
+                        {/* Scrollable Members List */}
+                        <div className="flex-1 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 space-y-3">
+                          {loadingHistory ? (
+                            // Skeleton loaders
+                            Array.from({ length: 5 }).map((_, i) => (
+                              <div
+                                key={i}
+                                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-white animate-pulse"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-5 h-5 rounded bg-gray-200" />
+                                  <div className="space-y-2">
+                                    <div className="w-24 h-3 bg-gray-200 rounded" />
+                                    <div className="w-40 h-3 bg-gray-200 rounded" />
+                                  </div>
+                                </div>
+                                <div className="w-12 h-5 bg-gray-200 rounded-full" />
+                              </div>
+                            ))
+                          ) : (
+                            <>
+                              {filteredMembers.map((m) => {
+                                const alreadyInvited = inviteHistory.some((h) =>
+                                  h.members.some((hm) => hm.id === m.id)
+                                );
+                                return (
+                                  <label
+                                    key={m.id}
+                                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition cursor-pointer bg-white"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <input
+                                        type="checkbox"
+                                        checked={selected.includes(m.id)}
+                                        onChange={() => toggleSelect(m.id)}
+                                        className="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
+                                      />
+                                      <div className="text-sm text-gray-800">
+                                        <p className="font-medium">{m.name}</p>
+                                        <p className="text-gray-500 text-xs">{m.email}</p>
+                                      </div>
+                                    </div>
+                                    {alreadyInvited && (
+                                      <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium">
+                                        Invited
+                                      </span>
+                                    )}
+                                  </label>
+                                );
+                              })}
+
+                              {filteredMembers.length === 0 && !loadingHistory && (
+                                <div className="text-center text-gray-500 p-4 border rounded-lg">
+                                  <p>No matching members found.</p>
+                                  <a
+                                    href={`/member-list/${orgId}`}
+                                    className="inline-block mt-2 px-4 py-2 rounded-md bg-black/10 text-sm text-gray-700 hover:bg-black/20 transition"
+                                  >
+                                    Add Members
+                                  </a>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+
+                        {/* Fixed Footer */}
+                        <div className="pt-4 border-t mt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+                          <button
+                            onClick={onClose}
+                            className="w-full sm:w-auto px-4 py-2 rounded-md font-semibold text-gray-700 hover:bg-gray-100"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSend}
+                            disabled={loading || selected.length === 0}
+                            className={`w-full sm:w-auto px-4 py-2 rounded-md font-semibold text-white transition 
+                              bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] 
+                              hover:from-[#080aa8] hover:to-[#6d0668]
+                              disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {loading ? "Sending..." : "Send Invite"}
+                          </button>
                         </div>
                       </div>
-                    </label>
-                  ))}
-
-                  {filteredMembers.length === 0 && (
-                    <div className="text-center text-gray-500 p-4 border rounded-lg">
-                      <p>No matching members found.</p>
-                      <a
-                        href={`/member-list/${orgId}`}
-                        className="inline-block mt-2 px-4 py-2 rounded-md bg-black/10 text-sm text-gray-700 hover:bg-black/20 transition"
-                      >
-                        Add Members
-                      </a>
-                    </div>
+                  ): (
+                        <div className="space-y-4 max-h-72 overflow-y-auto pr-2">
+                          {loadingHistory ? (
+                            <>
+                              {[...Array(3)].map((_, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-3 border rounded-md bg-gray-50 animate-pulse"
+                                >
+                                  <div className="h-4 w-32 bg-gray-300 rounded mb-2"></div>
+                                  <div className="h-3 w-20 bg-gray-200 rounded mb-3"></div>
+                                  <div className="space-y-1">
+                                    <div className="h-3 w-40 bg-gray-200 rounded"></div>
+                                    <div className="h-3 w-28 bg-gray-200 rounded"></div>
+                                  </div>
+                                </div>
+                              ))}
+                            </>
+                          ) : inviteHistory.length === 0 ? (
+                            <p className="text-gray-500 text-center">
+                              No invites sent yet.
+                            </p>
+                          ) : (
+                            inviteHistory.map((h) => (
+                              <div
+                                key={h.id}
+                                className="p-3 border rounded-md bg-gray-50"
+                              >
+                                <p className="text-sm font-semibold text-gray-800">
+                                  {new Date(h.created_at).toLocaleString()}
+                                </p>
+                                <p className="text-xs text-gray-500 mb-2">
+                                  By: {h.invited_by}
+                                </p>
+                                <ul className="list-disc list-inside text-sm text-gray-700">
+                                  {h.members.map((m) => (
+                                    <li key={m.id}>
+                                      {m.name} ({m.email})
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))
+                          )}
+                        </div>
                   )}
                 </div>
 
-                {/* Footer */}
-                <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
-                  <button
-                    onClick={onClose}
-                    className="w-full sm:w-auto px-4 py-2 rounded-md font-semibold text-gray-700 hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSend}
-                    disabled={loading || selected.length === 0}
-                    className={`w-full sm:w-auto px-4 py-2 rounded-md font-semibold text-white transition 
-                      bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] 
-                      hover:from-[#080aa8] hover:to-[#6d0668]
-                      disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    {loading ? "Sending..." : "Send Invite"}
-                  </button>
-                </div>
+                {/* {viewMode === "invite" && (
+                  
+                )} */}
+
+                {/* {viewMode === "history" && (
+                  
+                )} */}
               </Dialog.Panel>
             </Transition.Child>
           </div>
