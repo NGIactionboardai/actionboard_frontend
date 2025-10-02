@@ -371,7 +371,7 @@ export default function NewNavbar({ variant = "default" }) {
                     Sign Up
                   </NavLink>
 
-                  <NavLink href="/auth/register" isActive={hasMounted && isActive('/help')}>
+                  <NavLink href="/help" isActive={hasMounted && isActive('/help')}>
                     <span className='flex items-center'>
 
                       <HelpCircle className="mr-2 h-4 w-4" /> Help
