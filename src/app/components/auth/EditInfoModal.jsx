@@ -104,12 +104,43 @@ export default function EditInfoModal({ isOpen, onClose }) {
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
+  
+    // basic required checks
+    if (!form.first_name.trim()) {
+      setError("First name is required");
+      setLoading(false);
+      return;
+    }
+    if (!form.last_name.trim()) {
+      setError("Last name is required");
+      setLoading(false);
+      return;
+    }
+    if (!form.country) {
+      setError("Country is required");
+      setLoading(false);
+      return;
+    }
+    if (!form.date_of_birth) {
+      setDobError("Date of birth is required");
+      setLoading(false);
+      return;
+    }
+  
+    // length enforcement
+    if (form.first_name.length > 30 || form.last_name.length > 50) {
+      setError("Names cannot exceed 30 characters");
+      setLoading(false);
+      return;
+    }
+  
+    // validate DOB
     if (!validateDob(form.date_of_birth)) {
       setLoading(false);
       return;
     }
+  
     try {
-      // send country as ISO code (form.country)
       const { data } = await editUserInfo(form);
       dispatch(updateUserInfo({ user: data.user }));
       toast.success('Profile updated!');
@@ -166,6 +197,13 @@ export default function EditInfoModal({ isOpen, onClose }) {
                 </div>
 
                 <div className="space-y-4">
+                  {/* Global error */}
+                  {error && (
+                    <div className="p-2 rounded-md bg-red-50 border border-red-200">
+                      <p className="text-sm text-red-600">{error}</p>
+                    </div>
+                  )}
+
                   {/* First Name */}
                   <div>
                     <label
@@ -180,6 +218,8 @@ export default function EditInfoModal({ isOpen, onClose }) {
                       name="first_name"
                       value={form.first_name}
                       onChange={handleChange}
+                      maxLength={30}
+                      required
                       placeholder="Enter your first name"
                       className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
@@ -199,6 +239,8 @@ export default function EditInfoModal({ isOpen, onClose }) {
                       name="last_name"
                       value={form.last_name}
                       onChange={handleChange}
+                      maxLength={50}
+                      required
                       placeholder="Enter your last name"
                       className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
@@ -218,6 +260,7 @@ export default function EditInfoModal({ isOpen, onClose }) {
                         name="country"
                         value={form.country}
                         onChange={handleCountrySelect}
+                        required
                         className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm bg-white appearance-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       >
                         <option value="">Select Country</option>
@@ -276,6 +319,7 @@ export default function EditInfoModal({ isOpen, onClose }) {
                       showYearDropdown
                       scrollableYearDropdown
                       yearDropdownItemNumber={100}
+                      required
                       className="w-full border-2 border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
 

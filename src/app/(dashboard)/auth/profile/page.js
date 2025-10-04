@@ -89,11 +89,19 @@ function ProfilePage() {
             </div>
             
             {/* User Info */}
-            <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+            <div className="flex-1 text-center sm:text-left min-w-0">
+              <h1
+                className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 truncate"
+                title={getUserDisplayName()} // tooltip shows full name
+              >
                 {getUserDisplayName()}
               </h1>
-              <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">{user.email}</p>
+              <p
+                className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base truncate"
+                title={user.email} // tooltip shows full email
+              >
+                {user.email}
+              </p>
               
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center sm:justify-start">

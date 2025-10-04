@@ -291,8 +291,10 @@ export default function NewNavbar({ variant = "default" }) {
                       <div className="h-9 w-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium shadow-md group-hover:shadow-lg transition-shadow">
                         {getUserInitials()}
                       </div>
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium text-gray-900 text-sm">
+                      <div className="flex flex-col items-start max-w-60">
+                        <span className="font-medium text-gray-900 text-sm max-w-45 truncate"
+                          title={getUserDisplayName()}
+                        >
                           {getUserDisplayName()}
                         </span>
                         <span className="text-xs text-gray-500">
@@ -309,13 +311,24 @@ export default function NewNavbar({ variant = "default" }) {
                           <div className="py-2">
                             {/* User info header */}
                             <div className="px-4 py-3 border-b border-gray-100">
-                              <div className="flex items-center space-x-3">
+                              <div className="flex items-center space-x-3 min-w-0">
                                 <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
                                   {getUserInitials()}
                                 </div>
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
-                                  <p className="text-xs text-gray-500">{user?.email || 'user@example.com'}</p>
+                                <div className="min-w-0">
+                                <p
+                                  className="text-sm font-medium text-gray-900 max-w-36 truncate"
+                                  title={getUserDisplayName()}
+                                >
+                                  {getUserDisplayName()}
+                                </p>
+                                <p
+                                  className="text-xs text-gray-500 truncate"
+                                  title={user?.email || 'user@example.com'}
+                                >
+                                  {user?.email || 'user@example.com'}
+                                </p>
+
                                 </div>
                               </div>
                             </div>
@@ -421,9 +434,19 @@ export default function NewNavbar({ variant = "default" }) {
                   <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium mr-3">
                     {getUserInitials()}
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Welcome, {getUserDisplayName()}</p>
-                    <p className="text-xs text-gray-500">{user?.email || 'user@example.com'}</p>
+                  <div className="min-w-0">
+                    <p
+                      className="text-sm font-medium text-gray-900 truncate"
+                      title={getUserDisplayName()}
+                    >
+                      Welcome, {getUserDisplayName()}
+                    </p>
+                    <p
+                      className="text-xs text-gray-500 truncate"
+                      title={user?.email || 'user@example.com'}
+                    >
+                      {user?.email || 'user@example.com'}
+                    </p>
                   </div>
                 </div>
 
