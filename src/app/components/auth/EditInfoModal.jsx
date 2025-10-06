@@ -104,6 +104,7 @@ export default function EditInfoModal({ isOpen, onClose }) {
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
+    setDobError('');
   
     // basic required checks
     if (!form.first_name.trim()) {
@@ -123,6 +124,14 @@ export default function EditInfoModal({ isOpen, onClose }) {
     }
     if (!form.date_of_birth) {
       setDobError("Date of birth is required");
+      setLoading(false);
+      return;
+    }
+  
+    //  Restrict special characters
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/; // allows letters, spaces, apostrophes, hyphens
+    if (!nameRegex.test(form.first_name) || !nameRegex.test(form.last_name)) {
+      setError("Names can only contain letters, spaces, hyphens, or apostrophes");
       setLoading(false);
       return;
     }
