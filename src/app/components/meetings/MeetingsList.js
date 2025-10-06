@@ -18,6 +18,7 @@ const MeetingsList = ({
   onShareClick,
   onJoinClick,
   onDeleteClick,
+  onEditClick
 }) => {
 
   
@@ -171,40 +172,100 @@ const MeetingsList = ({
                   </div>
 
                   {/* RIGHT: Action Buttons */}
-                  <div className="flex flex-col items-stretch sm:items-center gap-2 min-w-[140px]">
-                    {meeting.join_url && (
+                  <div className="flex flex-col sm:flex-row md:flex-col items-stretch md:items-center gap-2 min-w-[160px]">
+                    {/* Desktop: 2x2 grid layout */}
+                    <div className="hidden md:grid grid-cols-2 gap-2 w-full">
+                      {meeting.join_url && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onJoinClick(meeting);
+                          }}
+                          className="px-4 py-2 text-sm font-semibold rounded-full border border-black text-black bg-[#f9f1fc] hover:bg-[#f0e6f7] transition"
+                        >
+                          Start
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          onJoinClick(meeting);
+                          onShareClick(meeting);
                         }}
-                        className="w-full sm:w-auto px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-[#f9f1fc] hover:bg-[#f0e6f7] transition"
+                        className="px-4 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
                       >
-                        Start
+                        Invite
                       </button>
-                    )}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onShareClick(meeting);
-                      }}
-                      className="w-full sm:w-auto px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
-                    >
-                      Invite
-                    </button>
 
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onDeleteClick(meeting);
-                      }}
-                      className="w-full sm:w-auto px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-red-300 hover:bg-red-400 transition"
-                    >
-                      Delete
-                    </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onEditClick(meeting);
+                        }}
+                        className="px-4 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onDeleteClick(meeting);
+                        }}
+                        className="px-4 py-2 text-sm font-semibold rounded-full border border-black text-black bg-red-300 hover:bg-red-400 transition"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    {/* Mobile: vertical layout */}
+                    <div className="flex flex-col gap-2 md:hidden w-full">
+                      {meeting.join_url && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onJoinClick(meeting);
+                          }}
+                          className="w-full px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-[#f9f1fc] hover:bg-[#f0e6f7] transition"
+                        >
+                          Start
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onShareClick(meeting);
+                        }}
+                        className="w-full px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
+                      >
+                        Invite
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onEditClick(meeting);
+                        }}
+                        className="w-full px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onDeleteClick(meeting);
+                        }}
+                        className="w-full px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-red-300 hover:bg-red-400 transition"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
 
                 </div>

@@ -118,13 +118,13 @@ export default function ContactPage() {
       description: "Send us an email anytime",
       color: "from-blue-100 to-cyan-50"
     },
-    {
-      icon: <Phone className="w-6 h-6" />,
-      title: "Call Us",
-      content: "+1-3473698716",
-      description: "Mon-Fri from 8am to 6pm",
-      color: "from-purple-100 to-pink-50"
-    },
+    // {
+    //   icon: <Phone className="w-6 h-6" />,
+    //   title: "Call Us",
+    //   content: "+1-3473698716",
+    //   description: "Mon-Fri from 8am to 6pm",
+    //   color: "from-purple-100 to-pink-50"
+    // },
     {
       icon: <MapPin className="w-6 h-6" />,
       title: "Visit Us",
@@ -316,7 +316,7 @@ export default function ContactPage() {
           </motion.div>
 
           {/* Contact Info Cards */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="flex justify-center items-center gap-8 mb-16">
             {contactInfo.map((info, index) => (
               <motion.div
                 key={index}

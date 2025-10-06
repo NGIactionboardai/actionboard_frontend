@@ -192,6 +192,20 @@ export const createZoomMeeting = createAsyncThunk(
   }
 );
 
+export const editZoomMeeting = createAsyncThunk(
+  "zoom/editZoomMeeting",
+  async ({ organizationId, meetingId, meetingData, resendInvites = true }, { rejectWithValue }) => {
+    try {
+      const payload = { ...meetingData, resend_invites: resendInvites };
+      const resp = await axios.patch(`${API_BASE_URL2}/meetings/zoom/meeting/${organizationId}/${meetingId}/edit/`, payload);
+      return resp.data;
+    } catch (err) {
+      console.error(err);
+      return rejectWithValue(err.response?.data || { message: err.message });
+    }
+  }
+);
+
 // In your zoomSlice.js, update the getZoomMeetings thunk:
 export const getZoomMeetings = createAsyncThunk(
   'zoom/getMeetings',
@@ -531,6 +545,32 @@ const zoomSlice = createSlice({
       .addCase(createZoomMeeting.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to create Zoom meeting';
+      });
+
+
+      // Edit Meeting
+
+      builder
+      .addCase(editZoomMeeting.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(editZoomMeeting.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedMeeting = action.payload.meeting || action.payload;
+    
+        // ✅ Update meeting in-place if it exists
+        const index = state.meetings.findIndex((m) => m.id === updatedMeeting.id);
+        if (index !== -1) {
+          state.meetings[index] = updatedMeeting;
+        }
+    
+        state.currentMeeting = updatedMeeting;
+        state.successMessage = "Zoom meeting updated successfully!";
+      })
+      .addCase(editZoomMeeting.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Failed to update Zoom meeting";
       });
 
     // Get Meetings

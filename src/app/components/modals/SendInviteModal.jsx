@@ -94,6 +94,34 @@ export default function SendInviteModal({
     }
   };
 
+  const getTimeZoneAbbr = (date) => {
+    const parts = new Intl.DateTimeFormat(undefined, {
+      timeZoneName: "short",
+    }).formatToParts(date);
+  
+    const tz = parts.find((p) => p.type === "timeZoneName");
+    return tz ? tz.value : "";
+  };
+  
+  const formatInviteDate = (dateString) => {
+    const date = new Date(dateString);
+  
+    // Format the main date/time
+    const main = new Intl.DateTimeFormat(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  
+    // Extract short tz label
+    const tz = getTimeZoneAbbr(date);
+  
+    return `${main}`;
+  };
+  
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -336,7 +364,7 @@ export default function SendInviteModal({
                                 className="p-3 border rounded-md bg-gray-50"
                               >
                                 <p className="text-sm font-semibold text-gray-800">
-                                  {new Date(h.created_at).toLocaleString()}
+                                  {formatInviteDate(h.created_at)}
                                 </p>
                                 <p className="text-xs text-gray-500 mb-2">
                                   By: {h.invited_by}

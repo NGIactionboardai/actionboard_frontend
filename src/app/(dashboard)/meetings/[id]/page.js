@@ -31,6 +31,7 @@ import { selectZoomUserInfo } from '@/redux/auth/zoomSlice';
 import { Plus, SlidersHorizontal, X } from 'lucide-react';
 import MeetingsToolbarMobile from '@/app/components/meetings/MeetingsToolbarMobile';
 import DeleteMeetingModal from '@/app/components/meetings/DeleteMeetingModal';
+import EditMeetingModal from '@/app/components/EditMeetingModal';
 
 export default function Meetings() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -82,6 +83,8 @@ export default function Meetings() {
     handleZoomConnectionClick,
     handleCreateMeetingClick
   } = useMeetingsModal(successMessage);
+
+  const [isEditMeetingModalOpen, setIsEditMeetingModalOpen] = useState(false)
 
   const token = useSelector((state) => state.auth?.token);
 
@@ -260,6 +263,10 @@ export default function Meetings() {
             setSelectedMeeting(meeting);
             setIsDeleteModalOpen(true);
           }}
+          onEditClick={(meeting) => {
+            setSelectedMeeting(meeting);
+            setIsEditMeetingModalOpen(true);
+          }}
         />
   
         {/* Modals */}
@@ -270,6 +277,17 @@ export default function Meetings() {
           isZoomConnected={isZoomConnected}
           setShowRecordingInfoModal={setShowRecordingInfoModal}
         />
+
+      {selectedMeeting && (
+        <EditMeetingModal
+          isOpen={isEditMeetingModalOpen}
+          onClose={() => setIsEditMeetingModalOpen(false)}
+          organizationId={organizationId}
+          meeting={selectedMeeting}
+          isZoomConnected={isZoomConnected}
+        />
+      )}
+        
 
         <InstructionModal
           isOpen={showRecordingInfoModal}
