@@ -129,9 +129,9 @@ export default function EditInfoModal({ isOpen, onClose }) {
     }
   
     //  Restrict special characters
-    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/; // allows letters, spaces, apostrophes, hyphens
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/; // only letters + spaces
     if (!nameRegex.test(form.first_name) || !nameRegex.test(form.last_name)) {
-      setError("Names can only contain letters, spaces, hyphens, or apostrophes");
+      setError("Names can only contain letters and spaces");
       setLoading(false);
       return;
     }
