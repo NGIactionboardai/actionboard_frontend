@@ -18,6 +18,8 @@ import { ArrowLeft, Building2, FileDown } from 'lucide-react';
 import EditStructuredSummary from '@/app/components/meeting/EditStructuredSummary';
 import _ from "lodash";
 import SendSummaryModal from '@/app/components/meeting/SendSummaryModal';
+import { motion, AnimatePresence } from "framer-motion";
+
 
 
 
@@ -1140,510 +1142,512 @@ export default function MeetingDetails() {
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           {/* Tab Navigation */}
           <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-            <nav className="-mb-px flex space-x-6 overflow-x-auto no-scrollbar">
-              {meeting_insights && (
-                <button
-                  onClick={() => setActiveTab("insights")}
-                  className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === "insights"
-                      ? "border-indigo-500 text-indigo-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  AI Insights
-                </button>
-              )}
-              {transcript && (
-                <button
-                  onClick={() => setActiveTab("transcript")}
-                  className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === "transcript"
-                      ? "border-indigo-500 text-indigo-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  Transcript
-                </button>
-              )}
-              {meeting_insights && (
-                <button
-                  onClick={() => setActiveTab("speaker_summary")}
-                  className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === "speaker_summary"
-                      ? "border-indigo-500 text-indigo-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  Speaker Summary
-                </button>
-              )}
-              {meeting_sentiment_summary && (
-                <button
-                  onClick={() => setActiveTab("meeting_sentiment")}
-                  className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === "meeting_sentiment"
-                      ? "border-indigo-500 text-indigo-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  Overall Meeting Sentiment
-                </button>
-              )}
+            <nav className="flex space-x-3 overflow-x-auto no-scrollbar">
+              {[
+                meeting_insights && { key: "insights", label: "AI Insights" },
+                transcript && { key: "transcript", label: "Transcript" },
+                meeting_insights && { key: "speaker_summary", label: "Speaker Summary" },
+                meeting_sentiment_summary && {
+                  key: "meeting_sentiment",
+                  label: "Overall Meeting Sentiment",
+                },
+              ]
+                .filter(Boolean)
+                .map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setActiveTab(key)}
+                    className={`relative flex-shrink-0 px-5 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out rounded-sm
+                      ${
+                        activeTab === key
+                          ? "text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-sm"
+                          : "text-gray-600 bg-gray-100 hover:bg-gray-200 hover:text-gray-800"
+                      }`}
+                  >
+                    {label}
+                    {activeTab === key && (
+                      <span className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-[#0A0DC4] to-[#8B0782]" />
+                    )}
+                  </button>
+                ))}
             </nav>
           </div>
 
           {/* Tab Content */}
-          <div className="px-4 py-5 sm:px-6">
-            {/* AI Insights Tab */}
-            {activeTab === "insights" && meeting_insights && (
-              <div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
-                    AI-Generated Insights
-                  </h3>
 
-                  {isValidStructuredSummary(meeting_insights?.structured_summary) && (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        onClick={() =>
-                          generateMeetingPDF(meeting, meeting_insights, speaker_summaries)
-                        }
-                        className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                      >
-                        <FileDown className="w-4 h-4" />
-                        <span className="hidden xs:inline">Download PDF</span>
-                        <span className="xs:hidden">PDF</span>
-                      </button>
+          <div className="px-4 py-5 sm:px-6 relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab} // important for exit/enter animations
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                layout
+              >
+                {/* --- AI Insights --- */}
+                {activeTab === "insights" && meeting_insights && (
+                  <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">
+                        AI-Generated Insights
+                      </h3>
 
-                      <button
-                        onClick={() => {
-                          setDraftSummary(_.cloneDeep(meeting_insights?.structured_summary || {}));
-                          setIsEditingAiInsight(true);
-                        }}
-                        className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
-                      >
-                        Edit
-                      </button>
+                      {isValidStructuredSummary(meeting_insights?.structured_summary) && (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() =>
+                              generateMeetingPDF(meeting, meeting_insights, speaker_summaries)
+                            }
+                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          >
+                            <FileDown className="w-4 h-4" />
+                            <span className="hidden xs:inline">Download PDF</span>
+                            <span className="xs:hidden">PDF</span>
+                          </button>
 
-                      <button
-                        onClick={() => {
-                          setIsSendSummaryModalOpen(true);
-                        }}
-                        className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
-                      >
-                        Share
-                      </button>
-                    </div>
-                  )}
-                </div>
+                          <button
+                            onClick={() => {
+                              setDraftSummary(_.cloneDeep(meeting_insights?.structured_summary || {}));
+                              setIsEditingAiInsight(true);
+                            }}
+                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
+                          >
+                            Edit
+                          </button>
 
-                {isEditingAiInsight ? (
-                  <EditStructuredSummary
-                    meetingId={meeting.meeting_id}
-                    draftSummary={draftSummary}
-                    setDraftSummary={setDraftSummary}
-                    onCancel={() => setIsEditingAiInsight(false)}
-                    onSave={() => {
-                      setMeeting_insights((prev) => ({
-                        ...prev,
-                        structured_summary: draftSummary,
-                      }));
-                      setIsEditingAiInsight(false);
-                    }}
-                  />
-                ) : (
-                    <div className="bg-green-50 p-4 rounded-lg space-y-8">
-                      {/* 🔹 Schema Guard */}
-                      {!isValidStructuredSummary(meeting_insights?.structured_summary) ? (
-                        <div className="p-4 text-center text-sm text-red-600 bg-red-50 rounded-md">
-                          This transcript is using an older summary format. Please retranscribe to view insights.
-                        </div>
-                      ) : (
-                        <div className="space-y-8">
-                          {/* Meeting Summary */}
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                              Meeting Summary
-                            </h4>
-                            <div className="prose prose-sm max-w-none space-y-4">
-                              <h5 className="font-medium text-gray-900">Meeting Objective:</h5>
-                              <p className='text-gray-700'>
-                                {meeting_insights.structured_summary.summary_text.meeting_objective}
-                              </p>
-                              <div>
-                                <h5 className="font-medium text-gray-900">High-level Outcomes:</h5>
-                                <ul className="ml-3 list-disc list-inside text-gray-700">
-                                  {meeting_insights.structured_summary.summary_text.high_level_outcomes.map(
-                                    (outcome, index) => (
-                                      <li key={index}>{outcome}</li>
-                                    )
-                                  )}
-                                </ul>
-                              </div>
-                              <div>
-                                <h5 className="font-medium text-gray-900">Key Discussion Themes:</h5>
-                                <ul className="ml-3 list-disc list-inside text-gray-700">
-                                  {meeting_insights.structured_summary.summary_text.key_discussion_themes.map(
-                                    (theme, index) => (
-                                      <li key={index}>{theme}</li>
-                                    )
-                                  )}
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Minutes of the Meeting */}
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                              Minutes of the Meeting
-                            </h4>
-
-                            {/* Date & Attendees */}
-                            <div className="mb-6">
-                              <p className="text-sm text-gray-700">
-                                <span className="font-medium">Date:</span>{" "}
-                                {meeting?.end_time
-                                  ? format(new Date(meeting.end_time), "MMMM d, yyyy, h:mm a")
-                                  : "N/A"}
-                              </p>
-
-                              {meeting_insights.structured_summary.attendees?.length > 0 && (
-                                <div className="mt-2 flex flex-wrap items-center gap-2">
-                                  <span className="text-sm font-medium text-gray-800">
-                                    Attendees:
-                                  </span>
-                                  {meeting_insights.structured_summary.attendees.map(
-                                    (attendee, index) => (
-                                      <span
-                                        key={index}
-                                        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-800"
-                                      >
-                                        {attendee}
-                                      </span>
-                                    )
-                                  )}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Minutes Sections */}
-                            <div className="space-y-4">
-                              {meeting_insights.structured_summary.minutes.sections.map(
-                                (section, index) => (
-                                  <div key={index}>
-                                    <h5 className="font-medium text-gray-900">
-                                      {index + 1}. {section.title}
-                                    </h5>
-                                    <ul className="ml-3 list-disc list-inside text-gray-700">
-                                      {section.points.map((point, idx) => (
-                                        <li key={idx}>{point}</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )
-                              )}
-                            </div>
-
-                          </div>
-
-                          {/* Action Items */}
-                          {meeting_insights.structured_summary.action_items.length > 0 && (
-                            <div>
-                              <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                                Action Items
-                              </h4>
-                              <div className="overflow-x-auto">
-                                <table className="min-w-full border border-gray-200 text-sm text-left">
-                                  <thead className="bg-gray-100">
-                                    <tr>
-                                      <th className="px-3 py-2 font-medium text-gray-700 border-b">
-                                        Task
-                                      </th>
-                                      <th className="px-3 py-2 font-medium text-gray-700 border-b">
-                                        Responsible Person
-                                      </th>
-                                      <th className="px-3 py-2 font-medium text-gray-700 border-b">
-                                        Deadline
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {meeting_insights.structured_summary.action_items.map(
-                                      (item, index) => (
-                                        <tr key={index} className="hover:bg-gray-50">
-                                          <td className="px-3 py-2 border-b text-gray-700">
-                                            {item.task}
-                                          </td>
-                                          <td className="px-3 py-2 border-b text-gray-700">
-                                            {item.owner || "N/A"}
-                                          </td>
-                                          <td className="px-3 py-2 border-b text-gray-700">
-                                            {item.deadline}
-                                          </td>
-                                        </tr>
-                                      )
-                                    )}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          )}
+                          <button
+                            onClick={() => {
+                              setIsSendSummaryModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
+                          >
+                            Share
+                          </button>
                         </div>
                       )}
                     </div>
-                )}
 
-                
-                
-              </div>
-            )}
-
-            {/* Transcript Tab */}
-            {activeTab === "transcript" && (
-              <>
-                {/* Case 1: Multilingual utterances exist */}
-                {multilingualUtterence ? (
-                  <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Meeting Transcript
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-700">Language:</label>
-                        <select
-                          value={selectedLang}
-                          onChange={(e) => setSelectedLang(e.target.value)}
-                          className="border border-gray-300 rounded-lg px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                          <option value="en">English</option>
-                          <option value="bn">Bengali</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Transcript Body (Multilingual) */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm max-h-[70vh] sm:max-h-96 overflow-y-auto divide-y divide-gray-100">
-                      {(() => {
-                        const utterancesToRender =
-                          multilingualUtterence?.[selectedLang] || transcript || [];
-
-                        return Array.isArray(utterancesToRender) ? (
-                          utterancesToRender.map((utterance, idx) => {
-                            const formatTime = (ms) => {
-                              const totalSeconds = Math.floor(ms / 1000);
-                              const hours = Math.floor(totalSeconds / 3600);
-                              const minutes = Math.floor((totalSeconds % 3600) / 60);
-                              const seconds = totalSeconds % 60;
-                              return [hours, minutes, seconds]
-                                .map((val) => String(val).padStart(2, "0"))
-                                .join(":");
-                            };
-
-                            return (
-                              <div key={idx} className="py-2">
-                                <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
-                                  <span className="inline-block bg-indigo-100 text-indigo-700 font-medium px-2 py-0.5 rounded-md mr-2">
-                                    {formatSpeakerLabel(utterance.speaker)}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    [{formatTime(utterance.start)}]
-                                  </span>
-                                </p>
-                                <p className="mt-1 text-gray-900">{utterance.text}</p>
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <p className="text-gray-500 italic">No transcript available.</p>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                ) : (
-                  /* Case 2: Fallback to old transcript structure */
-                  Array.isArray(transcript) && (
-                    <div>
-                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                        Meeting Transcript
-                      </h3>
-                      <div className="bg-gray-50 p-4 rounded-lg max-h-[70vh] sm:max-h-96 overflow-y-auto space-y-4">
-                        {transcript.map((utterance, idx) => {
-                          const formatTime = (ms) => {
-                            const totalSeconds = Math.floor(ms / 1000);
-                            const hours = Math.floor(totalSeconds / 3600);
-                            const minutes = Math.floor((totalSeconds % 3600) / 60);
-                            const seconds = totalSeconds % 60;
-                            return [hours, minutes, seconds]
-                              .map((val) => String(val).padStart(2, "0"))
-                              .join(":");
-                          };
-
-                          return (
-                            <div key={idx}>
-                              <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                                <span className="font-semibold text-indigo-700">
-                                 {formatSpeakerLabel(utterance.speaker)}
-                                </span>
-                                &nbsp;&nbsp;
-                                <span className="text-gray-950">
-                                  [{formatTime(utterance.start)}]
-                                </span>
-                                &nbsp;&nbsp;
-                                {utterance.text}
-                              </p>
+                    {isEditingAiInsight ? (
+                      <EditStructuredSummary
+                        meetingId={meeting.meeting_id}
+                        draftSummary={draftSummary}
+                        setDraftSummary={setDraftSummary}
+                        onCancel={() => setIsEditingAiInsight(false)}
+                        onSave={() => {
+                          setMeeting_insights((prev) => ({
+                            ...prev,
+                            structured_summary: draftSummary,
+                          }));
+                          setIsEditingAiInsight(false);
+                        }}
+                      />
+                    ) : (
+                        <div className="bg-green-50 p-4 rounded-lg space-y-8">
+                          {/* 🔹 Schema Guard */}
+                          {!isValidStructuredSummary(meeting_insights?.structured_summary) ? (
+                            <div className="p-4 text-center text-sm text-red-600 bg-red-50 rounded-md">
+                              This transcript is using an older summary format. Please retranscribe to view insights.
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )
-                )}
-              </>
-            )}
-            
+                          ) : (
+                            <div className="space-y-8">
+                              {/* Meeting Summary */}
+                              <div>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                  Meeting Summary
+                                </h4>
+                                <div className="prose prose-sm max-w-none space-y-4">
+                                  <h5 className="font-medium text-gray-900">Meeting Objective:</h5>
+                                  <p className='text-gray-700'>
+                                    {meeting_insights.structured_summary.summary_text.meeting_objective}
+                                  </p>
+                                  <div>
+                                    <h5 className="font-medium text-gray-900">High-level Outcomes:</h5>
+                                    <ul className="ml-3 list-disc list-inside text-gray-700">
+                                      {meeting_insights.structured_summary.summary_text.high_level_outcomes.map(
+                                        (outcome, index) => (
+                                          <li key={index}>{outcome}</li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <h5 className="font-medium text-gray-900">Key Discussion Themes:</h5>
+                                    <ul className="ml-3 list-disc list-inside text-gray-700">
+                                      {meeting_insights.structured_summary.summary_text.key_discussion_themes.map(
+                                        (theme, index) => (
+                                          <li key={index}>{theme}</li>
+                                        )
+                                      )}
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
 
+                              {/* Minutes of the Meeting */}
+                              <div>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                  Minutes of the Meeting
+                                </h4>
 
-            {/* Speaker Summary Tab */}
-            {activeTab === "speaker_summary" && (
-              <>
-                {speaker_summary_table ? (
-                  <div className="mb-3">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                      Speaker Summary
-                    </h3>
+                                {/* Date & Attendees */}
+                                <div className="mb-6">
+                                  <p className="text-sm text-gray-700">
+                                    <span className="font-medium">Date:</span>{" "}
+                                    {meeting?.end_time
+                                      ? format(new Date(meeting.end_time), "MMMM d, yyyy, h:mm a")
+                                      : "N/A"}
+                                  </p>
 
-                    {/* Dropdown */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Select Speaker:
-                      </label>
-                      <select
-                        value={selectedSpeaker}
-                        onChange={(e) => setSelectedSpeaker(e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                      >
-                        <option value="" disabled>
-                          Select a speaker
-                        </option>
-                        {Object.keys(speaker_summaries).map((speakerKey) => (
-                          <option key={speakerKey} value={speakerKey}>
-                            {speakerKey}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                                  {meeting_insights.structured_summary.attendees?.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                      <span className="text-sm font-medium text-gray-800">
+                                        Attendees:
+                                      </span>
+                                      {meeting_insights.structured_summary.attendees.map(
+                                        (attendee, index) => (
+                                          <span
+                                            key={index}
+                                            className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-800"
+                                          >
+                                            {attendee}
+                                          </span>
+                                        )
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
 
-                    {selectedSpeaker && (
-                      <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                        <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                          {speaker_summaries[selectedSpeaker]}
-                        </p>
-                      </div>
-                    )}
+                                {/* Minutes Sections */}
+                                <div className="space-y-4">
+                                  {meeting_insights.structured_summary.minutes.sections.map(
+                                    (section, index) => (
+                                      <div key={index}>
+                                        <h5 className="font-medium text-gray-900">
+                                          {index + 1}. {section.title}
+                                        </h5>
+                                        <ul className="ml-3 list-disc list-inside text-gray-700">
+                                          {section.points.map((point, idx) => (
+                                            <li key={idx}>{point}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
 
-                    {selectedSpeaker && (
-                      <div className="max-w-full sm:max-w-md mx-auto">
-                        <SpeakerPieChart
-                          data={speaker_summary_table.find((entry) =>
-                            selectedSpeaker
-                              .toLowerCase()
-                              .includes(entry.Speaker.toLowerCase())
+                              </div>
+
+                              {/* Action Items */}
+                              {meeting_insights.structured_summary.action_items.length > 0 && (
+                                <div>
+                                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                    Action Items
+                                  </h4>
+                                  <div className="overflow-x-auto">
+                                    <table className="min-w-full border border-gray-200 text-sm text-left">
+                                      <thead className="bg-gray-100">
+                                        <tr>
+                                          <th className="px-3 py-2 font-medium text-gray-700 border-b">
+                                            Task
+                                          </th>
+                                          <th className="px-3 py-2 font-medium text-gray-700 border-b">
+                                            Responsible Person
+                                          </th>
+                                          <th className="px-3 py-2 font-medium text-gray-700 border-b">
+                                            Deadline
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {meeting_insights.structured_summary.action_items.map(
+                                          (item, index) => (
+                                            <tr key={index} className="hover:bg-gray-50">
+                                              <td className="px-3 py-2 border-b text-gray-700">
+                                                {item.task}
+                                              </td>
+                                              <td className="px-3 py-2 border-b text-gray-700">
+                                                {item.owner || "N/A"}
+                                              </td>
+                                              <td className="px-3 py-2 border-b text-gray-700">
+                                                {item.deadline}
+                                              </td>
+                                            </tr>
+                                          )
+                                        )}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           )}
-                        />
-                      </div>
+                        </div>
                     )}
 
-                    {/* Comparative Table */}
-                    <div className="mt-10 overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                              Speaker
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">
-                              Pos %
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                              Neu %
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-red-600 uppercase tracking-wider">
-                              Neg %
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                              Overall
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                          {speaker_summary_table.map((entry, idx) => (
-                            <tr key={idx} className="hover:bg-gray-50 transition">
-                              <td className="px-4 py-2 text-sm text-gray-800 font-medium">
-                                {entry.Speaker}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-green-700">
-                                {entry["Pos %"]}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-blue-700">
-                                {entry["Neu %"]}
-                              </td>
-                              <td className="px-4 py-2 text-sm text-red-700">
-                                {entry["Neg %"]}
-                              </td>
-                              <td className="px-4 py-2 text-sm">
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                    entry.Overall === "Positive"
-                                      ? "bg-green-100 text-green-800"
-                                      : entry.Overall === "Negative"
-                                      ? "bg-red-100 text-red-800"
-                                      : "bg-blue-100 text-blue-800"
+                    
+                    
+                  </div>
+                )}
+
+                {/* --- Transcript --- */}
+                {activeTab === "transcript" && (
+                  <>
+                    {/* Case 1: Multilingual utterances exist */}
+                    {multilingualUtterence ? (
+                      <div className="space-y-4">
+                        {/* Header */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Meeting Transcript
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium text-gray-700">Language:</label>
+                            <select
+                              value={selectedLang}
+                              onChange={(e) => setSelectedLang(e.target.value)}
+                              className="border border-gray-300 rounded-lg px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
+                              <option value="en">English</option>
+                              <option value="bn">Bengali</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Transcript Body (Multilingual) */}
+                        <div className="bg-white p-4 rounded-xl shadow-sm max-h-[70vh] sm:max-h-96 overflow-y-auto divide-y divide-gray-100">
+                          {(() => {
+                            const utterancesToRender =
+                              multilingualUtterence?.[selectedLang] || transcript || [];
+
+                            return Array.isArray(utterancesToRender) ? (
+                              utterancesToRender.map((utterance, idx) => {
+                                const formatTime = (ms) => {
+                                  const totalSeconds = Math.floor(ms / 1000);
+                                  const hours = Math.floor(totalSeconds / 3600);
+                                  const minutes = Math.floor((totalSeconds % 3600) / 60);
+                                  const seconds = totalSeconds % 60;
+                                  return [hours, minutes, seconds]
+                                    .map((val) => String(val).padStart(2, "0"))
+                                    .join(":");
+                                };
+
+                                return (
+                                  <div key={idx} className="py-2">
+                                    <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                                      <span className="inline-block bg-indigo-100 text-indigo-700 font-medium px-2 py-0.5 rounded-md mr-2">
+                                        {formatSpeakerLabel(utterance.speaker)}
+                                      </span>
+                                      <span className="text-xs text-gray-500">
+                                        [{formatTime(utterance.start)}]
+                                      </span>
+                                    </p>
+                                    <p className="mt-1 text-gray-900">{utterance.text}</p>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <p className="text-gray-500 italic">No transcript available.</p>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    ) : (
+                      /* Case 2: Fallback to old transcript structure */
+                      Array.isArray(transcript) && (
+                        <div>
+                          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            Meeting Transcript
+                          </h3>
+                          <div className="bg-gray-50 p-4 rounded-lg max-h-[70vh] sm:max-h-96 overflow-y-auto space-y-4">
+                            {transcript.map((utterance, idx) => {
+                              const formatTime = (ms) => {
+                                const totalSeconds = Math.floor(ms / 1000);
+                                const hours = Math.floor(totalSeconds / 3600);
+                                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                                const seconds = totalSeconds % 60;
+                                return [hours, minutes, seconds]
+                                  .map((val) => String(val).padStart(2, "0"))
+                                  .join(":");
+                              };
+
+                              return (
+                                <div key={idx}>
+                                  <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                                    <span className="font-semibold text-indigo-700">
+                                    {formatSpeakerLabel(utterance.speaker)}
+                                    </span>
+                                    &nbsp;&nbsp;
+                                    <span className="text-gray-950">
+                                      [{formatTime(utterance.start)}]
+                                    </span>
+                                    &nbsp;&nbsp;
+                                    {utterance.text}
+                                  </p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </>
+                )}
+
+                {/* --- Speaker Summary --- */}
+                {activeTab === "speaker_summary" && (
+                  <>
+                    {speaker_summary_table ? (
+                      <div className="mb-3">
+                        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                          Speaker Summary
+                        </h3>
+
+                        {/* Speaker Selection Row */}
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Select Speaker:
+                          </label>
+
+                          {/* Scrollable Chip Container */}
+                          <div className="relative">
+                            <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-thumb-rounded-md">
+                              {Object.keys(speaker_summaries).map((speakerKey) => (
+                                <button
+                                  key={speakerKey}
+                                  onClick={() => setSelectedSpeaker(speakerKey)}
+                                  className={`flex-shrink-0 px-3 py-1.5 rounded-full border text-sm font-medium transition ${
+                                    selectedSpeaker === speakerKey
+                                      ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                                      : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
                                   }`}
                                 >
-                                  {entry.Overall}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                                  {speakerKey}
+                                </button>
+                              ))}
+                            </div>
 
-                    {/* Charts */}
-                    <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div>
-                        <h4 className="text-md font-semibold text-gray-800 mb-2">
-                          Positive Contribution to Group Sentiment
-                        </h4>
-                        <PositiveContributionPieChart data={speaker_summary_table} />
+                            {/* subtle gradient fade on right for overflow hint */}
+                            <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white" />
+                          </div>
+                        </div>
+
+                        {/* Speaker Summary */}
+                        {selectedSpeaker && (
+                          <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                            <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                              {speaker_summaries[selectedSpeaker]}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Speaker Pie Chart */}
+                        {selectedSpeaker && (
+                          <div className="max-w-full sm:max-w-md mx-auto">
+                            <SpeakerPieChart
+                              data={speaker_summary_table.find((entry) => {
+                                // Extract just the letter from "Speaker B" -> "B"
+                                const selectedLetter = selectedSpeaker.replace('Speaker ', '').trim();
+                                return entry.Speaker.toLowerCase() === selectedLetter.toLowerCase();
+                              })}
+                            />
+                          </div>
+                        )}
+
+                        {/* Comparative Table */}
+                        <div className="mt-10 overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                  Speaker
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-green-600 uppercase tracking-wider">
+                                  Pos %
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                                  Neu %
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-red-600 uppercase tracking-wider">
+                                  Neg %
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                  Overall
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-100">
+                              {speaker_summary_table.map((entry, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50 transition">
+                                  <td className="px-4 py-2 text-sm text-gray-800 font-medium">
+                                    {entry.Speaker}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-green-700">
+                                    {entry["Pos %"]}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-blue-700">
+                                    {entry["Neu %"]}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-red-700">
+                                    {entry["Neg %"]}
+                                  </td>
+                                  <td className="px-4 py-2 text-sm">
+                                    <span
+                                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        entry.Overall === "Positive"
+                                          ? "bg-green-100 text-green-800"
+                                          : entry.Overall === "Negative"
+                                          ? "bg-red-100 text-red-800"
+                                          : "bg-blue-100 text-blue-800"
+                                      }`}
+                                    >
+                                      {entry.Overall}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Charts */}
+                        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div>
+                            <h4 className="text-md font-semibold text-gray-800 mb-2">
+                              Positive Contribution to Group Sentiment
+                            </h4>
+                            <PositiveContributionPieChart data={speaker_summary_table} />
+                          </div>
+                          <div>
+                            <h4 className="text-md font-semibold text-gray-800 mb-2">
+                              Sentiment Distribution by Speaker
+                            </h4>
+                            <SentimentDistributionBarChart data={speaker_summary_table} />
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-md font-semibold text-gray-800 mb-2">
-                          Sentiment Distribution by Speaker
-                        </h4>
-                        <SentimentDistributionBarChart data={speaker_summary_table} />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500 italic mt-4">
-                    No speaker summaries available.
-                  </p>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic mt-4">
+                        No speaker summaries available.
+                      </p>
+                    )}
+                  </>
                 )}
-              </>
-            )}
 
-            {/* Meeting Sentiment Tab */}
-            {activeTab === "meeting_sentiment" &&
-              meeting_sentiment_summary &&
-              Array.isArray(transcript) && (
-                <div>
-                  <SentimentSummaryTable summary={meeting_sentiment_summary} />
-                </div>
-              )}
+                {/* --- Meeting Sentiment --- */}
+                {activeTab === "meeting_sentiment" &&
+                  meeting_sentiment_summary &&
+                  Array.isArray(transcript) && (
+                    <div>
+                      <SentimentSummaryTable summary={meeting_sentiment_summary} />
+                    </div>
+                )}
+
+              </motion.div>
+            </AnimatePresence>
           </div>
+
+          
         </div>
 
       )}
