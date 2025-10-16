@@ -21,6 +21,7 @@ import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import withProfileCompletionGuard from '../withProfileCompletionGuard';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
+import { ORG_COLORS } from '@/app/constants/orgColors';
 
 
 
@@ -73,11 +74,28 @@ const ManageOrganizations = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState(null);
-  const [formData, setFormData] = useState({
-    name: ''
-  });
+  const [formData, setFormData] = useState({ name: '', color: '' });
   const [searchTerm, setSearchTerm] = useState('');
   const [formError, setFormError] = useState('');
+
+  // const ORG_COLORS = [
+  //   '#4F46E5', // Indigo
+  //   '#10B981', // Emerald
+  //   '#F59E0B', // Amber
+  //   '#EF4444', // Red
+  //   '#3B82F6', // Blue
+  //   '#8B5CF6', // Violet
+  //   '#EC4899', // Pink
+  //   '#14B8A6', // Teal
+  //   '#F97316', // Orange
+  //   '#84CC16', // Lime
+  //   '#6366F1', // Indigo Light
+  //   '#06B6D4', // Cyan
+  // ];
+
+  // const usedColors = userOrganizations.map(org => org.color);
+  // const availableColors = ORG_COLORS.filter(c => !usedColors.includes(c));
+
 
   // Load organizations on component mount
   useEffect(() => {
@@ -123,7 +141,7 @@ const ManageOrganizations = ({
   
     if (!formData.name.trim()) return;
   
-    dispatch(createOrganization({ name: formData.name }))
+    dispatch(createOrganization({ name: formData.name, color: formData.color }))
       .unwrap()
       .then((result) => {
         // Success flow
@@ -160,7 +178,7 @@ const ManageOrganizations = ({
     try {
       const result = await dispatch(updateOrganization({
         orgId: selectedOrg.org_id || selectedOrg.id,
-        updateData: { name: formData.name }
+        updateData: { name: formData.name, color:  formData.color,}
       })).unwrap();
   
       setIsEditModalOpen(false);
@@ -206,14 +224,20 @@ const ManageOrganizations = ({
 
   const openCreateModal = () => {
     setFormError('')
-    setFormData({ name: '' });
+    setFormData({
+      name: '',
+      color: '#4F46E5',
+    });
     setIsCreateModalOpen(true);
   };
 
   const openEditModal = (org) => {
     setFormError('')
     setSelectedOrg(org);
-    setFormData({ name: org.name });
+    setFormData({
+      name: org.name,
+      color: org.color || '',
+    });
     setIsEditModalOpen(true);
   };
 
@@ -463,6 +487,12 @@ const ManageOrganizations = ({
                           <p className="text-sm text-red-500 mt-1">{formError}</p>
                         )}
                       </div>
+                      <ColorSelector
+                        mode="create"
+                        formData={formData}
+                        setFormData={setFormData}
+                        userOrganizations={userOrganizations}
+                      />
                     </div>
                   </div>
                 </div>
@@ -524,6 +554,15 @@ const ManageOrganizations = ({
                           <p className="text-sm text-red-500 mt-1">{formError}</p>
                         )}
                       </div>
+
+                      <ColorSelector
+                        mode="edit"
+                        formData={formData}
+                        setFormData={setFormData}
+                        userOrganizations={userOrganizations}
+                        selectedOrg={selectedOrg}
+                      />
+
                     </div>
                   </div>
                 </div>
@@ -605,3 +644,60 @@ const ManageOrganizations = ({
 };
 
 export default ManageOrganizations;
+
+
+
+const ColorSelector = ({ mode, formData, setFormData, userOrganizations, selectedOrg }) => {
+  const usedColors = userOrganizations.map(org => org.color).filter(Boolean);
+
+  const getAvailableColors = () => {
+    if (mode === 'create') {
+      // Only unused colors
+      return ORG_COLORS.filter(color => !usedColors.includes(color));
+    }
+
+    // Edit mode
+    const currentColor = selectedOrg?.color || formData.color;
+
+    if (!currentColor) {
+      // Org has no color — behave like create
+      return ORG_COLORS.filter(color => !usedColors.includes(color));
+    }
+
+    // Show all colors, but disable ones used by others
+    return ORG_COLORS;
+  };
+
+  const availableColors = getAvailableColors();
+
+  return (
+    <div className="mt-4">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Organization Color
+      </label>
+      <div className="flex flex-wrap gap-3">
+        {availableColors.map((color) => {
+          const isUsedByOther =
+            mode === 'edit' &&
+            usedColors.includes(color) &&
+            color !== selectedOrg?.color;
+
+          return (
+            <button
+              key={color}
+              type="button"
+              disabled={isUsedByOther}
+              className={`w-8 h-8 rounded-full border-2 transition-transform ${
+                formData.color === color
+                  ? 'border-gray-800 scale-110'
+                  : 'border-gray-200 hover:scale-105'
+              } ${isUsedByOther ? 'opacity-40 cursor-not-allowed' : ''}`}
+              style={{ backgroundColor: color }}
+              onClick={() => !isUsedByOther && setFormData({ ...formData, color })}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+};

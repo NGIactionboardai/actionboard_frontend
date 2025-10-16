@@ -21,6 +21,7 @@ import ZoomConfig from './ZoomConfig';
 import axios from 'axios';
 import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { ORG_COLORS } from '../constants/orgColors';
 
   
 
@@ -266,17 +267,48 @@ export default function Calendar() {
     fetchOrganizationsAndEvents();
   }, []);
 
-    const generateOrgColors = (orgs) => {
-      const tailwindColors = [
-        '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899',
-        '#3b82f6', '#14b8a6', '#ef4444', '#a855f7', '#f97316'
-      ];
-      const colorMap = {};
-      orgs.forEach((org, idx) => {
-        colorMap[org.name] = tailwindColors[idx % tailwindColors.length];
-      });
-      return colorMap;
-    };
+
+  const generateOrgColors = (orgs) => {
+    const colorMap = {};
+    const usedColors = new Set();
+  
+    // 1️⃣ Assign existing org colors (from API) if valid
+    orgs.forEach(org => {
+      if (org.color && ORG_COLORS.includes(org.color)) {
+        colorMap[org.name] = org.color;
+        usedColors.add(org.color);
+      }
+    });
+  
+    // 2️⃣ Assign new unique colors for orgs missing color or having invalid color
+    let colorIndex = 0;
+    orgs.forEach(org => {
+      if (!colorMap[org.name]) {
+        // find first unused color
+        while (colorIndex < ORG_COLORS.length && usedColors.has(ORG_COLORS[colorIndex])) {
+          colorIndex++;
+        }
+        const color = ORG_COLORS[colorIndex % ORG_COLORS.length];
+        colorMap[org.name] = color;
+        usedColors.add(color);
+        colorIndex++;
+      }
+    });
+  
+    return colorMap;
+  };
+
+    // const generateOrgColors = (orgs) => {
+    //   const tailwindColors = [
+    //     '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899',
+    //     '#3b82f6', '#14b8a6', '#ef4444', '#a855f7', '#f97316'
+    //   ];
+    //   const colorMap = {};
+    //   orgs.forEach((org, idx) => {
+    //     colorMap[org.name] = tailwindColors[idx % tailwindColors.length];
+    //   });
+    //   return colorMap;
+    // };
     
     // const orgColors = generateOrgColors(organizations);
 

@@ -140,7 +140,8 @@ export const createOrganization = createAsyncThunk(
       console.log("Creating organization:", orgData.name);
 
       const response = await axios.post(API_ENDPOINTS.CREATE_ORG, {
-        name: orgData.name.trim()
+        name: orgData.name.trim(),
+        color: orgData.color || '#4F46E5', // Default fallback
       }, config);
 
       const organization = response.data;
@@ -280,7 +281,8 @@ export const updateOrganization = createAsyncThunk(
       }
 
       const response = await axios.patch(`${API_ENDPOINTS.UPDATE_ORG}${orgId}/`, {
-        name: updateData.name.trim()
+        name: updateData.name.trim(),
+        color: updateData.color,
       }, config);
 
       const organization = response.data;

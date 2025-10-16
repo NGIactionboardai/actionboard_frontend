@@ -22,6 +22,7 @@ import OrgEventReportsComponent from './OrgEventReportsComponent';
 import { getZoomConnectionStatus, selectZoomIsConnected } from '@/redux/auth/zoomSlice';
 import axios from 'axios';
 import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ORG_COLORS } from '@/app/constants/orgColors';
 
 
 
@@ -285,18 +286,47 @@ export default function OrgCalendar({ orgId }) {
     fetchOrganizationsAndEvents();
   }, []);
 
+  const generateOrgColors = (orgs) => {
+    const colorMap = {};
+    const usedColors = new Set();
+  
+    // 1️⃣ Use backend-provided color if valid
+    orgs.forEach(org => {
+      if (org.color && /^#[0-9A-F]{6}$/i.test(org.color)) {
+        colorMap[org.name] = org.color;
+        usedColors.add(org.color);
+      }
+    });
+  
+    // 2️⃣ Assign fallback unique colors for missing/invalid ones
+    let colorIndex = 0;
+    orgs.forEach(org => {
+      if (!colorMap[org.name]) {
+        while (colorIndex < ORG_COLORS.length && usedColors.has(ORG_COLORS[colorIndex])) {
+          colorIndex++;
+        }
+        const assignedColor = ORG_COLORS[colorIndex % ORG_COLORS.length];
+        colorMap[org.name] = assignedColor;
+        usedColors.add(assignedColor);
+        colorIndex++;
+      }
+    });
+  
+    return colorMap;
+  };
 
-    const generateOrgColors = (orgs) => {
-      const tailwindColors = [
-        '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899',
-        '#3b82f6', '#14b8a6', '#ef4444', '#a855f7', '#f97316'
-      ];
-      const colorMap = {};
-      orgs.forEach((org, idx) => {
-        colorMap[org.name] = tailwindColors[idx % tailwindColors.length];
-      });
-      return colorMap;
-    };
+
+    // const generateOrgColors = (orgs) => {
+    //   const tailwindColors = [
+    //     '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899',
+    //     '#3b82f6', '#14b8a6', '#ef4444', '#a855f7', '#f97316'
+    //   ];
+    //   const colorMap = {};
+    //   orgs.forEach((org, idx) => {
+    //     colorMap[org.name] = tailwindColors[idx % tailwindColors.length];
+    //   });
+    //   return colorMap;
+    // };
     
     // const orgColors = generateOrgColors(organizations);
 
