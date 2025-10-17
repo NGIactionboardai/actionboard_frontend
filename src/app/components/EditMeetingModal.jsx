@@ -56,6 +56,8 @@ const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConn
       return;
     }
     try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
+
       const meetingData = {
         topic: form.topic,
         start_time: new Date(form.start_time).toISOString(),
@@ -67,6 +69,7 @@ const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConn
         auto_recording: form.auto_recording,
         audio: form.audio ? "both" : "none",
         video: form.video,
+        timezone,
       };
       await dispatch(editZoomMeeting({
         organizationId,

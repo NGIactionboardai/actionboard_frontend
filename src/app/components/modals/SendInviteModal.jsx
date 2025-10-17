@@ -58,11 +58,14 @@ export default function SendInviteModal({
 
     setLoading(true);
     try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       const res = await axios.post(
         `${API_BASE_URL}/meetings/send-meeting-invitations/${orgId}/`,
         {
           member_ids: selected,
           meeting_id: meeting.id,
+          timezone,
         }
       );
 
