@@ -39,7 +39,16 @@ export default function MemberFormModal({
         `Failed to ${existing ? "update" : "create"} member`,
         err.response?.data || err.message
       );
-      setError("Something went wrong. Please try again.");
+    
+      if (err.response?.data?.email) {
+        // Backend sent a validation error for the email field
+        setError(err.response.data.email[0]);
+      } else if (typeof err.response?.data?.detail === "string") {
+        // Generic error detail
+        setError(err.response.data.detail);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
