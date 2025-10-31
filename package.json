@@ -41,9 +41,11 @@
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
     "react-input-mask-next": "^3.0.0-alpha.12",
+    "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
     "recharts": "^3.1.0",
     "redux-persist": "^6.0.0",
+    "remark-gfm": "^4.0.1",
     "rsuite": "^5.83.3",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7"

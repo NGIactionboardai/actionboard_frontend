@@ -12,7 +12,7 @@ import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import OrgSwitcher from './OrgSwitcher';
 import { ZoomConnectionStatus } from '../ZoomConfig';
 import axios from 'axios';
-
+import { Video, MessageSquare, CalendarDays, Users, Settings } from "lucide-react";
 
 export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }) {
 
@@ -137,7 +137,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
             <button
               onClick={onCreateMeetingClick}
               disabled={!isZoomConnected}
-              className={`w-full inline-flex justify-center items-center px-4 py-2 text-lg font-bold rounded-md transition-all
+              className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
                 ${isZoomConnected
                   ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
@@ -145,12 +145,27 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
               `}
               title={!isZoomConnected ? 'Connect to Zoom first' : 'Create new meeting'}
             >
+              <Video className="w-5 h-5" />
               Create Meeting
             </button>
 
             <Link
+              href={`/org-ai-chat/${organizationId}`}
+              className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
+                bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                ${isZoomConnected
+                  ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
+                  : 'opacity-50 cursor-not-allowed pointer-events-none'}
+              `}
+              title={!isZoomConnected ? 'Connect to Zoom first' : 'AI Assistant Chat'}
+            >
+              <MessageSquare className="w-5 h-5" />
+              AI Assistant
+            </Link>
+
+            <Link
               href={`/calendar/${organizationId}`}
-              className={`w-full inline-flex justify-center items-center px-4 py-2 text-lg font-bold rounded-md transition-all
+              className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
                 ${isZoomConnected
                   ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
@@ -158,12 +173,13 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
               `}
               title={!isZoomConnected ? 'Connect to Zoom first' : 'Go to Org Calendar'}
             >
+              <CalendarDays className="w-5 h-5" />
               Org Calendar
             </Link>
 
             <Link
               href={`/member-list/${organizationId}`}
-              className={`w-full inline-flex justify-center items-center px-4 py-2 text-lg font-bold rounded-md transition-all
+              className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
                 ${isZoomConnected
                   ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
@@ -171,14 +187,16 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
               `}
               title={!isZoomConnected ? 'Connect to Zoom first' : 'View Members'}
             >
+              <Users className="w-5 h-5" />
               Member List
             </Link>
 
             <button
               onClick={() => window.location.href = '/configure-meeting-tools'}
-              className="w-full inline-flex justify-center items-center px-4 py-2 text-lg font-bold rounded-md transition-all
+              className="w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer"
             >
+              <Settings className="w-5 h-5" />
               Meeting Platforms
             </button>
           </>
