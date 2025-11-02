@@ -358,15 +358,10 @@ export default function AIChatPage() {
             />
           </div>
 
-          {/* Select All */}
-          <button
-            onClick={handleSelectAll}
-            className="text-sm text-blue-600 hover:underline mb-2 block ml-auto"
-          >
-            {selectedMeetings.length === filteredMeetings.length && filteredMeetings.length > 0
-              ? 'Unselect All'
-              : 'Select All'}
-          </button>
+          {/* Note: Selection Limit */}
+          <p className="text-xs text-gray-500 mb-2 text-right italic">
+            You can select up to <span className="font-medium text-gray-700">10 meetings</span> at a time.
+          </p>
 
           {loadingMeetings && <p className="text-xs text-gray-500 mt-2">Loading meetings...</p>}
         </div>
@@ -559,6 +554,11 @@ export default function AIChatPage() {
               </button>
             </div>
 
+            <p className="text-xs text-gray-500 mb-3 text-center italic">
+              You can select up to <span className="font-medium text-gray-700">10 meetings</span> at a time.
+            </p>
+
+
             <div className="space-y-2">
             {filteredMeetings.map((meeting) => {
               const isDisabled =
@@ -605,6 +605,7 @@ export default function AIChatPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
