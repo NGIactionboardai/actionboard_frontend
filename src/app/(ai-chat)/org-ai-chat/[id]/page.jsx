@@ -30,6 +30,9 @@ export default function AIChatPage() {
   const [loadingConversation, setLoadingConversation] = useState(true);
   const [conversationId, setConversationId] = useState(null);
   const [error, setError] = useState(null);
+  const [quickStartQuestions, setQuickStartQuestions] = useState([]);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false)
+
 
   const chatEndRef = useRef(null);
   const [showMeetingModal, setShowMeetingModal] = useState(false);
@@ -89,6 +92,7 @@ export default function AIChatPage() {
           id: m.id,
           topic: m.topic ?? m.title ?? `Meeting ${m.id}`,
           date: m.start_time ?? m.date ?? null,
+          full_transcript: m.full_transcript ?? '',
           raw: m,
         }));
         setMeetings(normalized);
@@ -183,6 +187,90 @@ export default function AIChatPage() {
       return [...prev, id];
     });
   };
+
+  async function fetchQuickStartQuestions(meetings) {
+    const snippets = meetings.map(m => {
+      const parts = [];
+  
+      // Always include topic
+      if (m.topic) parts.push(`Topic: ${m.topic}`);
+  
+      // Include agenda if available
+      if (m.agenda) parts.push(`Agenda: ${m.agenda}`);
+  
+      // Include first ~300 chars of full transcript if available
+      if (m.full_transcript) {
+        const transcriptSnippet = m.full_transcript.slice(0, 500);
+        parts.push(`Transcript snippet: ${transcriptSnippet}`);
+      }
+  
+      // Join all parts into a single snippet, limit to 500 chars total
+      return parts.join("\n").slice(0, 500);
+    });
+  
+    try {
+      console.log("Snippits: ", snippets)
+      const res = await axios.post(
+        `${API_BASE_URL}/ai-assistant/quick-start-questions/`,
+        { snippets }
+      );
+      return res.data.questions || [];
+    } catch (err) {
+      console.error('Failed to generate quick start questions:', err);
+      throw new Error(
+        err.response?.data?.error || 'Failed to generate quick start questions'
+      );
+    }
+  }
+  
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadQuickStart() {
+      if (selectedMeetings.length === 0) {
+        setQuickStartQuestions([]);
+        return;
+      }
+
+      setInput('');
+      setIsLoadingQuestions(true);
+
+      const selected = meetings.filter(m => selectedMeetings.includes(m.id));
+
+      // Phase 1: Local fallback questions
+      const fallbackQuestions = selected.slice(0, 2).flatMap(m => [
+        `Summarize the meeting "${m.topic}"`,
+        `List key decisions from "${m.topic}"`,
+        `Show action items discussed in "${m.topic}"`,
+      ]);
+
+      if (selected.length > 1) {
+        fallbackQuestions.push("Compare discussions across the selected meetings");
+        fallbackQuestions.push("Find common themes across selected meetings");
+      }
+
+      setQuickStartQuestions(fallbackQuestions);
+
+      // Phase 2: Fetch refined AI-generated questions
+      try {
+        const aiQuestions = await fetchQuickStartQuestions(selected);
+        if (!isCancelled && aiQuestions.length > 0) {
+          setQuickStartQuestions(aiQuestions);
+        }
+      } catch (err) {
+        console.error(err);
+        // Keep fallback questions on failure
+      } finally {
+        if (!isCancelled) setIsLoadingQuestions(false);
+      }
+    }
+
+    loadQuickStart();
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedMeetings]);
 
   
 
@@ -480,7 +568,7 @@ export default function AIChatPage() {
                       msg.text
                     )}
 
-                    {msg.sender === 'bot' && msg.meta?.followups?.length > 0 && (
+                    {/* {msg.sender === 'bot' && msg.meta?.followups?.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {msg.meta.followups.map((f, idx) => (
                           <button
@@ -492,7 +580,9 @@ export default function AIChatPage() {
                           </button>
                         ))}
                       </div>
-                    )}
+                    )} */}
+
+
                   </div>
                   {msg.sender === 'user' && (
                     <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gray-300 rounded-full flex items-center justify-center shrink-0">
@@ -501,6 +591,50 @@ export default function AIChatPage() {
                   )}
                 </motion.div>
               ))}
+              {messages.length <= 1 && (
+                <div className="px-6 py-3 flex flex-wrap gap-2 justify-center">
+                  {isLoadingQuestions ? (
+                    <div className="flex justify-center items-center py-4">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"></div>
+                    </div>
+                  ) : (
+                    quickStartQuestions.map((q, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          handleQuickQuestion(q);
+                          // Remove clicked question from quickStartQuestions
+                          setQuickStartQuestions(prev => prev.filter(qq => qq !== q));
+                        }}
+                        className="text-sm border border-gray-300 rounded-full px-3 py-1.5 hover:border-[#8B0782] hover:text-[#8B0782] transition"
+                      >
+                        {q}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* <div className="px-6 py-3 flex flex-wrap gap-2 justify-center">
+                {isLoadingQuestions ? (
+                  <div className="flex justify-center items-center py-4">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"></div>
+                  </div>
+                ) : (
+                  quickStartQuestions.map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        handleQuickQuestion(q);
+                        setQuickStartQuestions(prev => prev.filter(qq => qq !== q));
+                      }}
+                      className="text-sm border border-gray-300 rounded-full px-3 py-1.5 hover:border-[#8B0782] hover:text-[#8B0782] transition"
+                    >
+                      {q}
+                    </button>
+                  ))
+                )}
+              </div> */}
             </AnimatePresence>
             <div ref={chatEndRef} />
           </div>
@@ -510,10 +644,13 @@ export default function AIChatPage() {
             <div className="flex items-center bg-gray-100 rounded-xl p-2">
               <input
                 type="text"
+                disabled={selectedMeetings.length === 0 || quickStartQuestions.length === 0}
                 placeholder={
-                  selectedMeetings.length > 0
-                    ? `Ask about ${selectedMeetings.length} selected meeting(s)...`
-                    : 'Type your message...'
+                  selectedMeetings.length === 0
+                    ? 'Select meetings first...'
+                    : quickStartQuestions.length === 0
+                      ? 'Generating quick questions...'
+                      : `Ask about ${selectedMeetings.length} meeting(s)...`
                 }
                 className="flex-1 px-3 py-2 outline-none text-sm text-gray-800 bg-transparent"
                 value={input}
