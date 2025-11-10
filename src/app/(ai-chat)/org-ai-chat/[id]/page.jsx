@@ -225,52 +225,58 @@ export default function AIChatPage() {
   
 
   useEffect(() => {
-    let isCancelled = false;
-
-    async function loadQuickStart() {
-      if (selectedMeetings.length === 0) {
-        setQuickStartQuestions([]);
-        return;
-      }
-
-      setInput('');
-      setIsLoadingQuestions(true);
-
-      const selected = meetings.filter(m => selectedMeetings.includes(m.id));
-
-      // Phase 1: Local fallback questions
-      const fallbackQuestions = selected.slice(0, 2).flatMap(m => [
-        `Summarize the meeting "${m.topic}"`,
-        `List key decisions from "${m.topic}"`,
-        `Show action items discussed in "${m.topic}"`,
-      ]);
-
-      if (selected.length > 1) {
-        fallbackQuestions.push("Compare discussions across the selected meetings");
-        fallbackQuestions.push("Find common themes across selected meetings");
-      }
-
-      setQuickStartQuestions(fallbackQuestions);
-
-      // Phase 2: Fetch refined AI-generated questions
-      try {
-        const aiQuestions = await fetchQuickStartQuestions(selected);
-        if (!isCancelled && aiQuestions.length > 0) {
-          setQuickStartQuestions(aiQuestions);
-        }
-      } catch (err) {
-        console.error(err);
-        // Keep fallback questions on failure
-      } finally {
-        if (!isCancelled) setIsLoadingQuestions(false);
-      }
+    if (selectedMeetings.length === 0) {
+      setQuickStartQuestions([]);
+      return;
     }
-
-    loadQuickStart();
-    return () => {
-      isCancelled = true;
-    };
+  
+    setInput('');
+    setIsLoadingQuestions(true);
+  
+    const selected = meetings.filter(m => selectedMeetings.includes(m.id));
+  
+    // Generic base question templates (no sentiment)
+    const baseQuestions = [
+      "Meeting Topic",
+      "Meeting Minutes",
+      "Meeting Summary",
+      "Action Items",
+      "Speaker Names",
+      "Annual Report",
+    ];
+  
+    // Build tailored questions randomly using selected meetings
+    const dynamicQuestions = [];
+  
+    selected.forEach(m => {
+      const templates = [
+        `Summarize the meeting "${m.topic}"`,
+        `Can you summarize meeting "${m.topic}"?`,
+        `List the action items from "${m.topic}"`,
+        `Can you tell me the action items of meeting "${m.topic}"?`,
+        `Show meeting minutes for "${m.topic}"`,
+        `Who were the speakers in "${m.topic}"?`,
+        `Give a summary of speaker A from "${m.topic}"`,
+        `What are the key takeaways from "${m.topic}"?`,
+        `Can you compare "${m.topic}" with another meeting?`,
+      ];
+  
+      // Randomly pick one or two per meeting
+      const randomCount = Math.random() > 0.5 ? 2 : 1;
+      const shuffledTemplates = templates.sort(() => 0.5 - Math.random());
+      dynamicQuestions.push(...shuffledTemplates.slice(0, randomCount));
+    });
+  
+    // Merge base + dynamic + randomize + limit
+    const allQuestions = [...baseQuestions, ...dynamicQuestions];
+    const shuffled = allQuestions.sort(() => 0.5 - Math.random());
+    const finalQuestions = [...new Set(shuffled)].slice(0, 4);
+  
+    setQuickStartQuestions(finalQuestions);
+    setIsLoadingQuestions(false);
   }, [selectedMeetings]);
+  
+  
 
   
 
@@ -591,7 +597,7 @@ export default function AIChatPage() {
                   )}
                 </motion.div>
               ))}
-              {messages.length <= 1 && (
+              {/* {messages.length <= 1 && (
                 <div className="px-6 py-3 flex flex-wrap gap-2 justify-center">
                   {isLoadingQuestions ? (
                     <div className="flex justify-center items-center py-4">
@@ -613,9 +619,9 @@ export default function AIChatPage() {
                     ))
                   )}
                 </div>
-              )}
+              )} */}
 
-              {/* <div className="px-6 py-3 flex flex-wrap gap-2 justify-center">
+              <div className="px-6 py-3 flex flex-wrap gap-2 justify-center">
                 {isLoadingQuestions ? (
                   <div className="flex justify-center items-center py-4">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"></div>
@@ -634,7 +640,7 @@ export default function AIChatPage() {
                     </button>
                   ))
                 )}
-              </div> */}
+              </div>
             </AnimatePresence>
             <div ref={chatEndRef} />
           </div>
