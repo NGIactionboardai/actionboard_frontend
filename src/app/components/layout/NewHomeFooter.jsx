@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Linkedin, Github, Youtube } from "lucide-react";
+import { Twitter, Linkedin, Github, Youtube, X, TwitterIcon, Facebook, LucideYoutube } from "lucide-react";
 
 export default function NewHomeFooter() {
   return (
@@ -63,33 +63,40 @@ export default function NewHomeFooter() {
 
           {/* Social Icons */}
           <div className="flex space-x-6 mt-4 sm:mt-0 group">
+            {/* X (formerly Twitter) */}
             <Link
-              href="https://twitter.com"
+              href="https://x.com/home"
               target="_blank"
               className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
             >
-              <Twitter className="w-5 h-5" />
+              <TwitterIcon className="w-5 h-5" />
             </Link>
+
+            {/* Facebook */}
             <Link
-              href="https://linkedin.com"
+              href="https://www.facebook.com/profile.php?id=61582344688316"
               target="_blank"
               className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
             >
-              <Linkedin className="w-5 h-5" />
+              <Facebook className="w-5 h-5" />
             </Link>
-            <Link
+
+            {/* GitHub — same as before */}
+            {/* <Link
               href="https://github.com"
               target="_blank"
               className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
             >
               <Github className="w-5 h-5" />
-            </Link>
+            </Link> */}
+
+            {/* YouTube */}
             <Link
-              href="https://youtube.com"
+              href="https://www.youtube.com/@NousMeeting-2025"
               target="_blank"
               className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
             >
-              <Youtube className="w-5 h-5" />
+              <LucideYoutube className="w-5 h-5" />
             </Link>
           </div>
         </div>

@@ -228,8 +228,13 @@ export default function NewNavbar({ variant = "default" }) {
                               className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors mx-2 rounded-lg"
                               onClick={() => setOrgsOpen(false)}
                             >
-                              <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                              {org.name}
+                              <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></div>
+                                <span
+                                  className="truncate whitespace-nowrap max-w-[160px]"
+                                  title={org.name}
+                                >
+                                  {org.name}
+                                </span>
                             </Link>
                           ))}
                         </div>
@@ -269,8 +274,13 @@ export default function NewNavbar({ variant = "default" }) {
                               className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors mx-2 rounded-lg"
                               onClick={() => setCalendarOpen(false)}
                             >
-                              <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                              {org.name}
+                              <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></div>
+                                <span
+                                  className="truncate whitespace-nowrap max-w-[160px]"
+                                  title={org.name}
+                                >
+                                  {org.name}
+                                </span>
                             </Link>
                           ))}
                         </div>
