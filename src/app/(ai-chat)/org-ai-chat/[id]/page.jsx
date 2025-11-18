@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Search, CheckSquare, Square, Building2 } from 'lucide-react';
+import { Send, Bot, User, Search, CheckSquare, Square, Building2, Info } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -453,9 +453,21 @@ export default function AIChatPage() {
           </div>
 
           {/* Note: Selection Limit */}
-          <p className="text-xs text-gray-500 mb-2 text-right italic">
-            You can select up to <span className="font-medium text-gray-700">10 meetings</span> at a time.
-          </p>
+          <div className="space-y-2 mt-3">
+            <div className="flex items-start space-x-2 text-xs p-3 bg-blue-50/70 border border-blue-100 rounded-lg text-blue-700">
+              <Info className="w-4 h-4 mt-0.5" />
+              <p>
+                You can select up to <span className="font-semibold">10 meetings</span> at a time.
+              </p>
+            </div>
+
+            <div className="flex items-start space-x-2 text-xs p-3 bg-amber-50/70 border border-amber-100 rounded-lg text-amber-700">
+              <Info className="w-4 h-4 mt-0.5" />
+              <p>
+                <span className="font-semibold">Note:</span> Only ended and transcribed meetings are displayed here.
+              </p>
+            </div>
+          </div>
 
           {loadingMeetings && <p className="text-xs text-gray-500 mt-2">Loading meetings...</p>}
         </div>
