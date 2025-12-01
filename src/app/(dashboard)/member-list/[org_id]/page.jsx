@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
 import MemberFormModal from '@/app/components/memberlist/MemberFormModal';
 import ConfirmDeleteModal from '@/app/components/memberlist/ConfirmDeleteModal';
 import { useSelector } from 'react-redux';
-import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import withProfileCompletionGuard from '@/app/components/withProfileCompletionGuard';
 
 function MemberListPage() {
@@ -14,28 +13,76 @@ function MemberListPage() {
 
   const router = useRouter();
   const { org_id } = useParams();
+
   const [members, setMembers] = useState([]);
-  const [orgName, setOrgName] = useState('')
+  const [orgName, setOrgName] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [nextUrl, setNextUrl] = useState(null);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
   const [showFormModal, setShowFormModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
 
   const authToken = useSelector((state) => state.auth?.token);
 
+  // Fetch first page
   const fetchMembers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${org_id}/members/`);
-  
+      const res = await axios.get(
+        `${API_BASE_URL}/organisations/${org_id}/members/`
+      );
+
       setMembers(res.data.members);
       setOrgName(res.data.organisation_name);
+
+      setNextUrl(res.data.next);
+      setHasMore(Boolean(res.data.next));
     } catch (err) {
       console.error('Failed to load members:', err);
     } finally {
       setLoading(false);
     }
   };
+
+  // Fetch next page for infinite scroll
+  const loadMoreMembers = useCallback(async () => {
+    if (!nextUrl || isFetchingMore) return;
+
+    setIsFetchingMore(true);
+    try {
+      const res = await axios.get(nextUrl);
+
+      setMembers((prev) => [...prev, ...res.data.members]);
+      setNextUrl(res.data.next);
+      setHasMore(Boolean(res.data.next));
+    } catch (err) {
+      console.error('Failed to load more members:', err);
+    } finally {
+      setIsFetchingMore(false);
+    }
+  }, [nextUrl, isFetchingMore]);
+
+  // Attach infinite scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasMore || isFetchingMore) return;
+
+      const scrollPos = window.innerHeight + window.scrollY;
+      const threshold = document.body.offsetHeight - 300; // when 300px from bottom
+
+      if (scrollPos >= threshold) {
+        loadMoreMembers();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMore, isFetchingMore, loadMoreMembers]);
 
   useEffect(() => {
     if (org_id) fetchMembers();
@@ -44,6 +91,7 @@ function MemberListPage() {
   return (
     <main className="min-h-screen px-4 sm:px-6 py-8 sm:py-10 bg-gray-50">
       <div className="max-w-4xl mx-auto">
+
         {/* Back Button */}
         <button
           onClick={() => router.push(`/meetings/${org_id}`)}
@@ -51,13 +99,13 @@ function MemberListPage() {
         >
           ← Back to Org Home
         </button>
-  
+
         {orgName && (
           <h1 className="text-lg sm:text-2xl mb-3 sm:mb-4 font-semibold text-gray-800 break-words">
             Org: {orgName}
           </h1>
         )}
-  
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-5 sm:mb-6">
           <h2 className="text-lg sm:text-2xl font-semibold text-gray-800">Member List</h2>
@@ -71,7 +119,7 @@ function MemberListPage() {
             + Add Member
           </button>
         </div>
-  
+
         {/* List */}
         {loading ? (
           <p className="text-center text-gray-600 text-sm sm:text-base">Loading members...</p>
@@ -114,8 +162,20 @@ function MemberListPage() {
             ))}
           </ul>
         )}
+
+        {/* Infinite scroll loader */}
+        {isFetchingMore && (
+          <p className="text-center mt-4 text-sm text-gray-600">Loading more...</p>
+        )}
+
+        {!hasMore && members.length > 0 && (
+          <p className="text-center mt-4 text-xs sm:text-sm text-gray-400">
+            No more members to load.
+          </p>
+        )}
+
       </div>
-  
+
       {/* Modals */}
       {showFormModal && (
         <MemberFormModal
@@ -126,6 +186,7 @@ function MemberListPage() {
           onSuccess={fetchMembers}
         />
       )}
+
       {showDeleteModal && (
         <ConfirmDeleteModal
           member={selectedMember}
@@ -135,10 +196,9 @@ function MemberListPage() {
           onSuccess={fetchMembers}
         />
       )}
+
     </main>
   );
-  
 }
 
-
-export default withProfileCompletionGuard(MemberListPage)
+export default withProfileCompletionGuard(MemberListPage);
