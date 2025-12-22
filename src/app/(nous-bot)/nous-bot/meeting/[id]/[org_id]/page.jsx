@@ -82,7 +82,10 @@ function getInitials(name) {
 
 export default function MeetingNotesPage() {
   const { id: meetingId } = useParams();
+  const { org_id: orgId } = useParams();
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const [orgName, setOrgName] = useState('Acme Corp');
+
 
   const [meeting, setMeeting] = useState(null);
   const [loadingMeeting, setLoadingMeeting] = useState(true);
@@ -118,9 +121,25 @@ export default function MeetingNotesPage() {
         setLoadingMeeting(false);
       }
     };
-  
+    if (orgId) fetchOrg();
     if (meetingId) fetchMeetingDetails();
   }, [meetingId]);
+
+  // const fetchOrg = async () => {
+  //   try {
+  //     const res = await axios.get(`${API_BASE_URL}/organisations/${orgId}/`);
+  //     const data = res.data;
+  //     setOrgName(data.name);
+  //   } catch (err) {
+  //     console.error('Error fetching organization:', err);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (orgId) fetchOrg();
+  // }, [orgId]);
+
+
 
   const latestBot = meeting?.latest_bot;
   const summaryStatus = meeting?.summary_status;
@@ -283,6 +302,8 @@ export default function MeetingNotesPage() {
           botStatus={latestBot.status}
           onLeave={handleLeaveMeeting}
           meeting={meeting}
+          orgId={orgId}
+          orgName={orgName}
         />
       </div>
     );
@@ -293,10 +314,10 @@ export default function MeetingNotesPage() {
       {/* Header */}
       <div className="mb-6">
         {/* Organization */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+        <div className="flex items-center gap-2 text-gray-500 mb-1">
           <Building2 size={14} className="text-gray-400" />
-          <span className="font-medium">Nous AI</span>
-          <span className="opacity-60">• ORG-001</span>
+          <span className="font-medium text-lg">{orgName}</span>
+          <span className="opacity-60 text-sm">• {orgId}</span>
         </div>
 
         {/* Meeting name */}
@@ -520,7 +541,7 @@ export default function MeetingNotesPage() {
               )}
 
               {!loadingTranscript && botTranscript.map((u, idx) => (
-                <div className="flex gap-3">
+                <div className="flex gap-3" key={idx}>
                   <div className="w-9 h-9 rounded-full bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white flex items-center justify-center text-xs font-semibold">
                     {getInitials(u.speaker_name)}
                   </div>

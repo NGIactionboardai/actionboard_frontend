@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import { Plus, Link2, Play, Square, Type } from "lucide-react";
+import { Plus, Link2, Play, Square, Type, Building2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
@@ -11,6 +11,8 @@ import Link from "next/link";
 export default function BotMeetingsPage() {
   const { id: orgId } = useParams();
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const [orgName, setOrgName] = useState('Acme Corp');
+
 
   const [meetingName, setMeetingName] = useState("");
   const [meetingUrl, setMeetingUrl] = useState("");
@@ -24,7 +26,7 @@ export default function BotMeetingsPage() {
    * ----------------------------- */
   const fetchMeetings = async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const res = await axios.get(
         `${API_BASE_URL}/nous-bot-manager/bots/meetings/${orgId}/`
       );
@@ -33,13 +35,28 @@ export default function BotMeetingsPage() {
       console.error(err);
       toast.error("Failed to load meetings");
     } finally {
-      setLoading(false);
+      // setLoading(false);
+    }
+  };
+
+  const fetchOrg = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/organisations/${orgId}/`);
+      const data = res.data;
+      setOrgName(data.name);
+    } catch (err) {
+      console.error('Error fetching organization:', err);
     }
   };
 
   useEffect(() => {
+    setLoading(true);
     if (orgId) fetchMeetings();
+    if (orgId) fetchOrg();
+    setLoading(false);
   }, [orgId]);
+
+
 
   /* -----------------------------
    * Join bot
@@ -122,17 +139,18 @@ export default function BotMeetingsPage() {
 
 
   return (
-    <div className="bg-gray-50 px-6 py-6 min-h-screen">
+    <div className="bg-gray-50 px-6 py-6 min-h-screen mt-20">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Bot Meetings
-          </h1>
-          <p className="text-sm text-gray-500">
-            Name, join, and manage organization meetings
-          </p>
+        <div className="mb-6">
+        {/* Organization */}
+        <div className="flex items-center gap-2  text-gray-500 mb-1">
+          <Building2 size={14} className="text-gray-400" />
+          <span className="font-medium text-lg">{orgName}</span>
+          <span className="opacity-60 text-sm">• {orgId}</span>
         </div>
+
+      </div>
 
         {/* Join Meeting Card */}
         <motion.div
@@ -257,7 +275,7 @@ export default function BotMeetingsPage() {
 
 
                     <Link
-                      href={`/nous-bot/meeting/${m.id}`}
+                      href={`/nous-bot/meeting/${m.id}/${orgId}`}
                       className="flex items-center gap-1.5 text-sm text-[#8B0782] hover:underline"
                     >
                       <Play size={14} /> View
@@ -266,7 +284,7 @@ export default function BotMeetingsPage() {
                     
                   ) : (
                     <Link
-                      href={`/nous-bot/meeting/${m.id}`}
+                      href={`/nous-bot/meeting/${m.id}/${orgId}`}
                       className="flex items-center gap-1.5 text-sm text-[#8B0782] hover:underline"
                     >
                       <Play size={14} /> View
