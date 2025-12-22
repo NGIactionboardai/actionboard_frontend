@@ -125,15 +125,15 @@ export default function MeetingNotesPage() {
     if (meetingId) fetchMeetingDetails();
   }, [meetingId]);
 
-  // const fetchOrg = async () => {
-  //   try {
-  //     const res = await axios.get(`${API_BASE_URL}/organisations/${orgId}/`);
-  //     const data = res.data;
-  //     setOrgName(data.name);
-  //   } catch (err) {
-  //     console.error('Error fetching organization:', err);
-  //   }
-  // };
+  const fetchOrg = async () => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/organisations/${orgId}/`);
+      const data = res.data;
+      setOrgName(data.name);
+    } catch (err) {
+      console.error('Error fetching organization:', err);
+    }
+  };
 
   // useEffect(() => {
   //   if (orgId) fetchOrg();
