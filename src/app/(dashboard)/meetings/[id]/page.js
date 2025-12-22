@@ -48,6 +48,11 @@ export default function Meetings() {
   const [showRecordingInfoModal, setShowRecordingInfoModal] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+
+  const [nextUrl, setNextUrl] = useState(null);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   
 
 
@@ -113,6 +118,8 @@ export default function Meetings() {
       try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${organizationId}/members/`);
         setMembers(res.data.members || []);
+        setNextUrl(res.data.next);
+        setHasMore(Boolean(res.data.next));
       } catch (err) {
         console.error('Error fetching members', err);
       }
@@ -306,7 +313,7 @@ export default function Meetings() {
             onClose={() => setIsInviteModalOpen(false)}
             meeting={selectedMeeting}
             orgId={organizationId}
-            members={members}
+            // members={members}
             onSuccess={() => {
               setIsInviteModalOpen(false);
             }}
