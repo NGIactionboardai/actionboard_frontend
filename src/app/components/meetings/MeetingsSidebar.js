@@ -12,7 +12,8 @@ import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import OrgSwitcher from './OrgSwitcher';
 import { ZoomConnectionStatus } from '../ZoomConfig';
 import axios from 'axios';
-import { Video, MessageSquare, CalendarDays, Users, Settings } from "lucide-react";
+import { Video, MessageSquare, CalendarDays, Users, Settings, BotIcon } from "lucide-react";
+import ManualBotJoinModal from '../bots/ManualBotJoinModal';
 
 export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }) {
 
@@ -24,6 +25,8 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
   const [organizations, setOrganizations] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(organizationId);
   const [loading, setLoading] = useState(true); // New loading state
+  const [showManualBotModal, setShowManualBotModal] = useState(false);
+
 
   // useEffect(() => {
   //   const fetchOrgs = async () => {
@@ -150,6 +153,20 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
             </button>
 
             <Link
+              href={`/nous-bot/meetings/${organizationId}`}
+              className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
+                bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                ${isZoomConnected
+                  ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
+                  : 'opacity-50 cursor-not-allowed pointer-events-none'}
+              `}
+              title={!isZoomConnected ? 'Connect to Zoom first' : 'AI Assistant Chat'}
+            >
+              <BotIcon className="w-5 h-5" />
+              Add Bot
+            </Link>
+
+            <Link
               href={`/org-ai-chat/${organizationId}`}
               className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
@@ -202,6 +219,15 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
           </>
         )}
       </div>
+
+      <ManualBotJoinModal
+        isOpen={showManualBotModal}
+        onClose={() => setShowManualBotModal(false)}
+        onSubmit={(data) => {
+          console.log('Manual bot join payload:', data);
+          // later → POST /bots/join/manual/
+        }}
+      />
     </div>
   );
 }
