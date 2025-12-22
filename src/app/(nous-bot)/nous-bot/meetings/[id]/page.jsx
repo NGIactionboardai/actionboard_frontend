@@ -11,7 +11,7 @@ import Link from "next/link";
 export default function BotMeetingsPage() {
   const { id: orgId } = useParams();
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const [orgName, setOrgName] = useState('Acme Corp');
+  const [orgName, setOrgName] = useState('Loading...');
 
 
   const [meetingName, setMeetingName] = useState("");

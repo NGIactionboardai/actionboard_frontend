@@ -435,7 +435,8 @@ export default function MeetingNotesPage() {
                     </h3>
                   </div>
 
-                  {activeTemplate === "general" && (
+                  {/* {activeTemplate === "general" && (
+
                     <button
                       onClick={() => setIsEditingSummary(!isEditingSummary)}
                       className="flex items-center gap-1 text-sm text-[#8B0782]"
@@ -443,7 +444,7 @@ export default function MeetingNotesPage() {
                       {isEditingSummary ? <Save size={14} /> : <Edit3 size={14} />}
                       {isEditingSummary ? "Save" : "Edit"}
                     </button>
-                  )}
+                  )} */}
                 </div>
 
                 {/* GENERAL SUMMARY */}
@@ -526,13 +527,13 @@ export default function MeetingNotesPage() {
           <div className="lg:col-span-3 bg-white border border-gray-200 rounded-xl p-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-semibold text-gray-700">Transcript</h3>
-              <button
+              {/* <button
                 onClick={() => setIsEditing(!isEditing)}
                 className="flex items-center gap-1 text-sm text-[#8B0782]"
               >
                 {isEditing ? <Save size={14} /> : <Edit3 size={14} />}
                 {isEditing ? "Save" : "Edit"}
-              </button>
+              </button> */}
             </div>
 
             <div className="space-y-4">
