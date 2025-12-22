@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useCallback, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { X } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -13,7 +13,10 @@ export default function SendInviteModal({
   onSuccess,
   orgId,
   meeting,
-  members = [],
+  // members = [],
+  // nextUrl,
+  // isFetchingMore,
+  // hasMore
 }) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -23,6 +26,14 @@ export default function SendInviteModal({
   const [viewMode, setViewMode] = useState("invite"); // "invite" | "history"
   const [inviteHistory, setInviteHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const memberListRef = useRef(null);
+
+
+  const [members, setMembers] = useState([]);
+  const [nextUrl, setNextUrl] = useState(null);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const filteredMembers = members.filter(
     (m) =>
@@ -50,8 +61,65 @@ export default function SendInviteModal({
       setSelected([]);
       setViewMode("invite");
       fetchHistory()
+      fetchMembers()
     }
   }, [isOpen]);
+
+  const fetchMembers = async () => {
+    if (!orgId) return;  // token handled globally by interceptor
+
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${orgId}/members/`);
+      setMembers(res.data.members || []);
+      setNextUrl(res.data.next);
+      setHasMore(Boolean(res.data.next));
+    } catch (err) {
+      console.error('Error fetching members', err);
+    }
+  };
+
+  // Fetch next page for infinite scroll
+  const loadMoreMembers = useCallback(async () => {
+    if (!nextUrl || isFetchingMore) return;
+
+    setIsFetchingMore(true);
+    try {
+      const res = await axios.get(nextUrl);
+
+      setMembers((prev) => {
+        const map = new Map(prev.map(m => [m.id, m]));
+        res.data.members.forEach(m => map.set(m.id, m));
+        return Array.from(map.values());
+      });
+      setNextUrl(res.data.next);
+      setHasMore(Boolean(res.data.next));
+    } catch (err) {
+      console.error('Failed to load more members:', err);
+    } finally {
+      setIsFetchingMore(false);
+    }
+  }, [nextUrl, isFetchingMore]);
+
+  // Attach infinite scroll listener
+  useEffect(() => {
+    const el = memberListRef.current;
+    if (!el) return;
+  
+    const handleScroll = () => {
+      if (!hasMore || isFetchingMore || searchTerm) return;
+  
+      const threshold = 80; // px from bottom
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - threshold) {
+        loadMoreMembers();
+      }
+    };
+  
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [hasMore, isFetchingMore, loadMoreMembers, searchTerm]);
+
+
+
 
   const handleSend = async () => {
     if (selected.length === 0 || !meeting?.id) return;
@@ -253,7 +321,10 @@ export default function SendInviteModal({
                         </div>
 
                         {/* Scrollable Members List */}
-                        <div className="flex-1 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 space-y-3">
+                        <div 
+                          ref={memberListRef}
+                          className="flex-1 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 space-y-3"
+                        >
                           {loadingHistory ? (
                             // Skeleton loaders
                             Array.from({ length: 5 }).map((_, i) => (
