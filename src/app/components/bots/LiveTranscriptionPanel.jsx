@@ -5,7 +5,7 @@ import axios from "axios";
 import { Mic, Loader2, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function LiveTranscriptionPanel({ botId, botStatus, onLeave, meeting }) {
+export default function LiveTranscriptionPanel({ botId, botStatus, onLeave, meeting, orgName, orgId }) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [utterances, setUtterances] = useState([]);
@@ -55,10 +55,10 @@ export default function LiveTranscriptionPanel({ botId, botStatus, onLeave, meet
       {/* Meeting Header */}
       <div className="mb-6">
         {/* Organization */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+        <div className="flex items-center gap-2 text-gray-500 mb-1">
           <Building2 size={14} className="text-gray-400" />
-          <span className="font-medium">Nous AI</span>
-          <span className="opacity-60">• ORG-001</span>
+          <span className="font-medium text-lg">{orgName}</span>
+          <span className="opacity-60 text-sm">• {orgId}</span>
         </div>
 
         {/* Meeting name */}
@@ -66,7 +66,7 @@ export default function LiveTranscriptionPanel({ botId, botStatus, onLeave, meet
           {meeting?.name || "Live Meeting"}
         </h1>
       </div>
-      
+
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
