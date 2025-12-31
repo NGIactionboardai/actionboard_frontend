@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import { Plus, Link2, Play, Square, Type, Building2 } from "lucide-react";
+import { Plus, Link2, Play, Square, Type, Building2, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
@@ -141,6 +141,17 @@ export default function BotMeetingsPage() {
   return (
     <div className="bg-gray-50 px-6 py-6 min-h-screen mt-20">
       <div className="max-w-5xl mx-auto">
+        {/* Back to Meetings */}
+        <div className="mb-4">
+          <Link
+            href={`/meetings/${orgId}`}
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+          >
+            <ArrowLeft size={16} />
+            Back to Org Home
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="mb-6">
         {/* Organization */}

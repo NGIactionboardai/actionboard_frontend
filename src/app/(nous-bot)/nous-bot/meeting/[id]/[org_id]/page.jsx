@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { FileText, LayoutGrid, Edit3, Save, User, Video, CheckSquare, Square, Building2 } from "lucide-react";
+import { FileText, LayoutGrid, Edit3, Save, User, Video, CheckSquare, Square, Building2, ArrowLeft } from "lucide-react";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import LiveTranscriptionPanel from "@/app/components/bots/LiveTranscriptionPanel";
 import { buildWordTimeline } from "@/app/utils/buildWordTimeline";
+import Link from "next/link";
 // import LiveTranscriptionPanel from "@/components/nous-bot/LiveTranscriptionPanel";
 
 
@@ -311,6 +312,16 @@ export default function MeetingNotesPage() {
 
   return (
     <div className="px-6 py-6 max-w-7xl mx-auto mt-20">
+      {/* Back to Meetings */}
+      <div className="mb-4">
+        <Link
+          href={`/nous-bot/meetings/${orgId}`}
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+        >
+          <ArrowLeft size={16} />
+          Back to Meetings
+        </Link>
+      </div>
       {/* Header */}
       <div className="mb-6">
         {/* Organization */}

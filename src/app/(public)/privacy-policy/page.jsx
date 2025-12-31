@@ -4,188 +4,210 @@ const PrivacyPolicyPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-start justify-center p-6 sm:p-10">
       <div className="mt-20 w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 sm:p-12 backdrop-blur-sm border border-gray-100">
+
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">Privacy Policy</h1>
-          <p className="text-sm text-gray-500">Version 1.0, August 15th, 2025</p>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">
+            Privacy Policy
+          </h1>
+          <p className="text-sm text-gray-500">
+            Version 2.0 · Effective Date: December 22, 2025
+          </p>
         </div>
 
         {/* Policy Content */}
         <div className="prose prose-gray max-w-none text-justify">
+
           <p>
             Welcome to Nous Meeting’s website and application. Nous Meeting provides an
-            AI-powered smart meeting assistant designed to record, transcribe, summarize, extract
-            action items, analyze speaker sentiment, prepare reports, and manage follow-ups. The
-            service caters to a wide range of users, regardless of their professional background or
-            personal needs. Additionally, the platform aims to make learning about Nous Meeting’s
-            application and business activities easier and facilitate communication with the
-            platform.
+            AI-powered smart meeting assistant designed to record, transcribe, summarize,
+            extract action items, analyze speaker sentiment, prepare reports, and manage
+            follow-ups.
+          </p>
+
+          <p>
+            We recognize the importance of privacy and are committed to protecting your
+            personal information. This Privacy Policy explains how Nous Meeting collects,
+            uses, and safeguards your data.
+          </p>
+
+          <h2>1. Applicability of This Policy</h2>
+          <p>
+            This Privacy Policy applies solely to Nous Meeting’s website and application.
+            Third-party services accessed through our platform are governed by their own
+            privacy policies.
           </p>
           <p>
-            We recognize the importance of privacy, and we are committed to protecting your personal
-            information. This Privacy Policy outlines how Nous Meeting collects, uses, and
-            safeguards your data when you interact with our website and application.
+            “Nous Meeting” refers to the application owned by Next Generation Innovation
+            L.L.C., a limited liability company registered in the State of New York, USA.
           </p>
 
-          <h2 className="font-bold mt-8">Applicability of This Policy</h2>
+          <h2>2. Personal Information</h2>
           <p>
-            This Privacy Policy applies solely to Nous Meeting’s website and application. If you
-            visit any third-party websites or applications through our platform, we advise you to
-            review their respective privacy policies.
+            Personal information includes any data that can identify an individual, such as
+            name, email address, date of birth, phone number, voice recordings, emotions,
+            sentiments, and related meeting content.
           </p>
+
+          <h2>3. Information We Collect</h2>
+
+          <h3>3.1 Personal Information</h3>
           <p>
-            For the purposes of this policy, “Nous Meeting” refers to the application owned by
-            Next Generation Innovation L.L.C., a company registered in the State of New York as a
-            limited liability company.
+            We collect personal information during registration, surveys, transactions,
+            support requests, and communications via email.
           </p>
 
-          <h2 className="font-bold mt-8">Personal Information</h2>
+          <h3>3.2 Automatically Collected Information</h3>
+          <ul>
+            <li>Domain name and IP address</li>
+            <li>Browser type and operating system</li>
+            <li>Date and time of visit</li>
+            <li>Pages and services accessed</li>
+            <li>Referring and exit pages</li>
+            <li>Downloaded forms or documents</li>
+          </ul>
+
+          <h3>3.3 Cookies</h3>
           <p>
-            “Personal information” refers to any information that can be used to identify an
-            individual, such as name, date of birth, address, phone number, voice recordings,
-            emotions, and sentiments. This also includes identifiable information related to a
-            juridical entity.
+            We use session and persistent cookies to improve functionality. You may disable
+            cookies via browser settings, though some features may be limited.
           </p>
 
-          <h2 className="font-bold mt-8">Information We Collect</h2>
-          <div className="ml-4">
-            <h3 className="font-bold mt-6">1. Personal Information</h3>
-            <p className="">
-              Nous Meeting may collect personal information when users interact with the platform,
-              such as during registration, completing surveys, transactions, or when submitting
-              information via email.
-            </p>
-
-            <h3 className="font-bold mt-6">2. Automatically Collected Information</h3>
-            <p className="">We may automatically collect the following non-personally identifiable information when you visit our website or use our application:</p>
-            <ul className="mt-2">
-              <li className="mt-1 ml-3">a) Domain name and IP address</li>
-              <li className="mt-1 ml-3">b) Browser type and operating system</li>
-              <li className="mt-1 ml-3">c) Date and time of visit</li>
-              <li className="mt-1 ml-3">d) Pages and services accessed</li>
-              <li className="mt-1 ml-3">e) Referring websites and exit pages</li>
-              <li className="mt-1 ml-3">f) Forms or documents downloaded</li>
-            </ul>
-            <p className="mt-2">
-              This data is used to improve the functionality of the website, understand user
-              interaction, and for statistical analysis. Rest assured, Nous Meeting does not sell or
-              disclose this information for commercial purposes.
-            </p>
-
-            <h3 className="font-bold mt-6">3. Cookies</h3>
-            <p>
-              Nous Meeting uses “persistent” and “session” cookies, which store data temporarily for
-              the duration of your visit or longer, depending on your browser settings. You can manage
-              cookie preferences through your browser settings, though disabling certain cookies may
-              impact your ability to use some website features.
-            </p>
-
-            <h3 className="font-bold mt-6">4. Text Message Data</h3>
-            <p>We may retain text message data provided via the website for an indefinite period.</p>
-
-          </div>
-
-          <h2 className="font-bold mt-8">Information Collected During User Interaction</h2>
-          <div className="ml-4">
-
-            <h3 className="font-bold mt-6">1. Personal Information during Registration</h3>
-            <p className="ml-1">When registering for an account, we may collect the following personal information:</p>
-            <ul>
-              <li className="mt-1 ml-3">a) Name, email address, phone number (optional), and login credentials</li>
-              <li className="mt-1 ml-3">b) Profile details such as job title or organization name (optional)</li>
-              <li className="mt-1 ml-3">c) Meeting-related data if you schedule or host meetings (e.g., meeting title,
-                participant list, scheduled time)
-              </li>
-            </ul>
-
-            <h3 className="font-bold mt-6">2. Billing Information</h3>
-            <p>
-              For users who purchase premium plans, billing information (e.g., credit card details) is
-              securely processed through third-party payment processors.
-            </p>
-
-            <h3 className="font-bold mt-6">3. Usage Data</h3>
-            <p className="ml-1">We automatically collect device and technical information to improve platform
-            performance, including:</p>
-            <ul>
-              <li className="mt-1 ml-3">a) IP address, browser type, operating system, and device identifiers</li>
-              <li className="mt-1 ml-3">b) Meeting activity, including participation time, features used (e.g., screen sharing,
-                chat), and meeting duration
-              </li>
-            </ul>
-
-            <h3 className="font-bold mt-6">4. User-Generated Content</h3>
-            <p>
-              Any content shared during meetings (such as audio, video, chat messages, screen shares,
-              uploaded files) may be collected and stored based on your preferences. Support
-              communications and feedback are also recorded to enhance our services.
-            </p>
-
-          </div>
-          
-
-          <h2 className="font-bold mt-8">Information Provided via Email</h2>
+          <h3>3.4 Text Message Data</h3>
           <p>
-            When you email Nous Meeting, the email address and its contents (including text,
-            audio, video, or images) are collected. This information is used to respond to inquiries,
-            improve the website, and address any issues. Nous Meeting does not sell or disclose
-            email data for commercial purposes.
+            Text message data submitted via the website may be retained indefinitely unless
+            legally required otherwise.
           </p>
 
-          <h2 className="font-bold mt-8">Information Use and Disclosure</h2>
+          <h2>4. Information Collected During User Interaction</h2>
 
-          <div className="ml-4">
-            <h3 className="font-bold mt-6">1. Use of Information</h3>
-            <p>
-              The information collected is used to operate and improve our services, fulfil
-              transactions, and enhance user experience. We may disclose this information for
-              operational purposes, but never for commercial sale.
-            </p>
+          <h3>4.1 Registration Data</h3>
+          <ul>
+            <li>Name, email, phone number (optional), login credentials</li>
+            <li>Profile details such as organization or job title (optional)</li>
+            <li>Meeting metadata (title, participants, schedule)</li>
+          </ul>
 
-            <h3 className="font-bold mt-6">2. Compliance with Laws</h3>
-            <p>
-              Nous Meeting complies with U.S. state and federal laws. We may disclose personal
-              information as required by law, including in response to legal processes, or to protect
-              our intellectual property and ensure the integrity of our platform.
-            </p>
-          </div>
-          
-
-          <h2 className="font-bold mt-8">Child Privacy</h2>
+          <h3>4.2 Billing Information</h3>
           <p>
-            Nous Meeting does not knowingly collect information from children. We strongly advise
-            parents or guardians to monitor their children’s online activity and ensure that children
-            are not submitting personal information without supervision.
+            Payments are processed securely by third-party payment processors. Nous
+            Meeting does not store credit card details.
           </p>
 
-          <h2 className="font-bold mt-8">Security and Confidentiality</h2>
+          <h3>4.3 Usage Data</h3>
+          <ul>
+            <li>Device and browser identifiers</li>
+            <li>Meeting duration, participation time, and feature usage</li>
+          </ul>
+
+          <h3>4.4 User-Generated Content</h3>
           <p>
-            We are committed to safeguarding your personal information against unauthorized access
-            or disclosure. Nous Meeting employs security measures to protect your data, including
-            contractual obligations with employees to ensure data integrity and confidentiality.
+            Audio, video, chat messages, screen shares, uploaded files, and feedback may be
+            stored based on your settings.
           </p>
 
-          <h2 className="font-bold mt-8">External Links</h2>
+          <h2>5. Information Provided via Email</h2>
           <p>
-            Nous Meeting may provide links to third-party applications or websites. Please be aware
-            that once you leave our platform, you are subject to the privacy policies of those
-            external sites. We do not endorse the content, services, or privacy practices of external
-            sites.
+            Emails sent to Nous Meeting may be stored and used solely for support,
+            communication, and service improvement purposes.
           </p>
 
-          <h2 className="font-bold mt-8">Changes to This Privacy Policy</h2>
-          <p>
-            Nous Meeting reserves the right to modify this Privacy Policy at any time. Users should
-            periodically review this policy to stay informed of any changes.
+          <h2>6. Recording of Meetings – User Responsibility & Legal Compliance</h2>
+
+          <p className="font-semibold text-red-600">
+            CRITICAL NOTICE: Nous Meeting is a technology provider only. You are solely
+            responsible for complying with all recording, consent, and data-protection laws.
           </p>
 
-          <h2 className="font-bold mt-8">User Responsibility</h2>
           <p>
-            We encourage users to carefully protect their personal information, including login
-            credentials and any sensitive data submitted through the website.
+            As the meeting host or recording initiator, you are exclusively responsible for:
           </p>
+
+          <ul>
+            <li>Determining applicable federal, state, and international recording laws</li>
+            <li>Providing legally sufficient notice of recording</li>
+            <li>Obtaining all required participant consents</li>
+            <li>Complying with GDPR, CCPA, PIPEDA, and similar regulations</li>
+            <li>Securing, retaining, and deleting recordings appropriately</li>
+          </ul>
+
+          <p>
+            Automated recording indicators provided by Nous Meeting are technical features
+            only and may not constitute legal notice in all jurisdictions.
+          </p>
+
+          <p>
+            Nous Meeting disclaims all liability for recording misuse, non-compliance, or
+            legal consequences arising from user actions.
+          </p>
+
+          <h2>7. Information Use & Disclosure</h2>
+          <p>
+            We use collected information to operate and improve services, provide support,
+            conduct analytics, and meet legal obligations. We do not sell personal
+            information.
+          </p>
+
+          <h2>8. Security & Confidentiality</h2>
+          <p>
+            We employ industry-standard security measures including encryption, access
+            controls, and contractual confidentiality obligations. However, no system is
+            completely secure.
+          </p>
+
+          <h2>9. Your Privacy Rights</h2>
+          <p>
+            Depending on your jurisdiction, you may request access, correction, deletion,
+            restriction, portability, or withdrawal of consent by contacting us.
+          </p>
+
+          <h2>10. Children’s Privacy</h2>
+          <p>
+            Nous Meeting does not knowingly collect personal data from children under 13
+            (or under 16 where applicable).
+          </p>
+
+          <h2>11. External Links</h2>
+          <p>
+            We are not responsible for the privacy practices of third-party services linked
+            from our platform.
+          </p>
+
+          <h2>12. Data Retention</h2>
+          <p>
+            Data is retained only as long as necessary for legal, operational, and business
+            purposes, then securely deleted or anonymized.
+          </p>
+
+          <h2>13. Changes to This Policy</h2>
+          <p>
+            We may update this Privacy Policy periodically. Continued use of the service
+            constitutes acceptance of changes.
+          </p>
+
+          <h2>14. User Responsibility</h2>
+          <p>
+            Users are responsible for safeguarding their credentials and all activity under
+            their account.
+          </p>
+
+          <h2>15. Contact Us</h2>
+          <p>
+            <strong>Next Generation Innovation L.L.C.</strong><br />
+            State of Registration: New York, USA<br />
+            Email: support@nousmeeting.com<br />
+            Website: www.nousmeeting.com
+          </p>
+
+          <hr />
+
+          <p className="text-sm text-gray-500">
+            FINAL LEGAL NOTICE: This Privacy Policy is informational only and does not
+            constitute legal advice. Users must consult qualified legal counsel to ensure
+            compliance with applicable laws.
+          </p>
+
         </div>
-
       </div>
     </div>
   );
