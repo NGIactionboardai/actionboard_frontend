@@ -270,7 +270,7 @@ export default function AIChatPage() {
     // Merge base + dynamic + randomize + limit
     const allQuestions = [...baseQuestions, ...dynamicQuestions];
     const shuffled = allQuestions.sort(() => 0.5 - Math.random());
-    const finalQuestions = [...new Set(shuffled)].slice(0, 4);
+    const finalQuestions = [...new Set(shuffled)].slice(0, 1);
   
     setQuickStartQuestions(finalQuestions);
     setIsLoadingQuestions(false);
@@ -609,31 +609,8 @@ export default function AIChatPage() {
                   )}
                 </motion.div>
               ))}
-              {/* {messages.length <= 1 && (
-                <div className="px-6 py-3 flex flex-wrap gap-2 justify-center">
-                  {isLoadingQuestions ? (
-                    <div className="flex justify-center items-center py-4">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"></div>
-                    </div>
-                  ) : (
-                    quickStartQuestions.map((q, i) => (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          handleQuickQuestion(q);
-                          // Remove clicked question from quickStartQuestions
-                          setQuickStartQuestions(prev => prev.filter(qq => qq !== q));
-                        }}
-                        className="text-sm border border-gray-300 rounded-full px-3 py-1.5 hover:border-[#8B0782] hover:text-[#8B0782] transition"
-                      >
-                        {q}
-                      </button>
-                    ))
-                  )}
-                </div>
-              )} */}
 
-              <div className="px-6 py-3 flex flex-wrap gap-2 justify-center">
+              {/* <div className="px-6 py-3 flex flex-wrap gap-2 justify-center">
                 {isLoadingQuestions ? (
                   <div className="flex justify-center items-center py-4">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"></div>
@@ -652,7 +629,7 @@ export default function AIChatPage() {
                     </button>
                   ))
                 )}
-              </div>
+              </div> */}
             </AnimatePresence>
             <div ref={chatEndRef} />
           </div>
@@ -662,13 +639,19 @@ export default function AIChatPage() {
             <div className="flex items-center bg-gray-100 rounded-xl p-2">
               <input
                 type="text"
-                disabled={selectedMeetings.length === 0 || quickStartQuestions.length === 0}
+                disabled={selectedMeetings.length === 0 }
+                // placeholder={
+                //   selectedMeetings.length === 0
+                //     ? 'Select meetings first...'
+                //     : quickStartQuestions.length === 0
+                //       ? 'Generating quick questions...'
+                //       : `Ask about ${selectedMeetings.length} meeting(s)...`
+                // }
+
                 placeholder={
                   selectedMeetings.length === 0
                     ? 'Select meetings first...'
-                    : quickStartQuestions.length === 0
-                      ? 'Generating quick questions...'
-                      : `Ask about ${selectedMeetings.length} meeting(s)...`
+                    : `Ask about ${selectedMeetings.length} meeting(s)...`
                 }
                 className="flex-1 px-3 py-2 outline-none text-sm text-gray-800 bg-transparent"
                 value={input}
