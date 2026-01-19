@@ -13,6 +13,14 @@ export default function BotMeetingsPage() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const [orgName, setOrgName] = useState('Loading...');
 
+  const ACTIVE_STATUSES = [
+    "joining",
+    "joined",
+    "joined_recording",
+    "joined_transcribing",
+    "leaving",
+  ];
+
 
   const [meetingName, setMeetingName] = useState("");
   const [meetingUrl, setMeetingUrl] = useState("");
@@ -55,6 +63,27 @@ export default function BotMeetingsPage() {
     if (orgId) fetchOrg();
     setLoading(false);
   }, [orgId]);
+
+  useEffect(() => {
+    const hasActiveMeeting = meetings.some(
+      (m) => ACTIVE_STATUSES.includes(m.latest_bot?.status)
+    );
+  
+    if (!hasActiveMeeting) return;
+  
+    const interval = setInterval(async () => {
+      try {
+        const res = await axios.get(
+          `${API_BASE_URL}/nous-bot-manager/bots/meetings/${orgId}/`
+        );
+        setMeetings(res.data.results || []);
+      } catch (err) {
+        console.error("Polling meetings failed", err);
+      }
+    }, 3000);
+  
+    return () => clearInterval(interval);
+  }, [meetings, orgId]);
 
 
 
@@ -118,14 +147,30 @@ export default function BotMeetingsPage() {
   const getUiStatus = (meeting) => {
     const raw = meeting.latest_bot?.status ?? "idle";
   
-    if (raw === "joining") return { label: "Joining", type: "joining" };
-    if (raw === "leaving") return { label: "Leaving", type: "leaving" };
-    if (raw === "ended") return { label: "Ended", type: "ended" };
-    if (raw === "error") return { label: "Error", type: "error" };
+    if (raw === "joining")
+      return {
+        label: "Joining",
+        type: "joining",
+        message: "Please wait a few seconds while the notetaker joins the meeting",
+      };
+  
+    if (raw === "leaving")
+      return {
+        label: "Leaving",
+        type: "leaving",
+        message: "The notetaker is leaving the meeting",
+      };
+  
+    if (raw === "ended")
+      return { label: "Ended", type: "ended" };
+  
+    if (raw === "error")
+      return { label: "Error", type: "error" };
   
     if (raw.startsWith("joined")) {
       if (raw.includes("recording"))
         return { label: "Joined • Recording", type: "joined" };
+  
       if (raw.includes("transcribing"))
         return { label: "Joined • Transcribing", type: "joined" };
   
@@ -233,7 +278,16 @@ export default function BotMeetingsPage() {
                   <p className="text-xs text-gray-500 mt-0.5">
                     {new Date(m.created_at).toLocaleString()}
                   </p>
+                  {status.message && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {status.message}
+                      {status.type === "joining" && (
+                        <span className="ml-1 animate-pulse">•••</span>
+                      )}
+                    </p>
+                  )}
                 </div>
+                
 
                 <div className="flex items-center gap-4">
                 <span
@@ -271,29 +325,27 @@ export default function BotMeetingsPage() {
 
 
 
-                {status.type === "joined" ? (
-                  <>
-                    <button
-                      onClick={() => handleLeave(m.latest_bot.id)}
-                      disabled={leavingBotId === m.latest_bot.id}
-                      className="flex items-center gap-1.5 text-sm text-red-600 hover:underline disabled:opacity-50"
-                    >
-                      <Square size={14} />
-                      {leavingBotId === m.latest_bot.id
-                        ? "Leaving..."
-                        : "Leave"}
-                    </button>
+                {status.type === "joined" && (
+                    <>
+                      <button
+                        onClick={() => handleLeave(m.latest_bot.id)}
+                        disabled={leavingBotId === m.latest_bot.id}
+                        className="flex items-center gap-1.5 text-sm text-red-600 hover:underline disabled:opacity-50"
+                      >
+                        <Square size={14} />
+                        {leavingBotId === m.latest_bot.id ? "Leaving..." : "Leave"}
+                      </button>
 
+                      <Link
+                        href={`/nous-bot/meeting/${m.id}/${orgId}`}
+                        className="flex items-center gap-1.5 text-sm text-[#8B0782] hover:underline"
+                      >
+                        <Play size={14} /> View
+                      </Link>
+                    </>
+                  )}
 
-                    <Link
-                      href={`/nous-bot/meeting/${m.id}/${orgId}`}
-                      className="flex items-center gap-1.5 text-sm text-[#8B0782] hover:underline"
-                    >
-                      <Play size={14} /> View
-                    </Link>
-                  </>
-                    
-                  ) : (
+                  {status.type === "ended" && (
                     <Link
                       href={`/nous-bot/meeting/${m.id}/${orgId}`}
                       className="flex items-center gap-1.5 text-sm text-[#8B0782] hover:underline"
