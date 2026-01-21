@@ -11,7 +11,7 @@ import {
 } from '@/redux/auth/zoomSlice';
 import OrgSwitcher from './OrgSwitcher';
 import { ZoomConnectionStatus } from '../ZoomConfig';
-import { Video, MessageSquare, CalendarDays, Users, Settings } from "lucide-react";
+import { Video, MessageSquare, CalendarDays, Users, Settings, BotIcon } from "lucide-react";
 
 
 export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingClick }) {
@@ -91,6 +91,21 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
           <span>Create Meeting</span>
         </button>
 
+        {/* AI Note Taker */}
+        <button
+          onClick={() => (window.location.href = `/nous-bot/meetings/${organizationId}`)}
+          disabled={!isZoomConnected}
+          className={`w-full max-w-xs mx-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
+            bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+            ${isZoomConnected
+              ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
+              : 'opacity-50 cursor-not-allowed'}
+          `}
+        >
+          <BotIcon className="w-5 h-5" />
+          Add Bot
+        </button>
+
         {/* AI Assistant */}
         <button
           onClick={() => (window.location.href = `/org-ai-chat/${organizationId}`)}
@@ -105,6 +120,7 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
           <MessageSquare className="w-4 h-4" />
           <span>AI Assistant</span>
         </button>
+
 
         {/* Org Calendar */}
         <Link
