@@ -577,7 +577,7 @@ export default function AIChatPage() {
                     {msg.typing ? (
                       <TypingIndicator />
                     ) : msg.sender === 'bot' ? (
-                      <div className="prose prose-sm max-w-full break-words">
+                      <div className="prose prose-sm max-w-full break-words prose-headings:mt-3 prose-headings:mb-2">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {msg.text}
                         </ReactMarkdown>
