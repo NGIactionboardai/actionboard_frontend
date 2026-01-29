@@ -109,19 +109,54 @@ export default function MeetingNotesPage() {
     SUMMARY_TEMPLATES[0].content
   );
 
+  const [summaryActionLoading, setSummaryActionLoading] = useState(false);
+  const [refreshingMeeting, setRefreshingMeeting] = useState(false);
+
+  const fetchMeetingDetails = async () => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/nous-bot-manager/bots/bot-meeting/details/${meetingId}/`
+      );
+      setMeeting(res.data);
+    } catch (err) {
+      console.error("Failed to fetch meeting details", err);
+    } finally {
+      setLoadingMeeting(false);
+    }
+  };
+
+  const triggerSummaryGeneration = async () => {
+    if (summaryActionLoading) return;
+  
+    try {
+      setSummaryActionLoading(true);
+  
+      await axios.post(
+        `${API_BASE_URL}/nous-bot-manager/bots/bot-meeting/${meetingId}/regenerate-summary/`
+      );
+  
+      // Immediately reflect UX
+      setMeeting((prev) => ({
+        ...prev,
+        summary_status: "processing",
+      }));
+  
+      // Re-fetch meeting after short delay
+      setTimeout(() => {
+        fetchMeetingDetails();
+      }, 1500);
+  
+    } catch (err) {
+      console.error("Failed to trigger summary generation", err);
+    } finally {
+      setSummaryActionLoading(false);
+    }
+  };
+
+  
+
   useEffect(() => {
-    const fetchMeetingDetails = async () => {
-      try {
-        const res = await axios.get(
-          `${API_BASE_URL}/nous-bot-manager/bots/bot-meeting/details/${meetingId}/`
-        );
-        setMeeting(res.data);
-      } catch (err) {
-        console.error("Failed to fetch meeting details", err);
-      } finally {
-        setLoadingMeeting(false);
-      }
-    };
+   
     if (orgId) fetchOrg();
     if (meetingId) fetchMeetingDetails();
   }, [meetingId]);
@@ -165,6 +200,16 @@ export default function MeetingNotesPage() {
   
     return () => clearInterval(interval);
   }, [latestBot?.id, latestBot?.status, meetingId]);
+
+  useEffect(() => {
+    if (summaryStatus !== "processing") return;
+  
+    const interval = setInterval(() => {
+      fetchMeetingDetails();
+    }, 4000);
+  
+    return () => clearInterval(interval);
+  }, [summaryStatus]);
 
   
   
@@ -391,15 +436,24 @@ export default function MeetingNotesPage() {
                 <p className="text-sm text-gray-700 font-medium">
                   Summary is not available yet
                 </p>
+
+                {summaryStatus === "failed" && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Previous attempt failed. You can retry.
+                  </p>
+                )}
+
                 <button
-                  className="mt-3 px-4 py-2 rounded-lg bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white text-sm hover:opacity-90"
-                  onClick={() => {
-                    // call regenerate summary API later
-                    console.log("Regenerate summary");
-                  }}
+                  disabled={summaryActionLoading}
+                  onClick={triggerSummaryGeneration}
+                  className={`mt-4 px-4 py-2 rounded-lg text-sm text-white cursor-pointer
+                    bg-gradient-to-r from-[#0A0DC4] to-[#8B0782]
+                    ${summaryActionLoading ? "opacity-60 cursor-not-allowed" : "hover:opacity-90"}
+                  `}
                 >
-                  Generate summary
+                  {summaryActionLoading ? "Starting…" : "Generate Summary"}
                 </button>
+                
               </>
             )}
           </div>
@@ -445,6 +499,25 @@ export default function MeetingNotesPage() {
                         : "Action Items"}
                     </h3>
                   </div>
+
+                  <button
+                    onClick={triggerSummaryGeneration}
+                    disabled={summaryActionLoading}
+                    className={`
+                      text-sm font-medium px-4 py-1.5 rounded-md
+                      border border-[#8B0782]/30
+                      text-[#8B0782]
+                      bg-gradient-to-r from-[#0A0DC4]/5 to-[#8B0782]/5
+                      transition cursor-pointer
+                      ${
+                        summaryActionLoading
+                          ? "opacity-60 cursor-not-allowed"
+                          : "hover:from-[#0A0DC4]/10 hover:to-[#8B0782]/10"
+                      }
+                    `}
+                  >
+                    {summaryActionLoading ? "Regenerating…" : "Regenerate"}
+                  </button>
 
                   {/* {activeTemplate === "general" && (
 

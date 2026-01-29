@@ -84,7 +84,7 @@ export default function LiveTranscriptionPanel({ botId, botStatus, onLeave, meet
 
           <button
             onClick={onLeave}
-            className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition"
+            className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition cursor-pointer"
           >
             Leave
           </button>
