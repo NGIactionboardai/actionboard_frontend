@@ -285,6 +285,15 @@ export default function MeetingDetails() {
     }
   };
 
+  function getUtteranceText(u, lang) {
+    return (
+      u?.translations?.[lang] ||
+      u?.translations?.["en"] ||
+      u?.text ||
+      ""
+    );
+  }
+
   const formatSpeakerLabel = (speaker) => {
     // If the speaker is still a placeholder like "A", "B", "C" → show "Speaker A"
     if (/^[A-Z]$/.test(speaker)) {
@@ -1395,106 +1404,65 @@ export default function MeetingDetails() {
 
                 {/* --- Transcript --- */}
                 {activeTab === "transcript" && (
-                  <>
-                    {/* Case 1: Multilingual utterances exist */}
-                    {multilingualUtterence ? (
-                      <div className="space-y-4">
-                        {/* Header */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            Meeting Transcript
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium text-gray-700">Language:</label>
-                            <select
-                              value={selectedLang}
-                              onChange={(e) => setSelectedLang(e.target.value)}
-                              className="border border-gray-300 rounded-lg px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            >
-                              <option value="en">English</option>
-                              <option value="bn">Bengali</option>
-                            </select>
-                          </div>
-                        </div>
+                  <div className="space-y-4">
 
-                        {/* Transcript Body (Multilingual) */}
-                        <div className="bg-white p-4 rounded-xl shadow-sm max-h-[70vh] sm:max-h-96 overflow-y-auto divide-y divide-gray-100">
-                          {(() => {
-                            const utterancesToRender =
-                              multilingualUtterence?.[selectedLang] || transcript || [];
+                    {/* Header (mirror summary style) */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Meeting Transcript
+                      </h3>
 
-                            return Array.isArray(utterancesToRender) ? (
-                              utterancesToRender.map((utterance, idx) => {
-                                const formatTime = (ms) => {
-                                  const totalSeconds = Math.floor(ms / 1000);
-                                  const hours = Math.floor(totalSeconds / 3600);
-                                  const minutes = Math.floor((totalSeconds % 3600) / 60);
-                                  const seconds = totalSeconds % 60;
-                                  return [hours, minutes, seconds]
-                                    .map((val) => String(val).padStart(2, "0"))
-                                    .join(":");
-                                };
+                      {availableLanguages.length > 1 && (
+                        <select
+                          value={selectedLang}
+                          onChange={(e) => setSelectedLang(e.target.value)}
+                          className="border rounded-md px-2 py-1 text-sm"
+                        >
+                          {availableLanguages.map((lang) => (
+                            <option key={lang} value={lang}>
+                              {lang.toUpperCase()}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
 
-                                return (
-                                  <div key={idx} className="py-2">
-                                    <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
-                                      <span className="inline-block bg-indigo-100 text-indigo-700 font-medium px-2 py-0.5 rounded-md mr-2">
-                                        {formatSpeakerLabel(utterance.speaker)}
-                                      </span>
-                                      <span className="text-xs text-gray-500">
-                                        [{formatTime(utterance.start)}]
-                                      </span>
-                                    </p>
-                                    <p className="mt-1 text-gray-900">{utterance.text}</p>
-                                  </div>
-                                );
-                              })
-                            ) : (
-                              <p className="text-gray-500 italic">No transcript available.</p>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    ) : (
-                      /* Case 2: Fallback to old transcript structure */
-                      Array.isArray(transcript) && (
-                        <div>
-                          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                            Meeting Transcript
-                          </h3>
-                          <div className="bg-gray-50 p-4 rounded-lg max-h-[70vh] sm:max-h-96 overflow-y-auto space-y-4">
-                            {transcript.map((utterance, idx) => {
-                              const formatTime = (ms) => {
-                                const totalSeconds = Math.floor(ms / 1000);
-                                const hours = Math.floor(totalSeconds / 3600);
-                                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                                const seconds = totalSeconds % 60;
-                                return [hours, minutes, seconds]
-                                  .map((val) => String(val).padStart(2, "0"))
-                                  .join(":");
-                              };
+                    {/* Body */}
+                    <div className="bg-white p-4 rounded-xl shadow-sm max-h-[70vh] sm:max-h-96 overflow-y-auto divide-y divide-gray-100">
+                      {Array.isArray(transcript) && transcript.length > 0 ? (
+                        transcript.map((u, idx) => {
+                          const formatTime = (ms) => {
+                            const totalSeconds = Math.floor(ms / 1000);
+                            const hours = Math.floor(totalSeconds / 3600);
+                            const minutes = Math.floor((totalSeconds % 3600) / 60);
+                            const seconds = totalSeconds % 60;
+                            return [hours, minutes, seconds]
+                              .map((v) => String(v).padStart(2, "0"))
+                              .join(":");
+                          };
 
-                              return (
-                                <div key={idx}>
-                                  <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                                    <span className="font-semibold text-indigo-700">
-                                    {formatSpeakerLabel(utterance.speaker)}
-                                    </span>
-                                    &nbsp;&nbsp;
-                                    <span className="text-gray-950">
-                                      [{formatTime(utterance.start)}]
-                                    </span>
-                                    &nbsp;&nbsp;
-                                    {utterance.text}
-                                  </p>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </>
+                          return (
+                            <div key={idx} className="py-2">
+                              <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                                <span className="inline-block bg-indigo-100 text-indigo-700 font-medium px-2 py-0.5 rounded-md mr-2">
+                                  {formatSpeakerLabel(u.speaker)}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  [{formatTime(u.start)}]
+                                </span>
+                              </p>
+
+                              <p className="mt-1 text-gray-900">
+                                {getUtteranceText(u, selectedLang)}
+                              </p>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="text-gray-500 italic">No transcript available.</p>
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 {/* --- Speaker Summary --- */}
@@ -1846,6 +1814,9 @@ export default function MeetingDetails() {
         onClose={() => setShowEditModal(false)}
         meetingId={meetingId}
         utterances={transcript}
+        selectedLang={selectedLang}          
+        onLanguageChange={setSelectedLang}
+        availableLanguages={availableLanguages}   
         onUpdateSuccess={async () => {
           await checkTranscriptionStatus();
           await fetchMeetingDetails();

@@ -9,7 +9,10 @@ const EditSpeakersModal = ({
   onClose, 
   meetingId, 
   onUpdateSuccess, 
-  utterances = [] // 👈 pass transcript here
+  utterances = [],
+  selectedLang = "en",        
+  onLanguageChange = () => {},
+  availableLanguages = []
 }) => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -34,6 +37,15 @@ const EditSpeakersModal = ({
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
+  };
+
+  const getUtteranceText = (u) => {
+    return (
+      u?.translations?.[selectedLang] ||
+      u?.translations?.["en"] ||
+      u?.text ||
+      ""
+    );
   };
 
   const fetchSpeakers = async () => {
@@ -164,7 +176,21 @@ const EditSpeakersModal = ({
 
           {/* Right: Transcript Preview */}
           <div className="bg-gray-50 p-3 rounded-md border max-h-[60vh] overflow-y-auto text-sm">
-            <h4 className="font-medium text-gray-800 mb-2">Transcript Preview</h4>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-medium text-gray-800">Transcript Preview</h4>
+
+            <select
+              value={selectedLang}
+              onChange={(e) => onLanguageChange(e.target.value)}
+              className="border rounded-md px-2 py-1 text-xs"
+            >
+              {availableLanguages.map((lang) => (
+                <option key={lang} value={lang}>
+                  {lang.toUpperCase()}
+                </option>
+              ))}
+            </select>
+          </div>
             {utterances.length > 0 ? (
               utterances.map((u, idx) => (
                 <div key={idx} className="mb-2">
@@ -174,7 +200,9 @@ const EditSpeakersModal = ({
                     </span>{" "}
                     <span className="text-gray-500">[{formatTime(u.start)}]</span>
                   </p>
-                  <p className="text-gray-900">{u.text}</p>
+                  <p className="text-gray-900">
+                    {getUtteranceText(u)}
+                  </p>
                 </div>
               ))
             ) : (
