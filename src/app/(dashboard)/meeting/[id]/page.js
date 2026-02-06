@@ -52,9 +52,18 @@ export default function MeetingDetails() {
   const [summary, setSummary] = useState(null);
   const [transcriptLoading, setTranscriptLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-  const [meeting_insights, setMeeting_insights] = useState(null);
+
+  const [rawMeetingInsights, setRawMeetingInsights] = useState(null); // wrapper
+  const [meeting_insights, setMeeting_insights] = useState(null);     // selected lang
+  const [speaker_summaries, setSpeaker_summaries] = useState(null);
+  const [availableLanguages, setAvailableLanguages] = useState([]);
+  const [selectedSummaryLang, setSelectedSummaryLang] = useState("en");
+
+
+
+  // const [meeting_insights, setMeeting_insights] = useState(null);
   const [meeting_sentiment_summary, setMeeting_sentiment_summary] = useState(null)
-  const [speaker_summaries, setSpeaker_summaries] = useState(null)
+  // const [speaker_summaries, setSpeaker_summaries] = useState(null)
   const [speaker_summary_table, setSpeaker_summary_table] = useState(null)
   const [sentiment_summaries, setSentiment_summaries] = useState(null)
   const [activeTab, setActiveTab] = useState('insights'); // For tabbed view
@@ -82,81 +91,22 @@ export default function MeetingDetails() {
 
   const isTranscriptionOngoing = transcriptionStatus === 'pending' || transcriptionStatus === 'processing';
 
-  // Helper function to get auth headers (following your Redux pattern)
-  const getAuthHeaders = () => {
-    // Try Redux token first, then localStorage as fallback
-    const token = authToken || localStorage.getItem('token');
-    
-    if (!token) {
-      throw new Error('No authentication token found. Please log in.');
-    }
-    
+
+  // Normalize meeting insight
+  function normalizeMeetingInsights(ci) {
+    if (!ci) return null;
+  
+    // Already new format
+    if (ci.languages) return ci;
+  
+    // Old format -> wrap as English
     return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      detected_language: "en",
+      languages: {
+        en: ci,
+      },
     };
-  };
-
-  // Enhanced API call with retry logic and proper timeout
-  const makeApiCall = async (url, options = {}, maxRetries = 3) => {
-    let lastError;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        console.log(`Attempt ${attempt} for ${url}`);
-        console.log('Request options:', options);
-        
-        // Create AbortController for timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 200000); // 30 second timeout
-        
-        const response = await fetch(url, {
-          ...options,
-          signal: controller.signal,
-        });
-        
-        clearTimeout(timeoutId);
-        
-        console.log(`Response status: ${response.status} for ${url}`);
-
-        // If we get a 502, wait and retry
-        if (response.status === 502 && attempt < maxRetries) {
-          console.log(`502 error on attempt ${attempt}, retrying in ${attempt * 2} seconds...`);
-          await new Promise(resolve => setTimeout(resolve, attempt * 2000));
-          continue;
-        }
-
-        return response;
-      } catch (error) {
-        lastError = error;
-        console.error(`Attempt ${attempt} failed for ${url}:`, error);
-        console.error('Error name:', error.name);
-        console.error('Error message:', error.message);
-        
-        // Handle different types of errors
-        if (error.name === 'AbortError') {
-          console.log('Request timed out');
-        }
-        
-        // If it's a network error and we have retries left, wait and retry
-        if (attempt < maxRetries && (
-          error.name === 'TypeError' || 
-          error.name === 'AbortError' || 
-          error.message.includes('fetch') ||
-          error.message.includes('network')
-        )) {
-          console.log(`Network error on attempt ${attempt}, retrying in ${attempt * 2} seconds...`);
-          await new Promise(resolve => setTimeout(resolve, attempt * 2000));
-          continue;
-        }
-        
-        // If it's the last attempt or a non-retryable error, throw
-        throw error;
-      }
-    }
-    
-    throw lastError;
-  };
+  }
 
   // Fetch meeting details on component mount
   useEffect(() => {
@@ -197,6 +147,19 @@ export default function MeetingDetails() {
     fetchMembers();
   }, [orgId]);
 
+  useEffect(() => {
+    if (!rawMeetingInsights || !selectedLang) return;
+  
+    const bundle =
+      rawMeetingInsights.languages?.[selectedLang] ||
+      rawMeetingInsights.languages?.["en"];
+  
+    setMeeting_insights(bundle || null);
+    setSpeaker_summaries(bundle?.speaker_summaries || null);
+    setDraftSummary(_.cloneDeep(bundle?.structured_summary || {}));
+  
+  }, [selectedLang, rawMeetingInsights]);
+
 
   const fetchMeetingDetails = async () => {
     try {
@@ -222,37 +185,62 @@ export default function MeetingDetails() {
           setTranscript(data.transcript.utterances || null);
           setMultilingualUtterence(data.transcript.multilingual_utterances || null);
           setSummary(data.transcript.summary || null);
-          setMeeting_insights(data.transcript.meeting_insights || null);
-          setDraftSummary(_.cloneDeep(data.transcript.meeting_insights?.structured_summary || {}));
+          // setMeeting_insights(data.transcript.meeting_insights || null);
+          // setDraftSummary(_.cloneDeep(data.transcript.meeting_insights?.structured_summary || {}));
           setMeeting_sentiment_summary(data.transcript.meeting_sentiment_summary || null);
-          setSpeaker_summaries(data.transcript.meeting_insights?.speaker_summaries || null);
+          // setSpeaker_summaries(data.transcript.meeting_insights?.speaker_summaries || null);
           setSpeaker_summary_table(data.transcript.per_speaker_sentiment?.speaker_summary_table || null);
           setSentiment_summaries(data.transcript.sentiment_summaries || null);
 
+          const normalized = normalizeMeetingInsights(
+            data.transcript.meeting_insights
+          );
+          
+          setRawMeetingInsights(normalized);
+          
+          const langs = normalized?.languages
+            ? Object.keys(normalized.languages)
+            : [];
+          
+          setAvailableLanguages(langs);
+          
+          // default language
+          const initialLang = langs.includes("en")
+            ? "en"
+            : langs[0] || "en";
+          
+          setSelectedLang(initialLang);
+          
+          const bundle = normalized?.languages?.[initialLang] || null;
+          
+          setMeeting_insights(bundle);
+          setSpeaker_summaries(bundle?.speaker_summaries || null);
+          setDraftSummary(_.cloneDeep(bundle?.structured_summary || {}));
+
           // Normalize meeting insights (remove speaker_summaries)
-          if (data.transcript.meeting_insights) {
-            const { speaker_summaries, ...insightsWithoutSpeakers } =
-              data.transcript.meeting_insights;
+          // if (data.transcript.meeting_insights) {
+          //   const { speaker_summaries, ...insightsWithoutSpeakers } =
+          //     data.transcript.meeting_insights;
 
-            // Old structure: structured_summary is a string
-            // New structure: structured_summary is an object
-            let normalizedInsights = insightsWithoutSpeakers;
+          //   // Old structure: structured_summary is a string
+          //   // New structure: structured_summary is an object
+          //   let normalizedInsights = insightsWithoutSpeakers;
 
-            if (
-              typeof insightsWithoutSpeakers.structured_summary === "string"
-            ) {
-              normalizedInsights = {
-                ...insightsWithoutSpeakers,
-                structured_summary: {
-                  minutes: insightsWithoutSpeakers.structured_summary,
-                },
-              };
-            }
+          //   if (
+          //     typeof insightsWithoutSpeakers.structured_summary === "string"
+          //   ) {
+          //     normalizedInsights = {
+          //       ...insightsWithoutSpeakers,
+          //       structured_summary: {
+          //         minutes: insightsWithoutSpeakers.structured_summary,
+          //       },
+          //     };
+          //   }
 
-            setMeeting_insights(normalizedInsights);
-          } else {
-            setMeeting_insights(null);
-          }
+          //   setMeeting_insights(normalizedInsights);
+          // } else {
+          //   setMeeting_insights(null);
+          // }
 
         } else {
           setTranscript(data.transcript);
@@ -1195,6 +1183,20 @@ export default function MeetingDetails() {
 
                       {isValidStructuredSummary(meeting_insights?.structured_summary) && (
                         <div className="flex flex-wrap items-center gap-2">
+                          {availableLanguages.length > 1 && (
+                            <select
+                              value={selectedLang}
+                              onChange={(e) => setSelectedLang(e.target.value)}
+                              className="border rounded-md px-2 py-1 text-sm"
+                            >
+                              {availableLanguages.map((lang) => (
+                                <option key={lang} value={lang}>
+                                  {lang.toUpperCase()}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+
                           <button
                             onClick={() =>
                               generateMeetingPDF(meeting, meeting_insights, speaker_summaries)
@@ -1233,6 +1235,7 @@ export default function MeetingDetails() {
                         meetingId={meeting.meeting_id}
                         draftSummary={draftSummary}
                         setDraftSummary={setDraftSummary}
+                        summaryLang={selectedSummaryLang}
                         onCancel={() => setIsEditingAiInsight(false)}
                         onSave={() => {
                           setMeeting_insights((prev) => ({
@@ -1499,9 +1502,36 @@ export default function MeetingDetails() {
                   <>
                     {speaker_summary_table ? (
                       <div className="mb-3">
+                        
                         <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                           Speaker Summary
                         </h3>
+                        {availableLanguages.length > 1 && (
+                          <div className='mb-4 flex flex-row gap-3'>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Select Language:
+                              </label>
+                            </div>
+
+                            <div></div>
+                            
+                            <select
+                              value={selectedLang}
+                              onChange={(e) => setSelectedLang(e.target.value)}
+                              className="border rounded-md px-2 py-1 text-sm"
+                            >
+                              {availableLanguages.map((lang) => (
+                                <option key={lang} value={lang}>
+                                  {lang.toUpperCase()}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                            
+                          )}
+
+                        
 
                         {/* Speaker Selection Row */}
                         <div className="mb-6">

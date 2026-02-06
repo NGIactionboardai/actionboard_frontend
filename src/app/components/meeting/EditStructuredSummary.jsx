@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 // import { API_BASE_URL } from "@/config";
 
-export default function EditStructuredSummary({ meetingId, draftSummary, setDraftSummary, onCancel, onSave }) {
+export default function EditStructuredSummary({ meetingId, draftSummary, setDraftSummary, summaryLang, onCancel, onSave }) {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,10 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
       setLoading(true);
       const { data } = await axios.patch(
         `${API_BASE_URL}/transcripts/${meetingId}/update-structured-summary/`,
-        { structured_summary: draftSummary }
+        {
+          structured_summary: draftSummary,
+          lang: summaryLang
+        }
       );
       // callback with updated insights
       toast.success("Summary Updated successfully!");
