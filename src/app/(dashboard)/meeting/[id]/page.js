@@ -108,6 +108,24 @@ export default function MeetingDetails() {
     };
   }
 
+  const getMeetingDurationFromTimes = (start, end) => {
+    if (!start || !end) return 'N/A';
+  
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    console.log("Start Date: ", startDate)
+    console.log("End Date: ", endDate)
+  
+    const diffMs = endDate - startDate;
+  
+    if (diffMs <= 0) return 'N/A';
+  
+    const diffMinutes = Math.floor(diffMs / 60000);
+  
+    return `${diffMinutes} min`;
+  };
+
   // Fetch meeting details on component mount
   useEffect(() => {
     // Check if we have authentication
@@ -844,7 +862,7 @@ export default function MeetingDetails() {
       )}
 
       {/* Auto-transcript save prompt */}
-      {transcriptionStatus === 'completed' && autoTranscribed && !userConfirmed && (
+      {/* {transcriptionStatus === 'completed' && autoTranscribed && !userConfirmed && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-md shadow-sm sm:flex sm:justify-between sm:items-center">
           <p className="text-sm text-gray-700 break-words sm:flex-1">
             This transcript was auto-generated.
@@ -859,7 +877,7 @@ export default function MeetingDetails() {
             Save Transcript
           </button>
         </div>
-      )}
+      )} */}
 
       {/* Meeting Information */}
       <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
@@ -885,7 +903,7 @@ export default function MeetingDetails() {
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm sm:text-base font-medium text-gray-500">Duration</dt>
               <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2">
-                {meeting.duration ? `${meeting.duration} minutes` : 'N/A'}
+                {getMeetingDurationFromTimes(meeting.start_time, meeting.end_time)}
               </dd>
             </div>
 
@@ -999,7 +1017,7 @@ export default function MeetingDetails() {
                 <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0">
                   <button
                     onClick={handleTranscribe}
-                    disabled={transcribing || isTranscriptionOngoing || (autoTranscribed && !userConfirmed) }
+                    disabled={transcribing || isTranscriptionOngoing }
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {transcribing ? (

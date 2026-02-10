@@ -61,6 +61,25 @@ const MeetingsList = ({
     
   }
 
+
+  const getMeetingDurationFromTimes = (start, end) => {
+    if (!start || !end) return 'N/A';
+  
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    console.log("Start Date: ", startDate)
+    console.log("End Date: ", endDate)
+  
+    const diffMs = endDate - startDate;
+  
+    if (diffMs <= 0) return 'N/A';
+  
+    const diffMinutes = Math.floor(diffMs / 60000);
+  
+    return `${diffMinutes} min`;
+  };
+
   if (filteredMeetings.length === 0) {
     return (
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -145,7 +164,7 @@ const MeetingsList = ({
                   <div className="flex-1 flex flex-col space-y-1">
                     <p className="text-sm font-medium text-indigo-600 break-words">{meeting.topic}</p>
                     <p className="text-sm text-gray-500">
-                      {formatMeetingDateTime(meeting.start_time)} • {meeting.duration || 'N/A'} min
+                      {formatMeetingDateTime(meeting.start_time)} • {getMeetingDurationFromTimes(meeting.start_time, meeting.end_time)} min
                     </p>
 
                     {/* Status Section */}
