@@ -164,7 +164,7 @@ const MeetingsList = ({
                   <div className="flex-1 flex flex-col space-y-1">
                     <p className="text-sm font-medium text-indigo-600 break-words">{meeting.topic}</p>
                     <p className="text-sm text-gray-500">
-                      {formatMeetingDateTime(meeting.start_time)} • {getMeetingDurationFromTimes(meeting.start_time, meeting.end_time)} min
+                      {formatMeetingDateTime(meeting.scheduled_time)} • {getMeetingDurationFromTimes(meeting.start_time, meeting.end_time)} min
                     </p>
 
                     {/* Status Section */}

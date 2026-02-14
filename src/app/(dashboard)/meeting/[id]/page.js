@@ -894,13 +894,20 @@ export default function MeetingDetails() {
             </div>
 
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm sm:text-base font-medium text-gray-500">Scheduled Time</dt>
+              <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2">
+                {formatMeetingDateTime(meeting.scheduled_time)}
+              </dd>
+            </div>
+
+            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm sm:text-base font-medium text-gray-500">Start Time</dt>
               <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2">
                 {formatMeetingDateTime(meeting.start_time)}
               </dd>
             </div>
 
-            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm sm:text-base font-medium text-gray-500">Duration</dt>
               <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2">
                 {getMeetingDurationFromTimes(meeting.start_time, meeting.end_time)}
@@ -908,7 +915,7 @@ export default function MeetingDetails() {
             </div>
 
             {meeting.host && (
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm sm:text-base font-medium text-gray-500">Host</dt>
                 <dd className="mt-1 text-sm sm:text-base text-gray-900 sm:mt-0 sm:col-span-2 break-words">
                   {meeting.host.full_name || meeting.host.email || 'N/A'}

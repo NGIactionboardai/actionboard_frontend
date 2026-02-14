@@ -91,7 +91,7 @@ export default function AIChatPage() {
         const normalized = (res.data || []).map((m) => ({
           id: m.id,
           topic: m.topic ?? m.title ?? `Meeting ${m.id}`,
-          date: m.start_time ?? m.date ?? null,
+          date: m.scheduled_time ?? m.date ?? null,
           full_transcript: m.full_transcript ?? '',
           raw: m,
         }));
