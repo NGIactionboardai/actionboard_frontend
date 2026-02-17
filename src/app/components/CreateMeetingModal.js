@@ -24,11 +24,33 @@ const CreateMeetingModal = ({
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [membersLoading, setMembersLoading] = useState(false);
 
+  const [memberSearch, setMemberSearch] = useState("");
+
+
   const [nextUrl, setNextUrl] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const memberListRef = useRef(null);
+
+  const filteredMembers = members.filter(m => {
+    if (!memberSearch.trim()) return true;
+    const q = memberSearch.toLowerCase();
+    return (
+      m.name?.toLowerCase().includes(q) ||
+      m.email?.toLowerCase().includes(q)
+    );
+  });
+
+  const selectAllMembers = () => {
+    const allIds = filteredMembers.map(m => m.id);
+    setSelectedMembers(prev => Array.from(new Set([...prev, ...allIds])));
+  };
+  
+  const deselectAllMembers = () => {
+    const filteredIds = new Set(filteredMembers.map(m => m.id));
+    setSelectedMembers(prev => prev.filter(id => !filteredIds.has(id)));
+  };
 
 
   const [meetingForm, setMeetingForm] = useState({
@@ -339,20 +361,48 @@ const CreateMeetingModal = ({
                     Invite Members (optional)
                   </label>
 
-                  <div 
+                  {/* Search + actions */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="Search members..."
+                      value={memberSearch}
+                      onChange={(e) => setMemberSearch(e.target.value)}
+                      className="flex-1 border border-gray-300 rounded-md px-2.5 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={selectAllMembers}
+                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                    >
+                      All
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={deselectAllMembers}
+                      className="text-xs font-medium text-gray-500 hover:text-gray-700"
+                    >
+                      None
+                    </button>
+                  </div>
+
+                  {/* List */}
+                  <div
                     ref={memberListRef}
                     className="border border-gray-300 rounded-lg max-h-40 overflow-y-auto"
                   >
                     {membersLoading ? (
                       <p className="text-sm text-gray-500 p-3">Loading members...</p>
-                    ) : members.length === 0 ? (
+                    ) : filteredMembers.length === 0 ? (
                       <p className="text-sm text-gray-500 p-3">No members found</p>
                     ) : (
                       <>
-                        {members.map(member => (
+                        {filteredMembers.map(member => (
                           <label
                             key={member.id}
-                            className="flex items-center gap-2 px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors first:rounded-t-lg last:rounded-b-lg"
+                            className="flex items-center gap-2 px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors"
                           >
                             <input
                               type="checkbox"
@@ -374,7 +424,7 @@ const CreateMeetingModal = ({
                           </label>
                         ))}
 
-                        {isFetchingMore && (
+                        {isFetchingMore && !memberSearch && (
                           <p className="text-xs text-gray-500 px-3 py-2 text-center">
                             Loading more...
                           </p>
@@ -385,10 +435,12 @@ const CreateMeetingModal = ({
 
                   {selectedMembers.length > 0 && (
                     <p className="text-xs text-indigo-600 font-medium mt-1.5">
-                      {selectedMembers.length} member{selectedMembers.length > 1 ? "s" : ""} selected
+                      {selectedMembers.length} member
+                      {selectedMembers.length > 1 ? "s" : ""} selected
                     </p>
                   )}
                 </div>
+
 
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
