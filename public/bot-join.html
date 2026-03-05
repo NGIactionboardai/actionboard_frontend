@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Bot Join</title>
+  <style>
+    body { margin: 0; background: #000; overflow: hidden; }
+    #zmmtg-root { width: 100vw; height: 100vh; }
+  </style>
+</head>
+
+<body>
+  <div id="zmmtg-root"></div>
+
+  <script>
+    console.log("[BOT HTML] Script Started");
+  
+    // Log window vars
+    console.log("[BOT HTML] Meeting ID:", window.BOT_MEETING_ID);
+    console.log("[BOT HTML] Signature:", window.BOT_SIGNATURE);
+    console.log("[BOT HTML] Password:", window.BOT_MEETING_PASSWORD);
+    console.log("[BOT HTML] SDK Key:", window.ZOOM_SDK_KEY);
+  
+    function loadZoom() {
+      console.log("[BOT HTML] Loading Zoom SDK…");
+  
+      const s = document.createElement("script");
+      s.src = "https://source.zoom.us/2.18.5/zoom-meeting-2.18.5.min.js";
+  
+      s.onload = () => {
+        console.log("[BOT HTML] Zoom SDK loaded");
+        initZoom();
+      };
+  
+      s.onerror = (err) => {
+        console.error("[BOT HTML] Failed to load Zoom SDK!", err);
+      };
+  
+      document.body.appendChild(s);
+    }
+  
+    function initZoom() {
+      console.log("[BOT HTML] initZoom() called");
+  
+      try {
+        ZoomMtg.preLoadWasm();
+        ZoomMtg.prepareJssdk();
+      } catch (e) {
+        console.error("[BOT HTML] ZoomMtg init error:", e);
+        return;
+      }
+  
+      ZoomMtg.init({
+        leaveUrl: "https://example.com",
+        isSupportAV: true,
+        disablePreview: true,
+  
+        success: () => {
+          console.log("[BOT HTML] ZoomMtg.init() SUCCESS");
+          joinMeeting();
+        },
+  
+        error: (err) => {
+          console.error("[BOT HTML] ZoomMtg.init() ERROR:", err);
+        },
+      });
+    }
+  
+    function joinMeeting() {
+      console.log("[BOT HTML] joinMeeting() called");
+  
+      ZoomMtg.join({
+        meetingNumber: window.BOT_MEETING_ID,
+        userName: "Nous Bot",
+        passWord: window.BOT_MEETING_PASSWORD || "",
+        signature: window.BOT_SIGNATURE,
+        sdkKey: window.ZOOM_SDK_KEY,
+  
+        success: () => console.log("[BOT HTML] ZoomMtg.join() SUCCESS"),
+        error: (err) => console.error("[BOT HTML] ZoomMtg.join() ERROR:", err),
+      });
+    }
+  
+    loadZoom();
+  </script>
+  <script>
+    console.log("[BOT HTML] Script Started");
+    alert("BOT HTML LOADED");  // won't show visually but can show in Puppeteer logs
+  </script>
+</body>
+</html>
