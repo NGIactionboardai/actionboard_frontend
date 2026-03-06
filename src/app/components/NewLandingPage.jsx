@@ -13,27 +13,27 @@ export default function NewLandingPage() {
   const features = [
     {
       title: "Auto Transcription",
-      desc: "Let our AI automatically handle your meeting notes. Autotranscription runs in the background, capturing conversations with speaker labels and delivering accurate text—no setup, no effort, no missed details.",
+      desc: "Let our AI automatically handle your meeting notes. Autotranscription runs in the background, capturing conversations with speaker labels and delivering accurate text, no setup, no effort, no missed details.",
       img: "/features/feature-01.png",
     },
     {
       title: "AI Generated Summaries",
-      desc: "Let AI do the heavy lifting. Instantly extract key takeaways, action items, sentiment shifts, and speaker summaries—so you leave every meeting with clarity and direction.",
+      desc: "Let AI do the heavy lifting. Instantly extract key takeaways, action items, sentiment shifts, and speaker summaries so you leave every meeting with clarity and direction.",
       img: "/features/feature-02.png",
     },
     {
       title: "Analyze Speaker Sentiment",
-      desc: "Visualize how your meetings feel. Our AI analyzes tone and language to detect sentiment shifts—displayed through intuitive charts and graphs so you can spot engagement and alignment at a glance.",
+      desc: "Visualize how your meetings feel. Our AI analyzes tone and language to detect sentiment shifts, displayed through intuitive charts and graphs so you can spot engagement and alignment at a glance.",
       img: "/features/feature-03.png",
     },
     {
       title: "Interactive Dashboard",
-      desc: "Stay in control with a real-time dashboard that organizes your meeting transcripts, speaker summaries, action items, and AI insights—all in one place.",
+      desc: "Stay in control with a real-time dashboard that organizes your meeting transcripts, speaker summaries, action items, and AI insights, all in one place.",
       img: "/features/feature-04.png",
     },
     {
         title: "Personalized Calendar",
-        desc: "Keep track of key action items, follow-ups, and meeting insights—automatically synced to your calendar. ActionBoard AI highlights what matters most and helps you plan smarter, not harder.",
+        desc: "Keep track of key action items, follow-ups, and meeting insights automatically synced to your calendar. Nous Meeting highlights what matters most and helps you plan smarter, not harder.",
         img: "/features/feature-05.png",
     },
   ];
@@ -131,7 +131,7 @@ export default function NewLandingPage() {
                 variants={heroVariants}
                 className="text-gray-600 max-w-2xl mx-auto text-lg mb-8"
             >
-                Turns your meetings into actionable transcripts, live notes, intelligent summaries and many more
+                Turns your meetings into actionable transcripts, live notes, intelligent summaries and much more
             </motion.p>
     
             {/* Buttons */}
@@ -205,14 +205,14 @@ export default function NewLandingPage() {
               transition={{ duration: 0.6, delay: i * 0.3 }}
               className="w-full"
             >
-              <div className="mx-auto w-full max-w-5xl"> {/* made it wider */}
-                {/* Frame with consistent aspect ratio */}
-                <div className="relative aspect-[3/2] overflow-hidden rounded-2xl ring-1 ring-gray-200 shadow-xl">
+              <div className="mx-auto w-full max-w-5xl">
+                <div className="overflow-hidden rounded-2xl ring-1 ring-gray-200 shadow-xl">
                   <Image
                     src={f.img}
                     alt={f.title}
-                    fill
-                    className="object-contain object-center p-1" 
+                    width={1200}
+                    height={800}
+                    className="w-full h-auto"
                     sizes="(min-width: 1280px) 1000px, (min-width: 1024px) 900px, 100vw"
                     priority={i < 1}
                   />

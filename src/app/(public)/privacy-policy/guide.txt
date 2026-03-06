@@ -1,0 +1,484 @@
+PRIVACY POLICY
+Version 2.0
+
+Effective Date: December 22, 2025
+
+Welcome to Nous Meeting's website and application. Nous Meeting provides an AI-powered
+smart meeting assistant designed including but not limited to record, transcribe, summarize,
+extract action items, analyze speaker sentiment, prepare reports, and manage follow-ups.
+The service caters to a wide range of users, regardless of their professional background or
+personal needs. Additionally, the platform aims to make learning about Nous Meeting's
+application and business activities easier and facilitate communication with the platform.
+We recognize the importance of privacy, and we are committed to protecting your personal
+information. This Privacy Policy outlines how Nous Meeting collects, uses, and safeguards
+your data when you interact with our website and application.
+1. Applicability of This Policy
+This Privacy Policy applies solely to Nous Meeting's website and application. If you visit any
+third-party websites or applications through our platform, we advise you to review their
+respective privacy policies.
+For the purposes of this policy, "Nous Meeting" refers to the application owned by Next
+Generation Innovation L.L.C., a company registered in the State of New York as a limited
+liability company.
+2. Personal Information
+"Personal information" refers to any information that can be used to identify an individual,
+such as name, date of birth, address, phone number, voice recordings, emotions, and
+sentiments. This also includes identifiable information related to a juridical entity.
+3. Information We Collect
+3.1 Personal Information
+Nous Meeting may collect personal information when users interact with the platform, such
+as during registration, completing surveys, transactions, or when submitting information via
+email.
+3.2 Automatically Collected Information
+We may automatically collect the following non-personally identifiable information when you
+visit our website or use our application:
+a. Domain name and IP address
+
+2
+
+b. Browser type and operating system
+c. Date and time of visit
+d. Pages and services accessed
+e. Referring websites and exit pages
+f. Forms or documents downloaded
+This data is used to improve the functionality of the website, understand user interaction, and
+for statistical analysis. Rest assured, Nous Meeting does not sell or disclose this information
+for commercial purposes.
+3.3 Cookies
+Nous Meeting uses "persistent" and "session" cookies, which store data temporarily for the
+duration of your visit or longer, depending on your browser settings. You can manage cookie
+preferences through your browser settings, though disabling certain cookies may impact your
+ability to use some website features.
+3.4 Text Message Data
+We may retain text message data provided via the website for an indefinite period.
+4. Information Collected During User Interaction
+4.1 Personal Information During Registration
+When registering for an account, we may collect the following personal information:
+a. Name, email address, phone number (optional), and login credentials
+b. Profile details such as job title or organization name (optional)
+c. Meeting-related data if you schedule or host meetings (e.g., meeting title,
+participant list, scheduled time)
+
+4.2 Billing Information
+For users who purchase premium plans, billing information (e.g., credit card details) is
+securely processed through third-party payment processors.
+4.3 Usage Data
+We automatically collect device and technical information to improve platform performance,
+including:
+a. IP address, browser type, operating system, and device identifiers
+b. Meeting activity, including participation time, features used (e.g., screen
+sharing, chat), and meeting duration
+
+3
+
+4.4 User-Generated Content
+Any content shared during meetings (such as audio, video, chat messages, screen shares,
+uploaded files) may be collected and stored based on your preferences. Support
+communications and feedback are also recorded to enhance our services.
+5. Information Provided via Email
+When you email Nous Meeting, the email address and its contents (including text, audio,
+video, or images) are collected. This information is used to respond to inquiries, improve the
+website, and address any issues. Nous Meeting does not sell or disclose email data for
+commercial purposes.
+6. Recording of Meetings - User Responsibility and Legal Compliance
+CRITICAL NOTICE: HOST RESPONSIBILITY FOR RECORDING COMPLIANCE
+NOUS MEETING IS A TECHNOLOGY PROVIDER ONLY. WE PROVIDE RECORDING TOOLS BUT
+DO NOT AND CANNOT ENSURE YOUR COMPLIANCE WITH RECORDING LAWS. YOU, AS THE
+MEETING HOST OR RECORDING USER, ARE SOLELY AND EXCLUSIVELY RESPONSIBLE FOR:
+a. Determining which recording laws apply to your meetings
+b. Obtaining all required consents from meeting participants
+c. Providing proper notice of recording to all participants
+d. Complying with ALL applicable federal, state, local, and international laws
+e. All legal consequences of violating recording laws
+Nous Meeting provides functionality that allows hosts and authorized participants to record
+meetings for transcription, summarization, and analysis purposes. By providing this
+functionality, Nous Meeting acts solely as a technology service provider and assumes
+absolutely no responsibility for how users employ these recording features or whether such
+use complies with applicable laws.
+6.1 Nous Meeting's Role as Technology Provider
+Nous Meeting's Role: Nous Meeting provides software and technology that enables users to
+record meetings. We are a technology service provider, not a legal advisor, and we do not
+provide legal advice regarding recording compliance.
+What We Do NOT Do: Nous Meeting does NOT:
+a. Monitor whether you obtain required consents from meeting participants
+b. Determine which recording laws apply to your specific meetings
+c. Verify that you are complying with applicable recording laws
+d. Provide legal advice or guidance on recording compliance
+e. Ensure that meeting participants have consented to recording
+
+4
+
+f. Bear any responsibility for your violations of recording laws
+Your Acknowledgment: By using Nous Meeting's recording features, you acknowledge and
+agree that you are solely responsible for ensuring compliance with all applicable laws. Nous
+Meeting makes no representations or warranties regarding the legality of recording in any
+jurisdiction or circumstance.
+6.2 Host's Exclusive Responsibility for Legal Compliance
+As the meeting host or user initiating a recording, you bear complete and exclusive legal
+responsibility for:
+a. Researching and understanding all applicable recording laws in the jurisdictions
+where you and your participants are located
+b. Determining whether you are in a one-party consent or two-party/all-party
+consent jurisdiction
+c. Identifying the locations of all meeting participants and determining which
+jurisdiction's laws apply
+d. Providing clear, conspicuous, and legally adequate notice to all participants
+that recording will occur
+e. Obtaining all necessary consents as required by applicable federal, state, local,
+and international laws
+f. Documenting and maintaining records of all consents obtained
+g. Providing participants with the opportunity to decline participation or leave the
+meeting if they do not consent
+h. Complying with data protection laws (GDPR, CCPA, PIPEDA, etc.) regarding
+recorded content
+i. Securing recorded content against unauthorized access or disclosure
+j. Managing requests from participants regarding access to, correction of, or
+deletion of recordings
+k. Implementing appropriate data retention and deletion practices
+l. Accepting all legal, financial, and criminal consequences of any violations of
+recording laws
+
+6.3 Recording Notice and Consent Requirements
+Automated Notice Provided by Nous Meeting: Nous Meeting provides automated visual
+and/or audio indicators when recording is initiated. These indicators are provided as a
+courtesy and technical feature only. However, you acknowledge and agree that:
+a. Automated indicators do NOT constitute legally sufficient notice in all
+jurisdictions
+b. You remain solely responsible for providing legally adequate notice regardless
+of automated indicators
+c. You must supplement automated indicators with additional notice and consent
+mechanisms as required by law
+
+5
+
+Your Obligations Regarding Notice and Consent:
+a. Provide advance notice to participants (via email, calendar invite, or other
+means) that meetings may be recorded
+b. Provide verbal notice at the beginning of each meeting that recording will occur
+c. In all-party consent jurisdictions, obtain explicit verbal or written consent from
+EVERY participant before recording
+d. Allow participants who do not consent to leave the meeting before recording
+begins
+e. Immediately stop recording if any participant in an all-party consent jurisdiction
+withdraws consent
+6.4 U.S. Federal Law Requirements
+Under the Electronic Communications Privacy Act or "Federal Wiretap Act", it is a federal
+crime to intercept or record any wire, oral, or electronic communication without the consent
+of at least one party to the conversation.
+Host Responsibility: You must ensure at minimum that at least one party to the conversation
+(which may be you as the host) consents to any recording. However, stricter state laws may
+apply and require all-party consent. You are responsible for determining and complying with
+the most restrictive applicable law.
+6.5 U.S. State Recording Laws - Host's Responsibility to Comply
+Recording laws vary significantly by U.S. state. Some states require consent from all parties
+("all-party consent" states), while others require consent from only one party ("one-party
+consent" states). As the host, you are solely responsible for determining which laws apply and
+ensuring compliance.
+6.5.1 All-Party Consent States
+The following states require consent from ALL parties before recording:
+California, Connecticut, Florida, Illinois, Maryland, Massachusetts, Michigan, Montana,
+
+Nevada, New Hampshire, Pennsylvania, and Washington
+
+CRITICAL REQUIREMENT: If you OR ANY participant is located in one of these states, you
+MUST obtain explicit consent from ALL participants before recording. Failure to do so is a
+criminal offense.
+Your Mandatory Obligations in All-Party Consent Jurisdictions:
+a. Obtain explicit verbal or written consent from EVERY participant before
+initiating recording
+b. Provide clear advance notice that recording will occur
+c. Document all consents obtained (via email, recorded audio acknowledgment, or
+written consent forms)
+d. Allow non-consenting participants to leave before recording starts
+
+6
+
+e. Stop recording immediately if any participant withdraws consent
+6.5.2 One-Party Consent States
+States not listed in Section 6.5.1 generally follow a one-party consent standard, meaning only
+one party to the conversation must consent to recording.
+Host Responsibility: Even in one-party consent states, you remain responsible for determining
+applicable laws, as participants may be calling from all-party consent jurisdictions.
+Additionally, providing notice to all participants is strongly recommended as best practice and
+to avoid civil liability, workplace disputes, or professional sanctions.
+6.5.3 Determining Applicable Law - Host's Responsibility
+Multi-Jurisdictional Meetings: When participants are in different states or countries, the most
+restrictive law generally applies. This means:
+a. If ANY participant is in an all-party consent state, you must obtain consent from
+ALL participants
+b. You must research the location of each participant and determine applicable
+laws
+c. If participants' locations are unknown, you should assume all-party consent is
+required
+
+YOU, NOT NOUS MEETING, ARE SOLELY RESPONSIBLE FOR MAKING THESE LEGAL
+DETERMINATIONS.
+6.5.4 Criminal and Civil Consequences of Violations
+WARNING: Violating federal or state recording laws can result in severe consequences for
+which you bear sole responsibility:
+a. Criminal prosecution, fines, and imprisonment
+b. Civil lawsuits for statutory and actual damages (some states provide for treble
+damages)
+c. Attorney's fees and court costs awarded to prevailing plaintiffs
+d. Exclusion of illegally obtained recordings as evidence in legal proceedings
+e. Professional discipline, employment termination, or other workplace
+consequences
+f. Reputational damage and loss of trust
+g. Additional penalties under specific industry regulations (HIPAA, FERPA, etc.)
+6.6 International Recording Laws - Host's Responsibility
+When recording meetings with international participants, you must comply with all applicable
+international laws, which often impose stricter requirements than U.S. law. As the host, you
+are solely responsible for:
+a. Identifying the countries from which participants are joining
+
+7
+b. Researching applicable data protection and recording laws in those countries
+c. Ensuring compliance with all applicable laws, including but not limited to:
+European Union/EEA: General Data Protection Regulation (GDPR) requires a lawful basis for
+processing, explicit consent for certain processing, data protection impact assessments, and
+compliance with stringent data subject rights
+United Kingdom: UK GDPR and Data Protection Act 2018 impose similar requirements to EU
+GDPR
+Canada: Personal Information Protection and Electronic Documents Act (PIPEDA) and
+provincial privacy laws require meaningful consent and impose strict data handling
+requirements
+Australia: Privacy Act 1988 and Telecommunications (Interception and Access) Act 1979
+Other Jurisdictions: Numerous countries have enacted comprehensive data protection laws
+with varying requirements
+NOUS MEETING PROVIDES NO GUIDANCE ON INTERNATIONAL LAWS. YOU MUST CONSULT
+WITH QUALIFIED LEGAL COUNSEL IN RELEVANT JURISDICTIONS.
+6.7 Data Storage, Retention, and Security
+Nous Meeting provides secure storage infrastructure for recordings, but you, as the host,
+retain ultimate control and responsibility for:
+a. Determining appropriate retention periods for recordings based on your legal
+obligations and business needs
+b. Implementing and enforcing access controls to recordings
+c. Managing sharing and distribution of recordings in compliance with applicable
+laws
+d. Responding to participant requests for access, correction, or deletion of
+recordings
+e. Deleting recordings when legally required or when retention is no longer
+necessary
+f. Ensuring recordings are not shared with unauthorized parties
+While Nous Meeting implements technical security measures (encryption at rest and in
+transit, access controls, etc.), you are responsible for all policy decisions regarding recordings
+and for ensuring your use complies with applicable data protection laws.
+6.8 AI Processing of Recordings - Host's Responsibility
+Nous Meeting uses artificial intelligence to process recordings for transcription,
+summarization, action item extraction, and sentiment analysis. As the host, you are solely
+responsible for:
+a. Obtaining all necessary consents for AI processing of meeting content
+b. Informing participants that recordings will be processed using AI technology
+
+8
+
+c. Ensuring AI processing complies with applicable data protection laws
+d. Determining whether AI processing is permissible under your industry-specific
+regulations (e.g., HIPAA, FERPA, GLBA)
+6.9 Prohibited Uses of Recording Features
+You are strictly prohibited from using recording features to:
+a. Record without required legal notice and consent
+b. Violate any person's privacy rights, confidentiality obligations, or reasonable
+expectation of privacy
+c. Engage in illegal surveillance, wiretapping, stalking, harassment, or intimidation
+d. Record for blackmail, extortion, coercion, or other criminal purposes
+e. Violate intellectual property rights, trade secrets, attorney-client privilege, or
+confidentiality agreements
+f. Record meetings involving minors without proper parental/guardian consent
+g. Create deepfakes, manipulated content, or misleading representations from
+recordings
+
+6.10 Enforcement and Account Termination
+Nous Meeting reserves the right to investigate suspected violations of this Privacy Policy and
+applicable laws. If we become aware of potential illegal recording activity, we may: suspend
+or terminate your account, disable recording features, delete recordings, report violations to
+law enforcement, and cooperate with law enforcement investigations. However, such
+enforcement actions do not diminish or eliminate your sole responsibility for legal
+compliance.
+6.11 COMPREHENSIVE LIMITATION OF LIABILITY AND DISCLAIMER
+CRITICAL LEGAL NOTICE
+
+NOUS MEETING AND NEXT GENERATION INNOVATION L.L.C. PROVIDE RECORDING
+TECHNOLOGY AS A SERVICE ONLY. WE DO NOT AND CANNOT GUARANTEE, WARRANT, OR
+ENSURE YOUR COMPLIANCE WITH ANY RECORDING LAWS, DATA PROTECTION LAWS, OR
+OTHER LEGAL REQUIREMENTS.
+YOU, AS THE USER, HOST, OR RECORDING INITIATOR, ARE SOLELY, EXCLUSIVELY, AND
+COMPLETELY RESPONSIBLE FOR:
+a. Determining all applicable recording laws in all relevant jurisdictions
+b. Obtaining all required consents and providing all required notices
+c. Ensuring compliance with ALL federal, state, local, and international laws
+d. Protecting recorded content and complying with data protection regulations
+e. All legal, financial, criminal, and civil consequences of recording violations
+NOUS MEETING MAKES NO REPRESENTATIONS OR WARRANTIES REGARDING:
+
+9
+
+a. The legality of recording in any jurisdiction or circumstance
+b. The sufficiency of any notice or consent mechanisms
+c. Whether your use of recording features complies with applicable laws
+d. The accuracy, completeness, or currency of any legal information provided in
+this policy
+
+DISCLAIMER OF LIABILITY: NOUS MEETING, NEXT GENERATION INNOVATION L.L.C., AND
+THEIR RESPECTIVE OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, AFFILIATES, SUCCESSORS,
+AND ASSIGNS (COLLECTIVELY, "NOUS MEETING PARTIES") EXPRESSLY DISCLAIM ALL
+LIABILITY FOR:
+a. Your violations of any recording, wiretapping, surveillance, or privacy laws
+b. Your violations of data protection regulations (GDPR, CCPA, PIPAA, HIPAA,
+FERPA, etc.)
+c. Any criminal prosecution, civil lawsuits, or regulatory actions arising from your
+recording activities
+d. Any damages, penalties, fines, or fees you incur due to recording violations
+e. Any claims by meeting participants or third parties related to unauthorized
+recording
+f. Any other consequences arising from your use or misuse of recording features
+INDEMNIFICATION: BY USING NOUS MEETING'S RECORDING FEATURES, YOU AGREE TO
+DEFEND, INDEMNIFY, AND HOLD HARMLESS THE NOUS MEETING PARTIES FROM AND
+AGAINST ANY AND ALL CLAIMS, DAMAGES, LIABILITIES, COSTS, AND EXPENSES (INCLUDING
+REASONABLE ATTORNEYS' FEES AND COURT COSTS) ARISING FROM OR RELATED TO:
+a. Your use or misuse of recording features
+b. Your violations of any recording, privacy, or data protection laws
+c. Your failure to obtain required consents or provide required notices
+d. Any third-party claims related to your recording activities
+e. Your breach of any provision of this Privacy Policy regarding recording
+f. Any other conduct related to your use of Nous Meeting's recording technology
+This indemnification obligation survives termination of your account and continues in
+perpetuity for any recording-related claims.
+NO LEGAL ADVICE: Nothing in this Privacy Policy constitutes legal advice. This policy provides
+general information only and does not address the specific legal requirements applicable to
+your particular situation. You must consult with qualified legal counsel licensed in all relevant
+jurisdictions to ensure compliance with applicable recording laws. Nous Meeting assumes no
+responsibility for the accuracy, completeness, or applicability of any legal information
+contained in this policy.
+
+10
+ACKNOWLEDGMENT AND AGREEMENT: By using Nous Meeting's recording features, you
+acknowledge that you have read, understood, and agreed to all provisions of this Section 6,
+including all disclaimers, limitations of liability, and indemnification obligations. You
+acknowledge that you are solely responsible for all legal compliance related to recording and
+
+that Nous Meeting bears no responsibility whatsoever for your compliance or non-
+compliance with applicable laws.
+
+7. Information Use and Disclosure
+7.1 Use of Information
+The information collected is used to operate and improve our services, fulfill transactions,
+provide customer support, enhance user experience, conduct research and analytics, and
+comply with legal obligations. We may disclose this information for operational purposes, but
+we do not sell your personal information for commercial purposes.
+7.2 Information Sharing
+We may share your information in the following circumstances:
+a. With other meeting participants as necessary to facilitate meetings and provide
+services
+b. With service providers and vendors who perform services on our behalf (e.g.,
+hosting, payment processing, analytics)
+c. To comply with legal obligations, court orders, or respond to lawful requests
+from government authorities
+d. To protect our rights, privacy, safety, property, or intellectual property and that
+of our users
+e. To enforce our Terms of Service and prevent fraud or illegal activities
+f. In connection with a merger, acquisition, sale of assets, or other corporate
+transaction involving Next Generation Innovation L.L.C.
+
+7.3 Compliance with Laws
+Nous Meeting complies with U.S. state and federal laws, as well as applicable international
+data protection regulations. We may disclose personal information as required by law,
+including in response to legal processes such as subpoenas, court orders, or law enforcement
+requests, or to protect our intellectual property and ensure the integrity of our platform.
+8. Security and Confidentiality
+We are committed to safeguarding your personal information against unauthorized access,
+alteration, disclosure, or destruction. Nous Meeting employs industry-standard security
+measures to protect your data, including encryption, secure data transmission protocols,
+access controls, and regular security audits. We maintain contractual obligations with
+employees and service providers to ensure data integrity and confidentiality. However, no
+
+11
+method of transmission over the Internet or electronic storage is 100% secure, and we cannot
+guarantee absolute security.
+9. Your Privacy Rights
+Depending on your location, you may have certain rights regarding your personal information,
+including:
+a. The right to access and receive a copy of your personal information
+b. The right to correct or update inaccurate personal information
+c. The right to delete your personal information (subject to legal retention
+requirements)
+d. The right to object to or restrict certain processing activities
+
+e. The right to data portability (receiving your data in a structured, machine-
+readable format)
+
+f. The right to withdraw consent where processing is based on consent
+g. The right to lodge a complaint with a data protection authority
+To exercise these rights, please contact us at privacy@nousmeeting.com. We will respond to
+your request in accordance with applicable law.
+10. Children's Privacy
+Our services are not intended for children under 13 years of age (or under 16 in certain
+jurisdictions). We do not knowingly collect personal information from children. If you become
+aware that a child has provided us with personal information without parental consent,
+please contact us immediately at privacy@nousmeeting.com, and we will take steps to delete
+such information. We strongly advise parents or guardians to monitor their children's online
+activity and ensure that children are not submitting personal information without proper
+supervision and consent.
+11. External Links and Third-Party Services
+Nous Meeting may provide links to third-party applications, websites, or services for your
+convenience. Please be aware that once you leave our platform, you are subject to the privacy
+policies and terms of service of those external sites. We do not control, endorse, or assume
+responsibility for the content, services, privacy practices, or security measures of external
+
+sites or third-party services. We encourage you to review the privacy policies of any third-
+party sites you visit.
+
+12. Data Retention
+We retain personal information for as long as necessary to fulfill the purposes outlined in this
+Privacy Policy, unless a longer retention period is required or permitted by law. When
+determining retention periods, we consider the nature of the information, the purposes for
+
+12
+which it was collected, legal requirements, and our legitimate business interests. When
+personal information is no longer needed, we will securely delete or anonymize it in
+accordance with our data retention and deletion policies.
+13. Changes to This Privacy Policy
+Nous Meeting reserves the right to modify or update this Privacy Policy at any time to reflect
+changes in our practices, legal requirements, or business operations. We will notify you of any
+material changes by posting the new privacy policy on this page, updating the "Effective Date"
+at the top, and providing notice through our platform or via email where appropriate. Your
+continued use of our services after such changes constitutes acceptance of the updated
+policy. We encourage users to periodically review this Privacy Policy to stay informed about
+how we are protecting your information.
+14. User Responsibility
+We encourage users to carefully protect their personal information, including login
+credentials, passwords, authentication tokens, and any sensitive data submitted through the
+website or application. Users are responsible for maintaining the confidentiality of their
+account information and for all activities that occur under their account. Please notify us
+immediately if you suspect any unauthorized access to your account.
+15. Contact Us
+If you have questions, concerns, or requests regarding this Privacy Policy or our privacy
+practices, please contact us at:
+Next Generation Innovation L.L.C.
+State of Registration: New York, USA
+Email: support@nousmeeting.com
+Website: www.nousmeeting.com
+
+13
+
+FINAL LEGAL NOTICE AND DISCLAIMER
+
+THIS PRIVACY POLICY IS PROVIDED FOR INFORMATIONAL PURPOSES ONLY AND DOES NOT
+CONSTITUTE LEGAL ADVICE. USERS ARE SOLELY RESPONSIBLE FOR CONSULTING WITH
+QUALIFIED LEGAL COUNSEL LICENSED IN ALL RELEVANT JURISDICTIONS TO ENSURE
+COMPLIANCE WITH ALL APPLICABLE LAWS.
+Recording laws, wiretapping statutes, surveillance regulations, and data protection laws vary
+dramatically by jurisdiction, change frequently, and depend on highly specific factual
+circumstances. This policy cannot and does not address every possible legal requirement,
+scenario, or jurisdictional variation. The legal information provided herein may be incomplete,
+outdated, or inapplicable to your specific situation.
+NOUS MEETING AND NEXT GENERATION INNOVATION L.L.C. MAKE NO REPRESENTATIONS,
+WARRANTIES, OR GUARANTEES REGARDING THE ACCURACY, COMPLETENESS, CURRENCY,
+OR APPLICABILITY OF ANY LEGAL INFORMATION CONTAINED IN THIS POLICY. WE ASSUME
+
+ABSOLUTELY NO RESPONSIBILITY OR LIABILITY FOR YOUR COMPLIANCE OR NON-
+COMPLIANCE WITH ANY APPLICABLE LAWS.
+
+BY USING NOUS MEETING'S RECORDING FEATURES, YOU ACKNOWLEDGE THAT YOU BEAR
+FULL AND EXCLUSIVE LEGAL RESPONSIBILITY FOR ALL RECORDING ACTIVITIES AND THAT
+YOU HAVE CONSULTED OR WILL CONSULT WITH APPROPRIATE LEGAL COUNSEL TO ENSURE
+COMPLIANCE WITH ALL APPLICABLE LAWS IN ALL RELEVANT JURISDICTIONS.

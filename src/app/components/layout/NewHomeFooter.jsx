@@ -27,7 +27,7 @@ export default function NewHomeFooter() {
         <div>
           <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
           <ul className="space-y-3 text-gray-600 text-sm">
-            <li><Link href="/features" className="hover:text-[#0A0DC4]">Features</Link></li>
+            <li><Link href="/#features" className="hover:text-[#0A0DC4]">Features</Link></li>
             {/* <li><Link href="/pricing" className="hover:text-[#0A0DC4]">Pricing</Link></li> */}
             <li><Link href="/help" className="hover:text-[#0A0DC4]">Help Center</Link></li>
             <li><Link href="/help/#faq" className="hover:text-[#0A0DC4]">FAQ</Link></li>

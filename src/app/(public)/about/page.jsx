@@ -213,7 +213,7 @@ export default function AboutPage() {
             variants={heroVariants}
             className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed"
           >
-            We're on a mission to make meetings more productive by turning
+            We are on a mission to make meetings more productive by turning
             conversations into actionable insights with AI
           </motion.p>
 
@@ -266,7 +266,7 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-4 text-lg text-gray-600 leading-relaxed">
                 <p>
-                  Nous Meeting was founded with a simple idea: <strong className="text-gray-900">meetings should empower people</strong>, not drain them.
+                  Nous Meeting was developed with a simple belief: <strong className="text-gray-900">meetings should empower people</strong>, not drain them.
                 </p>
                 <p>
                   We saw teams wasting hours searching notes, losing track of action items, and struggling to align. Our founders, having experienced these pain points firsthand in their corporate careers, knew there had to be a better way.
@@ -344,9 +344,8 @@ export default function AboutPage() {
                     <h3 className="text-2xl font-bold text-gray-900">Our Mission</h3>
                   </div>
                   <p className="text-gray-600 leading-relaxed text-lg">
-                    To simplify communication and maximize productivity by providing
-                    teams with AI-powered meeting intelligence that ensures nothing is
-                    lost, forgotten, or overlooked.
+                    To streamline communication and elevate productivity by delivering AI-powered meeting
+                    intelligence that ensures every detail is captured, understood, and actionable.
                   </p>
                 </CardContent>
               </Card>
@@ -367,9 +366,8 @@ export default function AboutPage() {
                     <h3 className="text-2xl font-bold text-gray-900">Our Vision</h3>
                   </div>
                   <p className="text-gray-600 leading-relaxed text-lg">
-                    To become the go-to productivity companion for organizations
-                    worldwide—where every meeting ends with clarity, direction, and
-                    results.
+                    To be the leading productivity companion for organizations worldwide-empowering every
+                    meeting to end with clarity, direction, and measurable outcomes.
                   </p>
                 </CardContent>
               </Card>
@@ -505,15 +503,15 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link href="/auth/register">
+                <Link href="/pre-register">
                   <Button className="px-8 py-4 text-lg bg-white text-blue-700 hover:bg-gray-100 shadow-xl rounded-full">
-                    Get Started Free
+                    Pre Register
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link href="/features">
+                <Link href="/#features">
                   <Button 
                     variant="outline"
                     className="px-8 py-4 text-lg bg-transparent border-2 border-white text-white hover:bg-white/10 rounded-full"

@@ -94,7 +94,7 @@ export default function FreeTrialPage() {
           </h1>
 
           <p className="text-lg text-indigo-100">
-            Start your free trial of <span className="font-semibold">Nous Meeting</span> and
+            Be among the first to use <span className="font-semibold">Nous Meeting</span> and
             transform the way your team captures knowledge from meetings.
           </p>
 

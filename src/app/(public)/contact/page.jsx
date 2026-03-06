@@ -519,9 +519,9 @@ export default function ContactPage() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button 
                   className="px-8 py-4 text-lg bg-white text-blue-700 hover:bg-gray-100 shadow-xl rounded-full"
-                  onClick={() => router.push("/auth/register")}
+                  onClick={() => router.push("/pre-register")}
                 >
-                  Get Started
+                  Pre-register
                 </Button>
               </motion.div>
               {/* <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

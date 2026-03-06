@@ -36,16 +36,46 @@ const HelpPage = () => {
   };
 
   const faqs = [
-    { q: 'How do I create an organization?', a: 'Go to the Organizations page, click "+ Add Organization", and follow the form to create a new workspace. You can later invite members via email.' },
-    { q: 'Can I integrate with Zoom?', a: 'Yes. Navigate to Configure Meeting Tools > Zoom. From there, connect your Zoom account and manage the integration, including enabling automatic recording and transcription.' },
-    { q: 'Do I need Zoom for Nous Meeting to work?', a: 'No, Nous Meeting works without Zoom, but Zoom integration unlocks features like meeting creation, transcription, AI Meeting insights etc' },
-    { q: 'Where can I find my meeting reports?', a: 'Go to Calendar > Reports. Reports include total meetings, participant breakdown, organization-level summaries, action items, and speaker sentiment analytics.' },
-    { q: 'How do I view transcripts and summaries?', a: 'Open a meeting from the Meetings page. You’ll see a speaker-based transcript, key highlights, summaries, and sentiment analysis in the meeting details view.' },
-    { q: 'How do I reset my password?', a: 'On the login page, click "Forgot Password". Enter your email, verify the OTP, and set a new password. You’ll be automatically logged in afterwards.' },
-    { q: 'How can I update my profile information?', a: 'Go to Profile > Edit Info. You can update your name, email, country, date of birth, and password. Changes are saved immediately.' },
-    { q: 'What happens if my session expires?', a: 'If your session expires, Nous Meeting will refresh it automatically in the background. If refresh fails, you’ll be redirected to the login page.' },
-    { q: 'Is my data secure?', a: 'Yes. Nous Meeting employs encryption and secure storage for all your meeting data, including transcripts and reports. Data is never sold or shared with third parties.' },
-    { q: 'What platforms does Nous Meeting support?', a: 'Nous Meeting is currently supports only zoom' },
+    {
+      q: "How do I create an organization?",
+      a: "Go to the Organizations page, click '+ Add Organization', and follow the form to create a new workspace. You can invite members later via email."
+    },
+    {
+      q: "Can I integrate with Zoom?",
+      a: "Yes. Navigate to Meeting Platforms > Zoom. From there, connect your Zoom account and manage the integration, including automatic recording and transcription."
+    },
+    {
+      q: "Do I need Zoom for Nous Meeting to work?",
+      a: "No. Nous Meeting works independently, but Zoom integration unlocks additional features such as meeting creation, transcription, and AI-driven meeting insights."
+    },
+    {
+      q: "Where can I find my meeting reports?",
+      a: "Go to Organizations > Select your organization. Reports include total meetings, participant breakdowns, organization-level summaries, action items, and speaker sentiment analytics."
+    },
+    {
+      q: "How do I view transcripts and summaries?",
+      a: "Open any meeting from the Meetings page. You’ll find the speaker-based transcript, key highlights, summaries, and sentiment analysis inside the meeting details view."
+    },
+    {
+      q: "How do I reset my password?",
+      a: "On the login page, click 'Forgot Password'. Enter your email, verify the OTP, and set a new password. You’ll be logged in automatically afterward."
+    },
+    {
+      q: "How can I update my profile information?",
+      a: "Go to Profile > Profile Settings. You can update your name, email, country, date of birth, and password. All changes are saved automatically."
+    },
+    {
+      q: "What happens if my session expires?",
+      a: "If your session expires, Nous Meeting will attempt to refresh it automatically. If the refresh fails, you will be redirected to the login page."
+    },
+    {
+      q: "Is my data secure?",
+      a: "Yes. Nous Meeting uses encryption and secure storage to protect all your meeting data, including transcripts and reports. Your data is never sold or shared with third parties."
+    },
+    {
+      q: "What platforms does Nous Meeting support?",
+      a: "Nous Meeting currently supports Zoom for meeting integration."
+    }
   ];
 
   const stats = [
@@ -293,7 +323,7 @@ const HelpPage = () => {
               User Manual
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to know to get started with Nous Meeting
+              Your complete guide to getting started and making the most of Nous Meeting.
             </p>
           </div>
 
@@ -313,7 +343,7 @@ const HelpPage = () => {
               <ul className="list-disc pl-6 space-y-3 text-gray-700 mb-8">
                 <li>Create organizations workspaces.</li>
                 <li>Schedule and manage meetings directly inside Nous Meeting.</li>
-                <li>Connect with Zoom for transcription, recording, and meeting sync.</li>
+                <li>Connect with Zoom for transcription, recording, and meeting synchronization..</li>
                 <li>View meeting summaries, action items, and speaker sentiment analytics.</li>
                 <li>Use the calendar to track all events and generate reports.</li>
               </ul>
