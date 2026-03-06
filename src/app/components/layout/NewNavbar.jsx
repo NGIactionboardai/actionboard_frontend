@@ -390,8 +390,11 @@ export default function NewNavbar({ variant = "default" }) {
                   <NavLink href="/auth/login" isActive={hasMounted && isActive('/auth/login')}>
                     Sign In
                   </NavLink>
-                  <NavLink href="/auth/register" isActive={hasMounted && isActive('/auth/register')} isPrimary>
+                  {/* <NavLink href="/auth/register" isActive={hasMounted && isActive('/auth/register')} isPrimary>
                     Sign Up
+                  </NavLink> */}
+                  <NavLink href="/pre-register" isActive={hasMounted && isActive('/auth/register')} isPrimary>
+                    Pre-Register
                   </NavLink>
 
                   <NavLink href="/help" isActive={hasMounted && isActive('/help')}>

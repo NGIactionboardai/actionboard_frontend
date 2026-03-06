@@ -43,6 +43,8 @@
     "react-input-mask-next": "^3.0.0-alpha.12",
     "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
+    "react-select": "^5.10.2",
+    "react-select-country-list": "^2.2.3",
     "recharts": "^3.1.0",
     "redux-persist": "^6.0.0",
     "remark-gfm": "^4.0.1",
