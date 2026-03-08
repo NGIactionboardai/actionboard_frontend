@@ -1,8 +1,9 @@
 // src/app/(public)/layout.js
 import HomeNavbar from '@/app/components/layout/HomeNavbar';
-import NewHomeFooter from '@/app/components/layout/NewHomeFooter'; // ✅ import footer
 import { Inter } from 'next/font/google';
 import NewNavbar from '../components/layout/NewNavbar';
+import NewHomeFooter from '../components/layout/NewHomeFooter';
+// import NewNavbar from '../components/layout/NewNavbar';
 
 const inter = Inter({ subsets: ['latin'] });
 

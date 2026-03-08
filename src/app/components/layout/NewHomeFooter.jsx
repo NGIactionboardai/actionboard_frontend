@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Linkedin, Github, Youtube, X, TwitterIcon, Facebook, LucideYoutube } from "lucide-react";
+import { Twitter, Linkedin, Github, Youtube, X, TwitterIcon, Facebook, LucideYoutube, Instagram } from "lucide-react";
 
 export default function NewHomeFooter() {
   return (
     <footer className="bg-gray-50 border-t border-gray-200">
       {/* Main Footer */}
-      <div className="max-w-7xl mx-auto px-6 py-12 md:py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div className="max-w-7xl mx-auto px-6 py-12 md:py-16 grid grid-cols-1 md:grid-cols-5 gap-10">
         {/* Brand */}
         <div>
           <Link href="/" className="flex items-center space-x-2">
@@ -54,51 +54,76 @@ export default function NewHomeFooter() {
             {/* <li><Link href="/cookies" className="hover:text-[#0A0DC4]">Cookie Policy</Link></li> */}
           </ul>
         </div>
+
+        {/* Socials */}
+        <div>
+          <h4 className="font-semibold text-gray-900 mb-4">Socials</h4>
+          <ul className="space-y-3 text-gray-600 text-sm">
+            <li>
+              <Link
+                href="https://www.linkedin.com/company/nous-meeting/"
+                target="_blank"
+                className="flex items-center gap-2 hover:text-[#0A0DC4]"
+              >
+                <Linkedin className="w-4 h-4" />
+                LinkedIn
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="https://www.instagram.com/nous_meeting/"
+                target="_blank"
+                className="flex items-center gap-2 hover:text-[#0A0DC4]"
+              >
+                <Instagram className="w-4 h-4" />
+                Instagram
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="https://www.facebook.com/profile.php?id=61582344688316#"
+                target="_blank"
+                className="flex items-center gap-2 hover:text-[#0A0DC4]"
+              >
+                <Facebook className="w-4 h-4" />
+                Facebook
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="https://www.youtube.com/@NousMeeting-2025"
+                target="_blank"
+                className="flex items-center gap-2 hover:text-[#0A0DC4]"
+              >
+                <LucideYoutube className="w-4 h-4" />
+                YouTube
+              </Link>
+            </li>
+          </ul>
+        </div>
       </div>
 
       {/* Bottom Bar */}
       <div className="border-t border-gray-200 mt-8">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500">
-          <p>© {new Date().getFullYear()} Nous Meeting. All rights reserved.</p>
+          <p className="text-center sm:text-left">
+            © {new Date().getFullYear()} Nous Meeting. All rights reserved.
+            <br className="sm:hidden" />
+            <span className="text-gray-400">
+              {" "}A product of{" "}
+              <Link
+                href="https://nexgeninnovation.com/"
+                target="_blank"
+                className="font-medium text-gray-600 hover:text-[#0A0DC4]"
+              >
+                Next Generation Innovation L.L.C
+              </Link>
+            </span>
+          </p>
 
-          {/* Social Icons */}
-          <div className="flex space-x-6 mt-4 sm:mt-0 group">
-            {/* X (formerly Twitter) */}
-            <Link
-              href="https://x.com/home"
-              target="_blank"
-              className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
-            >
-              <TwitterIcon className="w-5 h-5" />
-            </Link>
-
-            {/* Facebook */}
-            <Link
-              href="https://www.facebook.com/profile.php?id=61582344688316"
-              target="_blank"
-              className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
-            >
-              <Facebook className="w-5 h-5" />
-            </Link>
-
-            {/* GitHub — same as before */}
-            {/* <Link
-              href="https://github.com"
-              target="_blank"
-              className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
-            >
-              <Github className="w-5 h-5" />
-            </Link> */}
-
-            {/* YouTube */}
-            <Link
-              href="https://www.youtube.com/@NousMeeting-2025"
-              target="_blank"
-              className="transition-opacity duration-300 group-hover:opacity-50 hover:!opacity-100 hover:text-[#0A0DC4]"
-            >
-              <LucideYoutube className="w-5 h-5" />
-            </Link>
-          </div>
         </div>
       </div>
     </footer>

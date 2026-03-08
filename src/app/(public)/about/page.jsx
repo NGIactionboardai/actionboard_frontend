@@ -205,6 +205,27 @@ export default function AboutPage() {
             </span>
           </motion.h1>
 
+          {/* Product Badge */}
+          <motion.div
+            custom={1.5}
+            initial="hidden"
+            animate="visible"
+            variants={heroVariants}
+            className="mb-6 flex justify-center"
+          >
+            <a
+              href="https://nexgeninnovation.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-gray-200 shadow-sm hover:shadow-md transition-all text-sm text-gray-700 hover:text-gray-900"
+            >
+              <span className="text-gray-500">A product of</span>
+              <span className="font-semibold bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] bg-clip-text text-transparent">
+                Next Generation Innovation L.L.C
+              </span>
+            </a>
+          </motion.div>
+
           {/* Subtitle */}
           <motion.p
             custom={2}
