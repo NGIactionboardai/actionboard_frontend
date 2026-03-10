@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Mail, Calendar, MapPin, Lock, Settings } from 'lucide-react';
+import { User, Mail, Calendar, MapPin, Lock, Settings, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../../../../redux/auth/authSlices'; // Adjust path as needed
@@ -9,12 +9,15 @@ import ChangePasswordModal from '@/app/components/auth/ChangePasswordModal';
 import AddPasswordModal from '@/app/components/auth/AddPasswordModal';
 import EditInfoModal from '@/app/components/auth/EditInfoModal';
 import withProfileCompletionGuard from '@/app/components/withProfileCompletionGuard';
+import { useRouter } from "next/navigation";
 
 function ProfilePage() {
   const user = useSelector(selectUser);
   const [isAddPasswordOpen, setIsAddPasswordOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const router = useRouter();
 
 
   // Get user display name
@@ -76,6 +79,25 @@ function ProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+
+        <button
+          onClick={() => {
+            if (window.history.length > 1) {
+              router.back();
+            } else {
+              router.push("/dashboard");
+            }
+          }}
+          className="absolute top-22 left-6 flex items-center gap-2 px-4 py-2 rounded-lg
+          bg-blue-50 text-blue-700 text-sm font-medium
+          border border-blue-200
+          hover:bg-blue-100 hover:text-blue-800
+          transition-all duration-200"
+        >
+          <ChevronLeft size={18} />
+          Back
+        </button>
+
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-4 py-6 sm:px-6 sm:py-8">

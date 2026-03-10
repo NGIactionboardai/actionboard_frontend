@@ -9,6 +9,8 @@ import { useMeetingsModal } from '../../hooks/useMeetings';
 import ZoomConfig from '../../components/ZoomConfig';
 import ZoomAccountCard from '../../components/ZoomAccountCard';
 import withProfileCompletionGuard from '../../components/withProfileCompletionGuard';
+import { ChevronLeft } from 'lucide-react';
+
 
 function ConfigureMeetingToolsPage() {
   const dispatch = useDispatch();
@@ -16,6 +18,7 @@ function ConfigureMeetingToolsPage() {
   const router = useRouter();
   const isZoomConnected = useSelector(selectZoomIsConnected);
   const successMessage = useSelector(selectZoomSuccessMessage);
+
 
   const {
       isCreateMeetingModalOpen,
@@ -52,7 +55,29 @@ function ConfigureMeetingToolsPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+
+    <button
+      onClick={() => {
+        if (window.history.length > 1) {
+          router.back();
+        } else {
+          router.push("/dashboard");
+        }
+      }}
+      className="absolute top-22 left-6 flex items-center gap-2 px-4 py-2 rounded-lg
+      bg-blue-50 text-blue-700 text-sm font-medium
+      border border-blue-200
+      hover:bg-blue-100 hover:text-blue-800
+      transition-all duration-200"
+    >
+      <ChevronLeft size={18} />
+      Back
+    </button>
+
       <div className="max-w-4xl mx-auto text-center">
+        {/* Beautiful Back Button */}
+        
+
         <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-8 sm:mb-10">
           Configure Your Meeting Platforms
         </h1>

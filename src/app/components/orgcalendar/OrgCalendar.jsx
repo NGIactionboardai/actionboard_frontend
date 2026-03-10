@@ -23,6 +23,7 @@ import { getZoomConnectionStatus, selectZoomIsConnected } from '@/redux/auth/zoo
 import axios from 'axios';
 import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ORG_COLORS } from '@/app/constants/orgColors';
+import { useRouter } from "next/navigation";
 
 
 
@@ -67,6 +68,7 @@ export default function OrgCalendar({ orgId }) {
     
 
     const authToken = useSelector((state) => state.auth?.token);
+    const router = useRouter();
 
 
     const tabBtnClass = (type) =>
@@ -864,72 +866,89 @@ export default function OrgCalendar({ orgId }) {
           {/* Main Content */}
           <div className="flex-1 flex flex-col overflow-hidden bg-white">
 
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              
-              {/* Left: Org info */}
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
-                    {orgName} Calendar
-                  </span>
-                  
-                </h2>
+            <div className="p-4 border-b border-gray-200">
 
-                <p className="text-xs text-gray-500 mt-1">
-                  Org ID: <span className="font-mono">{orgId}</span>
-                </p>
-
-                <p className="text-xs text-gray-500 mt-1">
-                  {currentDate.toLocaleDateString('default', {
-                    weekday: 'long',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </div>
-
-              {/* Right: Buttons */}
-              <div className="flex flex-wrap items-center gap-2">
+              {/* Back Button Row */}
+              <div className="mb-3">
                 <button
                   onClick={() => {
-                    const api = calendarRef.current.getApi();
-                    api.changeView('timeGridDay', new Date());
-                    setActiveTab('timeGridDay');
-                    updateTitle();
+                    if (window.history.length > 1) {
+                      router.back();
+                    } else {
+                      router.push("/dashboard");
+                    }
                   }}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors w-full sm:w-auto"
+                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors"
                 >
-                  Today
-                </button>
-
-                <button
-                  onClick={() => {
-                    const now = new Date();
-                    const rounded = new Date(
-                      Math.ceil(now.getTime() / (30 * 60 * 1000)) * (30 * 60 * 1000)
-                    );
-                    const end = new Date(rounded.getTime() + 30 * 60 * 1000);
-
-                    setAddEventStart(rounded.toISOString());
-                    setAddEventEnd(end.toISOString());
-                    setIsAddModalOpen(true);
-                  }}
-                  className="px-5 py-2 text-sm font-semibold text-white rounded-md transition-colors w-full sm:w-auto"
-                  style={{ backgroundColor: '#2C3E50' }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor = '#1E2B37')
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = '#2C3E50')
-                  }
-                >
-                  + Add Event
+                  <ChevronLeft size={16} />
+                  Back
                 </button>
               </div>
 
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                
+                {/* Left: Org info */}
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                    <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
+                      {orgName} Calendar
+                    </span>
+                  </h2>
+
+                  <p className="text-xs text-gray-500 mt-1">
+                    Org ID: <span className="font-mono">{orgId}</span>
+                  </p>
+
+                  <p className="text-xs text-gray-500 mt-1">
+                    {currentDate.toLocaleDateString('default', {
+                      weekday: 'long',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+
+                {/* Right: Buttons */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const api = calendarRef.current.getApi();
+                      api.changeView('timeGridDay', new Date());
+                      setActiveTab('timeGridDay');
+                      updateTitle();
+                    }}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors w-full sm:w-auto"
+                  >
+                    Today
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const now = new Date();
+                      const rounded = new Date(
+                        Math.ceil(now.getTime() / (30 * 60 * 1000)) * (30 * 60 * 1000)
+                      );
+                      const end = new Date(rounded.getTime() + 30 * 60 * 1000);
+
+                      setAddEventStart(rounded.toISOString());
+                      setAddEventEnd(end.toISOString());
+                      setIsAddModalOpen(true);
+                    }}
+                    className="px-5 py-2 text-sm font-semibold text-white rounded-md transition-colors w-full sm:w-auto"
+                    style={{ backgroundColor: '#2C3E50' }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor = '#1E2B37')
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = '#2C3E50')
+                    }
+                  >
+                    + Add Event
+                  </button>
+                </div>
+
+              </div>
             </div>
-          </div>
   
             <div className="flex-1 overflow-auto p-4">
 
@@ -1210,6 +1229,7 @@ export default function OrgCalendar({ orgId }) {
             
             </div>
           </div>
+
         </div>
           <style jsx global>{`
             @media (max-width: 640px) {
