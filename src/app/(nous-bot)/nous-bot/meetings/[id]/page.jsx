@@ -431,7 +431,7 @@ export default function BotMeetingsPage() {
                       disabled={m.status === "ended"}
                       className="flex-1 text-xs bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white py-1.5 rounded-lg hover:opacity-90 disabled:opacity-40"
                     >
-                      Add Bot
+                      Add Notetaker
                     </button>
 
                     <button
@@ -468,7 +468,7 @@ export default function BotMeetingsPage() {
             <div className="bg-white rounded-2xl p-6 w-[420px] shadow-lg">
 
               <h3 className="text-lg font-semibold mb-2">
-                Add Nous Bot
+                Add Notetaker
               </h3>
 
               <p className="text-sm text-gray-600 mb-4">

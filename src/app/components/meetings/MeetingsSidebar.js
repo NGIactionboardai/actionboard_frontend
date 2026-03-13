@@ -163,7 +163,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick }
               title={!isZoomConnected ? 'Connect to Zoom first' : 'AI Assistant Chat'}
             >
               <BotIcon className="w-5 h-5" />
-              Add Bot
+              Add Notetaker
             </Link>
 
             <Link
