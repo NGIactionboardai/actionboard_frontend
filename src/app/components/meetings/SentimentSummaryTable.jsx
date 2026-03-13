@@ -1,27 +1,7 @@
 'use client';
-import { Smile, Meh, Frown, Info } from 'lucide-react';
+import { Smile, Meh, Frown } from 'lucide-react';
 
 export default function SentimentSummaryTable({ summary }) {
-  if (
-    !summary ||
-    typeof summary !== 'object' ||
-    summary === null ||
-    Object.keys(summary).length === 0
-  ) {
-    return (
-      <div className="max-w-lg mx-auto mt-6 rounded-xl border border-gray-200 bg-yellow-50 shadow-md p-6 text-center">
-        <Info className="w-6 h-6 mx-auto mb-2 text-yellow-600" />
-        <h2 className="text-lg font-semibold text-yellow-700">
-          No Sentiment Summary Available
-        </h2>
-        <p className="text-sm text-gray-700 mt-2">
-          This meeting does not have a sentiment summary yet.
-          <br />
-          Please re-transcribe the meeting to generate one.
-        </p>
-      </div>
-    );
-  }
 
   const {
     average_compound,
@@ -44,29 +24,37 @@ export default function SentimentSummaryTable({ summary }) {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-6 rounded-xl border border-gray-200 bg-gradient-to-br from-blue-50 to-white shadow-md p-6">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-        Overall Meeting Sentiment Analysis
-      </h2>
+    <div className="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100">
 
       <div className="grid grid-cols-2 gap-y-4 text-sm">
+
         <div className="font-medium text-gray-700">Overall Sentiment:</div>
         <div className={`flex items-center gap-2 font-semibold ${sentimentColorMap[overall_sentiment]}`}>
           {sentimentIconMap[overall_sentiment]} {overall_sentiment}
         </div>
 
         <div className="font-medium text-gray-700">Average Compound Score:</div>
-        <div className="text-blue-600 font-medium">{average_compound.toFixed(3)}</div>
+        <div className="text-blue-600 font-medium">
+          {average_compound?.toFixed(3) ?? "0.000"}
+        </div>
 
         <div className="font-medium text-gray-700">Average Positive:</div>
-        <div className="text-green-600 font-medium">{average_positive.toFixed(3)}</div>
+        <div className="text-green-600 font-medium">
+          {average_positive?.toFixed(3) ?? "0.000"}
+        </div>
 
         <div className="font-medium text-gray-700">Average Neutral:</div>
-        <div className="text-yellow-500 font-medium">{average_neutral.toFixed(3)}</div>
+        <div className="text-yellow-500 font-medium">
+          {average_neutral?.toFixed(3) ?? "0.000"}
+        </div>
 
         <div className="font-medium text-gray-700">Average Negative:</div>
-        <div className="text-red-500 font-medium">{average_negative.toFixed(3)}</div>
+        <div className="text-red-500 font-medium">
+          {average_negative?.toFixed(3) ?? "0.000"}
+        </div>
+
       </div>
+
     </div>
   );
 }

@@ -87,7 +87,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           </div>
         ))}
         <button
-          className="mt-2 px-3 py-2 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
+          className="mt-2 px-3 py-2 text-sm rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-sm border-transparent"
           onClick={() =>
             updateField("summary_text.high_level_outcomes", [
               ...(draftSummary.summary_text?.high_level_outcomes || []),
@@ -132,7 +132,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           </div>
         ))}
         <button
-          className="mt-2 px-3 py-2 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
+          className="mt-2 px-3 py-2 text-sm rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-sm border-transparent"
           onClick={() =>
             updateField("summary_text.key_discussion_themes", [
               ...(draftSummary.summary_text?.key_discussion_themes || []),
@@ -203,7 +203,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
               </div>
             ))}
             <button
-              className="mt-2 px-3 py-2 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
+              className="mt-2 px-3 py-2 text-sm rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-sm border-transparent"
               onClick={() => {
                 const updated = [...draftSummary.minutes.sections];
                 updated[idx].points.push("");
@@ -215,7 +215,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           </div>
         ))}
         <button
-          className="mt-2 px-3 py-2 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
+          className="mt-2 px-3 py-2 text-sm rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-sm border-transparent"
           onClick={() => {
             updateField("minutes.sections", [
               ...(draftSummary.minutes?.sections || []),
@@ -291,7 +291,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
         ))}
   
         <button
-          className="mt-3 px-3 py-2 bg-[#4F39F6] hover:bg-[#432DD7] text-white text-sm rounded-lg"
+          className="mt-3 px-3 py-2 text-sm rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-sm border-transparent"
           onClick={() =>
             updateField("action_items", [
               ...(draftSummary.action_items || []),
@@ -311,7 +311,7 @@ export default function EditStructuredSummary({ meetingId, draftSummary, setDraf
           className={`px-4 py-2 rounded-lg shadow text-white ${
             loading
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#4F39F6] hover:bg-[#432DD7]"
+              : "text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-sm border-transparent"
           }`}
         >
           {loading ? "Updating..." : "Update AI Insight"}

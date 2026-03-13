@@ -371,21 +371,25 @@ const CreateMeetingModal = ({
                       className="flex-1 border border-gray-300 rounded-md px-2.5 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500"
                     />
 
-                    <button
-                      type="button"
-                      onClick={selectAllMembers}
-                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
-                    >
-                      All
-                    </button>
+                    
+                  </div>
 
+                  <div className="flex items-center justify-end gap-2 mb-2">
                     <button
-                      type="button"
-                      onClick={deselectAllMembers}
-                      className="text-xs font-medium text-gray-500 hover:text-gray-700"
-                    >
-                      None
-                    </button>
+                        type="button"
+                        onClick={selectAllMembers}
+                        className="text-sm text-blue-600 hover:underline font-medium"
+                      >
+                        Select All
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={deselectAllMembers}
+                        className="text-sm text-red-600 hover:underline font-medium"
+                      >
+                        Deselect All
+                      </button>
                   </div>
 
                   {/* List */}
@@ -432,6 +436,11 @@ const CreateMeetingModal = ({
                       </>
                     )}
                   </div>
+
+                  {/* <p className="text-xs text-indigo-600 font-medium mt-1.5">
+                    {selectedMembers.length} member
+                    {selectedMembers.length !== 1 ? "s" : ""} selected
+                  </p> */}
 
                   {selectedMembers.length > 0 && (
                     <p className="text-xs text-indigo-600 font-medium mt-1.5">

@@ -988,7 +988,7 @@ export default function MeetingDetails() {
                       {hasTranscript() ? 'Upload & Re-transcribe' : 'Upload & Transcribe'}
                     </button>
 
-                    {!(transcribing || isTranscriptionOngoing) && (
+                    {hasTranscript() && !(transcribing || isTranscriptionOngoing)&& (
 
                       <button
                         onClick={() => setShowEditModal(true)}
@@ -1045,7 +1045,7 @@ export default function MeetingDetails() {
                     )}
                   </button>
 
-                  {!(transcribing || isTranscriptionOngoing) && (
+                  {hasTranscript() && !(transcribing || isTranscriptionOngoing) && (
 
                     <button
                       onClick={() => setShowEditModal(true)}
@@ -1056,48 +1056,8 @@ export default function MeetingDetails() {
                       </svg>
                       Edit Speakers
                     </button>
-                    // !speakersUpdated ? (
-                    //   <button
-                    //     onClick={() => setShowEditModal(true)}
-                    //     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    //   >
-                    //     <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                    //     </svg>
-                    //     Edit Speakers
-                    //   </button>
-                    // ) : (
-                    //   <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
-                    //     <svg className="-ml-1 mr-1 h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    //     </svg>
-                    //     Speakers Updated
-                    //   </span>
-                    // )
+                    
                   )}
-
-                  {/* <button
-                    onClick={fetchTranscript}
-                    disabled={transcriptLoading || isTranscriptionOngoing || (autoTranscribed && !userConfirmed)}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {transcriptLoading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Loading...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Refresh Transcript
-                      </>
-                    )}
-                  </button> */}
                 </div>
               )}
             </div>
@@ -1232,25 +1192,37 @@ export default function MeetingDetails() {
                           )}
 
                           <button
+                            onClick={() => {
+                              if (isEditingAiInsight) {
+                                setIsEditingAiInsight(false);
+                              } else {
+                                setDraftSummary(_.cloneDeep(meeting_insights?.structured_summary || {}));
+                                setIsEditingAiInsight(true);
+                              }
+                            }}
+                            className={`inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border focus:outline-none transition
+                              ${
+                                isEditingAiInsight
+                                  ? "text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] shadow-sm border-transparent"
+                                  : "text-gray-700 border-gray-300 hover:bg-gray-100"
+                              }
+                            `}
+                          >
+                            {isEditingAiInsight ? "Cancel Editing" : "Edit"}
+                          </button>
+
+                          <button
                             onClick={() =>
                               generateMeetingPDF(meeting, meeting_insights, speaker_summaries)
                             }
-                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
                           >
                             <FileDown className="w-4 h-4" />
                             <span className="hidden xs:inline">Download PDF</span>
                             <span className="xs:hidden">PDF</span>
                           </button>
 
-                          <button
-                            onClick={() => {
-                              setDraftSummary(_.cloneDeep(meeting_insights?.structured_summary || {}));
-                              setIsEditingAiInsight(true);
-                            }}
-                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
-                          >
-                            Edit
-                          </button>
+                          
 
                           <button
                             onClick={() => {
@@ -1658,12 +1630,24 @@ export default function MeetingDetails() {
                 )}
 
                 {/* --- Meeting Sentiment --- */}
-                {activeTab === "meeting_sentiment" &&
-                  meeting_sentiment_summary &&
-                  Array.isArray(transcript) && (
-                    <div>
-                      <SentimentSummaryTable summary={meeting_sentiment_summary} />
-                    </div>
+                {activeTab === "meeting_sentiment" && (
+                  <>
+                    {meeting_sentiment_summary ? (
+                      <div className="mb-3">
+
+                        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                          Meeting Sentiment
+                        </h3>
+
+                        <SentimentSummaryTable summary={meeting_sentiment_summary} />
+
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic mt-4">
+                        No sentiment summary available.
+                      </p>
+                    )}
+                  </>
                 )}
 
               </motion.div>
