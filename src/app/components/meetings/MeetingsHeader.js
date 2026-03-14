@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 const MeetingsHeader = ({ organizationId, orgName }) => {
@@ -38,6 +39,17 @@ const MeetingsHeader = ({ organizationId, orgName }) => {
               </>
             ) : (
               <>
+
+                <div className="mb-4">
+                  <Link
+                    href={`/organizations`}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+                  >
+                    <ArrowLeft size={16} />
+                    Back to Dashboard
+                  </Link>
+                </div>
+
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug max-w-full break-words">
                   <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
                     Welcome to {orgName}

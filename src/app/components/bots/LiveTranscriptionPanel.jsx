@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { Mic, Loader2, Building2 } from "lucide-react";
+import { Mic, Loader2, Building2, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 export default function LiveTranscriptionPanel({ botId, botStatus, onLeave, meeting, orgName, orgId }) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -54,6 +55,16 @@ export default function LiveTranscriptionPanel({ botId, botStatus, onLeave, meet
     <div className="bg-white border mt-20 border-gray-200 rounded-2xl shadow-sm p-6 min-h-[300px] flex flex-col">
       {/* Meeting Header */}
       <div className="mb-6">
+        <div className="mb-4">
+          <Link
+            href={`/nous-bot/meetings/${orgId}`}
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+          >
+            <ArrowLeft size={16} />
+            Back to Meetings
+          </Link>
+        </div>
+
         {/* Organization */}
         <div className="flex items-center gap-2 text-gray-500 mb-1">
           <Building2 size={14} className="text-gray-400" />

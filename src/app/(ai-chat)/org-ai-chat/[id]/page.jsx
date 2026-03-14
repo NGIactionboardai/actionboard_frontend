@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Search, CheckSquare, Square, Building2, Info } from 'lucide-react';
+import { Send, Bot, User, Search, CheckSquare, Square, Building2, Info, ArrowLeft } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Trash2 } from "lucide-react";
 import ClearChatModal from '@/app/components/ai-chat/ClearChatModal';
+import Link from 'next/link';
 
 
 
@@ -438,6 +439,15 @@ export default function AIChatPage() {
       {/* Sidebar for larger screens */}
       <div className="hidden md:flex w-72 flex-col border-r border-gray-200 bg-white shadow-sm min-h-0">
         <div className="p-5 border-b border-gray-100">
+          <div className="mb-4">
+            <Link
+              href={`/meetings/${orgId}`}
+              className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+            >
+              <ArrowLeft size={16} />
+              Back to Org Home
+            </Link>
+          </div>
           <h2 className="text-lg font-semibold text-gray-800 mb-3">Meetings</h2>
 
           {/* Search */}

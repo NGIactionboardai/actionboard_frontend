@@ -229,12 +229,19 @@ export default function BotMeetingsPage() {
 
         {/* Header */}
         <div className="mb-6">
-        {/* Organization */}
-        <div className="flex items-center gap-2  text-gray-500 mb-1">
-          <Building2 size={14} className="text-gray-400" />
-          <span className="font-medium text-lg">{orgName}</span>
-          <span className="opacity-60 text-sm">• {orgId}</span>
-        </div>
+
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug max-w-full break-words">
+            <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
+              AI Notetaker For {orgName}
+            </span>
+          </h2>
+
+          {/* Organization */}
+          <div className="flex items-center gap-2  text-gray-500 mb-1">
+            <Building2 size={14} className="text-gray-400" />
+            <span className="font-medium text-lg">{orgName}</span>
+            <span className="opacity-60 text-sm">• {orgId}</span>
+          </div>
 
         </div>
 
