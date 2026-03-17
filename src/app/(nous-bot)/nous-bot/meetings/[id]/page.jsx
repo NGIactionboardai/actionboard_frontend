@@ -220,7 +220,7 @@ export default function BotMeetingsPage() {
         <div className="mb-4">
           <Link
             href={`/meetings/${orgId}`}
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+            className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-900 transition"
           >
             <ArrowLeft size={16} />
             Back to Org Home

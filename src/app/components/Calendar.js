@@ -875,7 +875,7 @@ export default function Calendar() {
                         router.push("/dashboard");
                       }
                     }}
-                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                    className="flex items-center gap-1 text-sm text-blue-500 hover:text-blue-900 transition-colors"
                   >
                     <ChevronLeft size={16} />
                     Back
