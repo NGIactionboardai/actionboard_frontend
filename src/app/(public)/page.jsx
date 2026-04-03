@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 
 import NewLandingPage from '../components/NewLandingPage';
 import { selectIsAuthenticated } from '@/redux/auth/authSlices';
+import LandingPage from '../components/landing/LandingPage';
 
 // Main component that conditionally renders based on authentication
 export default function ConditionalPage() {
@@ -33,5 +34,6 @@ export default function ConditionalPage() {
   }
 
   // If not authenticated, show landing page
-  return <NewLandingPage />;
+  // return <NewLandingPage />;
+  return <LandingPage />;
 }
