@@ -1,12 +1,15 @@
+// src/app/(nous-bot)/nous-bot/meetings/[id]/page.jsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import { Plus, Link2, Play, Square, Type, Building2, ArrowLeft } from "lucide-react";
+import { Plus, Link2, Play, Square, Type, Building2, ArrowLeft, Crown } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
+import { useFeature } from "@/app/hooks/useFeature";
+import UpgradeModal from "@/app/components/billing/UpgradeModal";
 
 export default function BotMeetingsPage() {
   const { id: orgId } = useParams();
@@ -31,6 +34,36 @@ export default function BotMeetingsPage() {
   const [zoomMeetings, setZoomMeetings] = useState([]);
   const [confirmModal, setConfirmModal] = useState(null);
   const [copiedMeetingId, setCopiedMeetingId] = useState(null);
+
+
+  // billing
+  const aiNotetaker = useFeature("ai_notetaker");
+
+  const [upgradeConfig, setUpgradeConfig] = useState(null);
+
+  const openUpgrade = (type) => {
+    setUpgradeConfig({
+      type,
+      featureKey: "ai_notetaker",
+    });
+  };
+
+  const closeUpgrade = () => setUpgradeConfig(null);
+
+
+  const handleFeatureGate = () => {
+    if (!aiNotetaker.enabled) {
+      openUpgrade("disabled");
+      return false;
+    }
+  
+    if (!aiNotetaker.canUse) {
+      openUpgrade("limit");
+      return false;
+    }
+  
+    return true;
+  };
 
   /* -----------------------------
    * Fetch bot meetings
@@ -249,11 +282,95 @@ export default function BotMeetingsPage() {
 
           <div>
 
+            {/* 💎 Billing Awareness Block */}
+            <div className="mb-6 relative overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-r from-[#0A0DC4]/10 to-[#8B0782]/10 p-6">
+
+                {/* 👑 Crown (only if locked) */}
+                {!aiNotetaker.enabled && (
+                  <div className="absolute top-3 right-3">
+                    <div className="bg-yellow-400 text-white rounded-full p-2 shadow-lg">
+                      <Crown className="w-4 h-4" />
+                    </div>
+                  </div>
+                )}
+
+                {/* 🔥 Title */}
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {!aiNotetaker.enabled
+                    ? "Unlock AI Notetaker"
+                    : "AI Notetaker Usage"}
+                </h3>
+
+                {/* 🔥 Description */}
+                <p className="text-sm text-gray-600 mt-1 max-w-md">
+                  {!aiNotetaker.enabled
+                    ? "Automatically join meetings, record conversations, and generate transcripts with AI."
+                    : "Track your usage and stay within your plan limits."}
+                </p>
+
+                {/* 📊 Usage (only if enabled) */}
+                {aiNotetaker.enabled && aiNotetaker.limit && (
+                  <div className="mt-4">
+
+                    {/* Progress bar */}
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] h-2 rounded-full transition-all"
+                        style={{
+                          width: `${(aiNotetaker.used / aiNotetaker.limit) * 100}%`,
+                        }}
+                      />
+                    </div>
+
+                    {/* Usage text */}
+                    <div className="flex justify-between text-xs text-gray-500 mt-2">
+                      <span>
+                        {aiNotetaker.used} / {aiNotetaker.limit} minutes used
+                      </span>
+
+                      <span>
+                        {aiNotetaker.remaining} left
+                      </span>
+                    </div>
+
+                    {/* ⚠️ Warning */}
+                    {aiNotetaker.remaining <= 10 && (
+                      <div className="text-xs text-orange-500 mt-2 font-medium">
+                        ⚠️ You're running low on minutes
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 🚀 CTA */}
+                {!aiNotetaker.enabled && (
+                  <button
+                    onClick={() => window.location.href = "/pricing"}
+                    className="mt-4 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90"
+                  >
+                    Upgrade Plan
+                  </button>
+                )}
+
+                {/* ⚠️ Upgrade CTA for low usage */}
+                {aiNotetaker.enabled && aiNotetaker.remaining <= 10 && (
+                  <button
+                    onClick={() => window.location.href = "/pricing"}
+                    className="mt-3 text-xs bg-orange-500 text-white px-4 py-1.5 rounded-md hover:bg-orange-600"
+                  >
+                    Upgrade for More Minutes
+                  </button>
+                )}
+
+            </div>
+
             {/* Join Meeting Card */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-10"
+              className={`bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-10 transition
+                ${!aiNotetaker.enabled ? "opacity-50" : ""}
+              `}
             >
               <h2 className="text-sm font-medium text-gray-700 mb-4 flex items-center gap-2">
                 <Link2 size={16} /> Join a meeting
@@ -284,14 +401,39 @@ export default function BotMeetingsPage() {
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-300 outline-none focus:ring-2 focus:ring-[#8B0782]/30"
                 />
 
-                <button
-                  onClick={handleJoin}
-                  disabled={joining}
-                  className="w-full md:w-auto bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white px-6 py-2.5 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50"
-                >
-                  <Plus size={16} />
-                  {joining ? "Joining..." : "Join meeting"}
-                </button>
+                <div className="flex w-full md:w-auto">
+                  <div className="relative inline-block w-full md:w-auto">
+
+                    {/* 👑 Crown */}
+                    {!aiNotetaker.enabled && (
+                      <div className="absolute -top-2 -right-2 z-10">
+                        <div className="bg-yellow-400 text-white rounded-full p-1 shadow-md">
+                          <Crown className="w-3 h-3" />
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        if (!handleFeatureGate()) return;
+                        handleJoin();
+                      }}
+                      disabled={joining}
+                      className={`w-full md:w-auto px-6 py-2.5 rounded-xl flex items-center justify-center gap-2 text-white transition-all
+                        bg-gradient-to-r from-[#0A0DC4] to-[#8B0782]
+                        ${aiNotetaker.canUse
+                          ? "hover:from-[#080aa8] hover:to-[#6d0668]"
+                          : "opacity-50 cursor-not-allowed"}
+                        ${joining ? "opacity-60 cursor-wait" : ""}
+                      `}
+                    >
+                      <Plus size={16} />
+                      {joining ? "Joining..." : "Join meeting"}
+                    </button>
+
+                  </div>
+                </div>
+
               </div>
             </motion.div>
 
@@ -517,6 +659,15 @@ export default function BotMeetingsPage() {
               </div>
             </div>
           </div>
+        )}
+
+
+        {upgradeConfig && (
+          <UpgradeModal
+            type={upgradeConfig.type}
+            featureKey="ai_notetaker"
+            onClose={closeUpgrade}
+          />
         )}
     </div>
   );

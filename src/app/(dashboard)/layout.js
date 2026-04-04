@@ -1,6 +1,7 @@
-// src/app/(dashboard)/layout.js
+"use client";
+
 import Navbar from '@/app/components/layout/Navbar';
-import ProtectedRoute from '@/app/components/ProtectedRoute';
+import ProtectedRoute from '../components/ProtectedRoute';
 import NewNavbar from '../components/layout/NewNavbar';
 
 export default function DashboardLayout({ children }) {

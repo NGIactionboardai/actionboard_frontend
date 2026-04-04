@@ -6,6 +6,7 @@ import authReducer from '../redux/auth/authSlices';
 import organizationReducer from '../redux/auth/organizationSlice';
 import meetingReducer from '../redux/auth/organizationSlice';
 import zoomSlice from '../redux/auth/zoomSlice';
+import billingReducer from "../redux/billing/billingSlice";
 
 // Persist config for zoom slice
 const zoomPersistConfig = {
@@ -45,7 +46,8 @@ const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
   organization: organizationReducer,
   meeting: meetingReducer,
-  zoom: persistReducer(zoomPersistConfig, zoomSlice)
+  zoom: persistReducer(zoomPersistConfig, zoomSlice),
+  billing: billingReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

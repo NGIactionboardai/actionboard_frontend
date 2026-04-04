@@ -32,6 +32,7 @@ import { Plus, SlidersHorizontal, X } from 'lucide-react';
 import MeetingsToolbarMobile from '@/app/components/meetings/MeetingsToolbarMobile';
 import DeleteMeetingModal from '@/app/components/meetings/DeleteMeetingModal';
 import EditMeetingModal from '@/app/components/EditMeetingModal';
+import UpgradeModal from '@/app/components/billing/UpgradeModal';
 
 export default function Meetings() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -53,6 +54,8 @@ export default function Meetings() {
   const [nextUrl, setNextUrl] = useState(null);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+
+  const [upgradeConfig, setUpgradeConfig] = useState(null);
   
 
 
@@ -181,6 +184,7 @@ export default function Meetings() {
           organizationId={organizationId}
           onZoomConnectionClick={handleZoomConnectionClick}
           onCreateMeetingClick={handleCreateMeetingClick}
+          setUpgradeConfig={setUpgradeConfig}
           isZoomConnected={isZoomConnected}
           orgName={orgName}
         />
@@ -190,23 +194,6 @@ export default function Meetings() {
       <main className="flex-1 px-4 py-6 w-full max-w-[95%] md:max-w-4xl mx-auto">
         {/* Header with hamburger on mobile */}
         <div className="flex items-center justify-between md:justify-start mb-4">
-
-        {/* <button
-          onClick={() => setIsSidebarOpen(prev => !prev)}
-          className="xl:hidden fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-4 py-3 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          {isSidebarOpen ? (
-            <>
-              <X className="w-5 h-5" />
-              <span className="text-sm font-medium">Close</span>
-            </>
-          ) : (
-            <>
-              <Plus className="w-5 h-5" />
-              <span className="text-sm font-medium">Create Meeting</span>
-            </>
-          )}
-        </button> */}
 
 
           <MeetingsHeader
@@ -221,6 +208,7 @@ export default function Meetings() {
           <MeetingsToolbarMobile
               organizationId={organizationId}
               onCreateMeetingClick={handleCreateMeetingClick}
+              setUpgradeConfig={setUpgradeConfig}
           />
 
         <AlertMessages
@@ -333,6 +321,14 @@ export default function Meetings() {
             isOpen={isDeleteModalOpen}
             onClose={() => setIsDeleteModalOpen(false)}
             meeting={selectedMeeting}
+          />
+        )}
+
+        {upgradeConfig && (
+          <UpgradeModal
+            type={upgradeConfig.type}
+            featureKey={upgradeConfig.featureKey}
+            onClose={() => setUpgradeConfig(null)}
           />
         )}
       </main>

@@ -1,9 +1,10 @@
+// src/app/(ai-chat)/org-ai-chat/[id]/page.jsx
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Search, CheckSquare, Square, Building2, Info, ArrowLeft } from 'lucide-react';
+import { Send, Bot, User, Search, CheckSquare, Square, Building2, Info, ArrowLeft, Crown } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -11,7 +12,8 @@ import remarkGfm from 'remark-gfm';
 import { Trash2 } from "lucide-react";
 import ClearChatModal from '@/app/components/ai-chat/ClearChatModal';
 import Link from 'next/link';
-
+import { useFeature } from "@/app/hooks/useFeature";
+import UpgradeModal from "@/app/components/billing/UpgradeModal";
 
 
 
@@ -43,12 +45,29 @@ export default function AIChatPage() {
   const [isClearing, setIsClearing] = useState(false);
 
 
+  // billing
+  const [upgradeConfig, setUpgradeConfig] = useState(null);
+
+  const aiAssistant = useFeature("ai_assistant");
+
+
+  const openUpgrade = (type) => {
+    setUpgradeConfig({
+      type,
+      featureKey: "ai_assistant",
+    });
+  };
+
+const closeUpgrade = () => setUpgradeConfig(null);
+
+
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const MEETINGS_API = `${API_BASE_URL}/ai-assistant/meetings/${orgId}/`;
   const CONVERSATION_API = `${API_BASE_URL}/ai-assistant/organisations/${orgId}/conversation/`;
   // Assumption: chat POST endpoint. Change if your backend uses a different route.
   const CHAT_API = `${API_BASE_URL}/ai-assistant/query/`;
+
 
   // const chatEndRef = useRef(null);
 
@@ -288,6 +307,22 @@ export default function AIChatPage() {
       toast.error('Please select at least one meeting before sending your query.');
       return;
     }
+
+    // 🔥 BILLING ENFORCEMENT
+    if (!aiAssistant.enabled) {
+      openUpgrade("disabled");
+      return;
+    }
+
+    if (!aiAssistant.canUse) {
+      openUpgrade("limit");
+      return;
+    }
+
+    // 🔥 SMART WARNING
+    if (aiAssistant.remaining !== null && aiAssistant.remaining <= 5) {
+      toast("⚠️ You're running low on AI queries");
+    }
   
     const text = (textOverride ?? input).trim();
     if (!text) return;
@@ -337,6 +372,11 @@ export default function AIChatPage() {
       ]);
     } catch (err) {
       console.error('Chat API failed', err);
+
+      if (err.response?.data?.error === "usage_exceeded") {
+        openUpgrade("limit");
+        return;
+      }
   
       const errorMessage =
         err?.response?.data?.detail ||
@@ -450,6 +490,63 @@ export default function AIChatPage() {
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mb-3">Meetings</h2>
 
+          <div className="mt-3 mb-3 space-y-2">
+
+            {/* 🚀 Upgrade CTA */}
+            {!aiAssistant.enabled && (
+              <div className="relative bg-gradient-to-r from-[#0A0DC4]/10 to-[#8B0782]/10 border border-purple-200 rounded-xl p-3">
+
+                {/* Crown */}
+                <div className="absolute -top-2 -right-2">
+                  <div className="bg-yellow-400 text-white rounded-full p-1 shadow-md">
+                    <Crown className="w-3 h-3" />
+                  </div>
+                </div>
+
+                <p className="text-sm font-medium text-gray-800">
+                  Unlock AI Assistant
+                </p>
+
+                <p className="text-xs text-gray-600 mt-1">
+                  Get insights, summaries, and answers from your meetings.
+                </p>
+
+                <button
+                  onClick={() => window.location.href = "/pricing"}
+                  className="mt-2 w-full text-xs bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white py-1.5 rounded-lg hover:opacity-90 transition"
+                >
+                  Upgrade Plan
+                </button>
+              </div>
+            )}
+
+            {/* ⚠️ Limit Warning */}
+            {aiAssistant.enabled && aiAssistant.limit && aiAssistant.remaining <= 5 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <p className="text-xs text-amber-700 font-medium">
+                  ⚠️ Only {aiAssistant.remaining} queries left
+                </p>
+
+                <button
+                  onClick={() => window.location.href = "/pricing"}
+                  className="mt-2 w-full text-xs bg-amber-500 text-white py-1.5 rounded-lg hover:bg-amber-600 transition"
+                >
+                  Upgrade for More
+                </button>
+              </div>
+            )}
+
+            {/* ✅ Usage Info */}
+            {aiAssistant.enabled && aiAssistant.limit && aiAssistant.remaining > 5 && (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                <p className="text-xs text-gray-600">
+                  {aiAssistant.used} / {aiAssistant.limit} queries used
+                </p>
+              </div>
+            )}
+
+          </div>
+
           {/* Search */}
           <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1 mb-3">
             <Search className="w-4 h-4 text-gray-500" />
@@ -461,6 +558,7 @@ export default function AIChatPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+
 
           {/* Note: Selection Limit */}
           <div className="space-y-2 mt-3">
@@ -644,38 +742,73 @@ export default function AIChatPage() {
             <div ref={chatEndRef} />
           </div>
 
+          {aiAssistant.limit && (
+            <div className="px-1 pb-1 text-xs text-gray-500 flex justify-between">
+              <span>
+                {aiAssistant.used} / {aiAssistant.limit} queries used
+              </span>
+
+              {aiAssistant.remaining <= 5 && (
+                <span className="text-orange-500 font-medium">
+                  Low usage
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Input */}
-          <div className="border-t border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4 shadow-[0_-2px_6px_rgba(0,0,0,0.05)] flex flex-col gap-3">
-            <div className="flex items-center bg-gray-100 rounded-xl p-2">
+          <div className="border-t border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4 shadow-[0_-2px_6px_rgba(0,0,0,0.05)] flex flex-row gap-3">
+            <div className="flex w-[90%] items-center bg-gray-100 rounded-xl p-2">
               <input
                 type="text"
                 disabled={selectedMeetings.length === 0 }
-                // placeholder={
-                //   selectedMeetings.length === 0
-                //     ? 'Select meetings first...'
-                //     : quickStartQuestions.length === 0
-                //       ? 'Generating quick questions...'
-                //       : `Ask about ${selectedMeetings.length} meeting(s)...`
-                // }
 
                 placeholder={
                   selectedMeetings.length === 0
                     ? 'Select meetings first...'
+                    : !aiAssistant.enabled
+                    ? 'Upgrade to use AI Assistant'
+                    : !aiAssistant.canUse
+                    ? 'Limit reached — upgrade to continue'
                     : `Ask about ${selectedMeetings.length} meeting(s)...`
                 }
+
                 className="flex-1 px-3 py-2 outline-none text-sm text-gray-800 bg-transparent"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               />
-              <button
-                onClick={() => handleSend()}
-                disabled={loadingReply}
-                className="ml-2 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-white rounded-lg px-4 py-2 text-sm flex items-center gap-1 transition disabled:opacity-60"
-              >
-                <Send size={16} />
-                {loadingReply ? 'Processing...' : 'Send'}
-              </button>
+
+              
+              
+            </div>
+            <div className="flex justify-end w-[10%]">
+              <div className="relative inline-block">
+
+                {/* Crown */}
+                {!aiAssistant.enabled && (
+                  <div className="absolute -top-2 -right-2 z-10">
+                    <div className="bg-yellow-400 text-white rounded-full p-1 shadow-md ring-2 ring-white transition-transform group-hover:scale-110">
+                      <Crown className="w-3 h-3" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Button */}
+                <button
+                  onClick={() => handleSend()}
+                  disabled={loadingReply}
+                  className={`bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white rounded-lg px-4 py-2 text-sm flex items-center gap-1 transition disabled:opacity-60
+                    ${aiAssistant.canUse
+                      ? "hover:from-[#080aa8] hover:to-[#6d0668]"
+                      : "opacity-50"}
+                  `}
+                >
+                  <Send size={16} />
+                  {loadingReply ? 'Processing...' : 'Send'}
+                </button>
+
+              </div>
             </div>
           </div>
         </div>
@@ -752,6 +885,14 @@ export default function AIChatPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {upgradeConfig && (
+        <UpgradeModal
+          type={upgradeConfig.type}
+          featureKey="ai_assistant"
+          onClose={closeUpgrade}
+        />
       )}
 
     </div>

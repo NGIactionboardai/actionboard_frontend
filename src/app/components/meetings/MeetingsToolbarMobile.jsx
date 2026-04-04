@@ -11,10 +11,12 @@ import {
 } from '@/redux/auth/zoomSlice';
 import OrgSwitcher from './OrgSwitcher';
 import { ZoomConnectionStatus } from '../ZoomConfig';
-import { Video, MessageSquare, CalendarDays, Users, Settings, BotIcon } from "lucide-react";
+import { Video, MessageSquare, CalendarDays, Users, Settings, BotIcon, Crown } from "lucide-react";
+import { useFeature } from "@/app/hooks/useFeature";
+import UpgradeModal from '../billing/UpgradeModal';
 
 
-export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingClick }) {
+export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingClick, setUpgradeConfig }) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const dispatch = useDispatch();
@@ -23,6 +25,34 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
   const [organizations, setOrganizations] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(organizationId);
   const [loading, setLoading] = useState(true);
+
+  // billing
+
+  const aiNotetaker = useFeature("ai_notetaker");
+  const aiAssistant = useFeature("ai_assistant");
+
+  const handleFeatureGate = (feature, key) => {
+    if (!feature.enabled) {
+      openUpgrade("disabled", key);
+      return false;
+    }
+  
+    if (!feature.canUse) {
+      openUpgrade("limit", key);
+      return false;
+    }
+  
+    return true;
+  };
+
+
+  const openUpgrade = (type, featureKey) => {
+    setUpgradeConfig({
+      type,        // "disabled" | "limit"
+      featureKey,  // "ai_assistant", etc
+    });
+  };
+  
 
   useEffect(() => {
     const fetchOrgs = async () => {
@@ -92,34 +122,60 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
         </button>
 
         {/* AI Note Taker */}
-        <button
-          onClick={() => (window.location.href = `/nous-bot/meetings/${organizationId}`)}
-          disabled={!isZoomConnected}
-          className={`w-full max-w-xs mx-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
-            bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
-            ${isZoomConnected
-              ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
-              : 'opacity-50 cursor-not-allowed'}
-          `}
-        >
-          <BotIcon className="w-5 h-5" />
-          Add Bot
-        </button>
+        <div className="relative w-full">
+          {!aiNotetaker.enabled && (
+            <div className="absolute -top-2 -right-2 z-10">
+              <div className="bg-yellow-400 text-white rounded-full p-1 shadow-md">
+                <Crown className="w-3 h-3" />
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => {
+              // if (!handleFeatureGate(aiNotetaker, "ai_notetaker")) return;
+              window.location.href = `/nous-bot/meetings/${organizationId}`;
+            }}
+            disabled={!isZoomConnected}
+            className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
+              bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white cursor-pointer
+              ${aiNotetaker.canUse
+                ? "hover:from-[#080aa8] hover:to-[#6d0668]"
+                : "opacity-50"}
+            `}
+          >
+            <BotIcon className="w-5 h-5" />
+              Add Notetaker
+          </button>
+        </div>
 
         {/* AI Assistant */}
-        <button
-          onClick={() => (window.location.href = `/org-ai-chat/${organizationId}`)}
-          disabled={!isZoomConnected}
-          className={`w-full max-w-xs mx-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
-            bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
-            ${isZoomConnected
-              ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
-              : 'opacity-50 cursor-not-allowed'}
-          `}
-        >
-          <MessageSquare className="w-4 h-4" />
-          <span>AI Assistant</span>
-        </button>
+        <div className="relative w-full">
+          {!aiAssistant.enabled && (
+            <div className="absolute -top-2 -right-2 z-10">
+              <div className="bg-yellow-400 text-white rounded-full p-1 shadow-md">
+                <Crown className="w-3 h-3" />
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => {
+              // if (!handleFeatureGate(aiAssistant, "ai_assistant")) return;
+              window.location.href = `/org-ai-chat/${organizationId}`;
+            }}
+            disabled={!isZoomConnected}
+            className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
+              bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white cursor-pointer
+              ${aiAssistant.canUse
+                ? " hover:from-[#080aa8] hover:to-[#6d0668]"
+                : "opacity-50"}
+            `}
+          >
+            <MessageSquare className="w-5 h-5" />
+              AI Assistant
+          </button>
+        </div>
 
 
         {/* Org Calendar */}
@@ -160,10 +216,6 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
           <span>Meeting Platforms</span>
         </button>
       </div>
-
-
-
-
 
     </div>
   );
