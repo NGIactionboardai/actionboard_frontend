@@ -1,3 +1,5 @@
+// src/app/components/layout/NewNavbar.jsx
+
 "use client";
 
 import Link from 'next/link';
@@ -428,6 +430,7 @@ export default function NewNavbar({ variant = "default" }) {
               )}
             </button>
           </div>
+
         </div>
       </div>
       

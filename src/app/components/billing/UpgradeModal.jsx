@@ -28,7 +28,7 @@ export default function UpgradeModal({ type, featureKey, onClose }) {
 
         {/* CTA */}
         <button
-          onClick={() => window.location.href = "/pricing"}
+          onClick={() => window.location.href = "/billing/upgrade"}
           className="w-full bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white py-2 rounded-lg hover:opacity-90 transition"
         >
           Upgrade Plan

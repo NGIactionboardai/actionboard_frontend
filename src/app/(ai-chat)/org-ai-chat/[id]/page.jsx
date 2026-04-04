@@ -512,7 +512,7 @@ const closeUpgrade = () => setUpgradeConfig(null);
                 </p>
 
                 <button
-                  onClick={() => window.location.href = "/pricing"}
+                  onClick={() => window.location.href = "/billing/upgrade"}
                   className="mt-2 w-full text-xs bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white py-1.5 rounded-lg hover:opacity-90 transition"
                 >
                   Upgrade Plan
