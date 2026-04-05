@@ -1,3 +1,4 @@
+// src/app/(dashboard)/billing/upgrade/page.jsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,6 +7,19 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { fetchSubscription } from "@/redux/billing/billingSlice";
 import { ArrowLeft, Crown, Check, X } from "lucide-react";
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return null;
+
+  const date = new Date(dateStr);
+
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 
 export default function UpgradePage() {
   const router = useRouter();
@@ -17,11 +31,21 @@ export default function UpgradePage() {
   const [checkoutLoading, setCheckoutLoading] = useState(null);
   const [billingCycle, setBillingCycle] = useState("monthly");
 
+  const sub = billing.subscription;
+
+  const isExpired = sub?.is_expired;
+  const isCanceled = sub && !["active", "trialing"].includes(sub.status);
+  const expiryDate = formatDate(sub?.current_period_end);
+
+  const isActive = ["active", "trialing"].includes(sub?.status);
+
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     fetchPlans();
   }, []);
+
+  
 
   const fetchPlans = async () => {
     try {
@@ -90,6 +114,29 @@ export default function UpgradePage() {
             Unlock powerful features and scale your productivity
           </p>
         </div>
+
+        {(isExpired || isCanceled) && (
+          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm text-center">
+            {isExpired
+              ? "Your free plan has expired. Upgrade to continue using the platform."
+              : "Your subscription is inactive. Please upgrade or renew to continue."}
+          </div>
+        )}
+
+        {sub?.current_period_end && (
+          <div className="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm text-center">
+            {isExpired ? (
+              <>
+                Your plan expired on <span className="font-semibold">{expiryDate}</span>.
+              </>
+            ) : isActive ? (
+              <>
+                Your current plan will expire on{" "}
+                <span className="font-semibold">{expiryDate}</span>.
+              </>
+            ) : null}
+          </div>
+        )}
 
         {/* TOGGLE (CENTERED) */}
         <div className="flex justify-center mb-10">
@@ -209,7 +256,7 @@ export default function UpgradePage() {
                     >
                       {checkoutLoading === plan.id
                         ? "Processing..."
-                        : "Upgrade"}
+                        : isExpired || isCanceled ? "Continue" : "Upgrade"}
                     </button>
                   )}
                 </div>

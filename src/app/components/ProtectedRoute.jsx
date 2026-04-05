@@ -43,7 +43,7 @@ export default function ProtectedRoute({ children }) {
   useEffect(() => {
     // 1. Auth check
     if (!isAuthenticated && !isPublic) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
   
@@ -59,24 +59,31 @@ export default function ProtectedRoute({ children }) {
   
       // API failed → block
       if (billing.status === "failed") {
-        router.push('/pricing');
+        router.replace('/pricing');
         return;
       }
   
       const sub = billing.subscription;
-  
-      // No subscription → block
+
+      // 1. No subscription → pricing
       if (!sub || !sub.has_subscription) {
-        router.push('/pricing');
+        router.replace('/pricing');
         return;
       }
-  
-      // Not active → block
+
+      // 2. Expired → upgrade (🔥 NEW CORE LOGIC)
+      if (sub.is_expired) {
+        router.replace('/billing/upgrade');
+        return;
+      }
+
+      // 3. Not active → upgrade (covers canceled, incomplete, etc.)
       if (!["active", "trialing"].includes(sub.status)) {
-        router.push('/pricing');
+        router.replace('/billing/upgrade');
+        return;
       }
     }
-  }, [isAuthenticated, isPublic, billing.status, billing.subscription]);
+  }, [isAuthenticated, isPublic, billing.status, pathname, billing.subscription]);
 
   // Show loading while checking auth on protected routes
   if (

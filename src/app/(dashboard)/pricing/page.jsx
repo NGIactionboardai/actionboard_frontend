@@ -6,6 +6,7 @@ import { Check, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { fetchSubscription } from "@/redux/billing/billingSlice";
+import toast from "react-hot-toast";
 
 
 export default function PricingPage() {
@@ -48,24 +49,35 @@ export default function PricingPage() {
   
       // ✅ FREE PLAN FLOW
       if (res.data.type === "free") {
-        console.log("🆓 Free plan activated");
+        toast.success("Free plan activated");
   
-        // refresh billing
         await dispatch(fetchSubscription());
   
-        // redirect to dashboard
-        window.location.href = "/organizations"; // or your default page
+        setTimeout(() => {
+          window.location.href = "/organizations";
+        }, 800);
+  
         return;
       }
   
       // ✅ PAID PLAN FLOW
       if (res.data.type === "paid") {
+        toast.loading("Redirecting to secure checkout...");
+  
         window.location.href = res.data.checkout_url;
         return;
       }
   
     } catch (err) {
       console.error("Checkout failed", err);
+  
+      // 🔥 HANDLE BACKEND MESSAGE (your free cap error will show here)
+      const message =
+        err?.response?.data?.error ||
+        "Something went wrong. Please try again.";
+  
+      toast.error(message);
+  
     } finally {
       setCheckoutLoading(null);
     }
@@ -203,7 +215,7 @@ export default function PricingPage() {
                     {checkoutLoading === plan.id
                       ? "Processing..."
                       : plan.name === "Free"
-                      ? "Subscribe"
+                      ? "Get Started"
                       : "Subscribe"}
                   </button>
                 ) : (
