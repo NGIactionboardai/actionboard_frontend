@@ -86,6 +86,15 @@ export default function UpgradePage() {
     }
   };
 
+  const handleCustomerPortal = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/billing/customer-portal/`);
+      window.location.href = res.data.url;
+    } catch (err) {
+      console.error("Failed to open portal");
+    }
+  };
+
   const currentPlanId = billing.subscription?.plan?.plan_id;
 
   const sortedPlans = [...plans].sort((a, b) => a.id - b.id);
@@ -264,6 +273,19 @@ export default function UpgradePage() {
             })}
           </div>
         )}
+
+        <div className="mt-10 text-center">
+          <p className="text-sm text-gray-600 mb-3">
+            Already have a subscription? Manage billing, update payment method, or cancel anytime.
+          </p>
+
+          <button
+            onClick={handleCustomerPortal}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Manage Subscription
+          </button>
+        </div>
       </div>
     </div>
   );

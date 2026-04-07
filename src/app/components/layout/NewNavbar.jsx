@@ -10,6 +10,7 @@ import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import axios from 'axios';
 import { getUserOrganizations, selectUserOrganizations } from '@/redux/auth/organizationSlice';
 import { HelpCircle, ChevronDown, Menu, X, Building2, Calendar, Settings, User, LogOut } from 'lucide-react';
+import { useRouter } from "next/navigation";
 
 export default function NewNavbar({ variant = "default" }) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -25,6 +26,7 @@ export default function NewNavbar({ variant = "default" }) {
   const orgRef = useRef(null);
   const [orgs, setOrgs] = useState([]);
 
+  const router = useRouter();
 
   const authToken = useSelector((state) => state.auth?.token);
 
@@ -35,6 +37,17 @@ export default function NewNavbar({ variant = "default" }) {
   const userOrganizations = useSelector(selectUserOrganizations);
 
   const dropdownRef = useRef(null);
+
+  const billing = useSelector((state) => state.billing);
+  const sub = billing.subscription;
+
+  const isFreePlan =
+    isAuthenticated &&
+    (
+      !sub ||
+      !sub.has_subscription ||
+      sub?.plan?.name === "Free"
+    );
 
   
 
@@ -289,6 +302,31 @@ export default function NewNavbar({ variant = "default" }) {
                       </div>
                     )}
                   </div>
+
+                  {isFreePlan && (
+                    <button
+                      onClick={() => router.push("/billing/upgrade")}
+                      className="relative ml-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white
+                      bg-gradient-to-r from-[#0A0DC4] to-[#8B0782]
+                      shadow-md hover:shadow-lg
+                      transition-all duration-300 transform hover:scale-105
+                      overflow-hidden group"
+                    >
+                      {/* ✨ Shine layer */}
+                      {/* <span className="absolute inset-0 bg-white/10 backdrop-blur-[2px] rounded-sm"></span> */}
+
+                      {/* ✨ Moving gloss effect */}
+                      <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500
+                        bg-gradient-to-r from-transparent via-white/30 to-transparent
+                        translate-x-[-100%] group-hover:translate-x-[100%] skew-x-[-20deg]">
+                      </span>
+
+                      {/* Content */}
+                      <span className="relative z-10">Upgrade ✨</span>
+                    </button>
+                  )}
+
+
             
                   {/* User profile dropdown */}
                   <div className="relative" ref={dropdownRef}>
@@ -465,6 +503,22 @@ export default function NewNavbar({ variant = "default" }) {
                     </p>
                   </div>
                 </div>
+
+                {isFreePlan && (
+                  <div className="mb-3">
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        window.location.href = "/billing/upgrade";
+                      }}
+                      className="w-full flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white 
+                      bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] 
+                      shadow-md transition-all duration-200"
+                    >
+                      Upgrade Plan 🚀
+                    </button>
+                  </div>
+                )}
 
                 {/* Organizations */}
                 <details className="group">

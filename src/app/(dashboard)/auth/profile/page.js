@@ -1,3 +1,4 @@
+// src/app/(dashboard)/auth/profile/page.js
 'use client';
 
 import { useState } from 'react';
@@ -10,14 +11,43 @@ import AddPasswordModal from '@/app/components/auth/AddPasswordModal';
 import EditInfoModal from '@/app/components/auth/EditInfoModal';
 import withProfileCompletionGuard from '@/app/components/withProfileCompletionGuard';
 import { useRouter } from "next/navigation";
+import axios from "axios";
+
 
 function ProfilePage() {
   const user = useSelector(selectUser);
+  const billing = useSelector((state) => state.billing);
+  const sub = billing.subscription;
+
+  const isFreePlan =
+    !sub ||
+    !sub.has_subscription ||
+    sub?.plan?.name === "Free";
+
+  const isPaidPlan =
+    sub &&
+    sub.has_subscription &&
+    sub?.plan?.name !== "Free";
   const [isAddPasswordOpen, setIsAddPasswordOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const router = useRouter();
+
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  const handleCustomerPortal = async () => {
+    try {
+      const res = await axios.post(
+        `${API_BASE}/billing/customer-portal/`,
+      );
+  
+      window.location.href = res.data.url; // ✅ correct
+    } catch (err) {
+      console.error("Portal Error:", err.response?.data || err.message);
+    }
+  };
 
 
   // Get user display name
@@ -85,7 +115,7 @@ function ProfilePage() {
             if (window.history.length > 1) {
               router.back();
             } else {
-              router.push("/dashboard");
+              router.push("/organizations");
             }
           }}
           className="absolute top-22 left-6 flex items-center gap-2 px-4 py-2 rounded-lg
@@ -283,63 +313,46 @@ function ProfilePage() {
         </div>
       </div>
 
+      {/* Billing & Subscription */}
+      <div className="bg-white mb-7 rounded-lg shadow-sm border border-gray-200">
+        <div className="px-4 py-5 sm:px-6 sm:py-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
+            Billing & Subscription
+          </h2>
 
-      {/* Security Section */}
-      {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Security & Privacy</h2>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <Lock className="w-5 h-5 text-gray-400" />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Password</p>
-                  <p className="text-xs text-gray-500">
-                    {user.has_password ? 'Last updated recently' : 'No password set yet'}
-                  </p>
-                </div>
-              </div>
+          {isFreePlan ? (
+            <>
+              <p className="text-sm text-gray-600 mb-4">
+                You are currently on the free plan. Upgrade to unlock premium features.
+              </p>
 
-              {user.has_password ? (
-                <button
-                  onClick={() => setIsChangePasswordOpen(true)}
-                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
-                >
-                  <Lock className="w-4 h-4 mr-2" />
-                  Change Password
-                </button>
-              ) : (
-                <button
-                  onClick={() => setIsAddPasswordOpen(true)}
-                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
-                >
-                  <Lock className="w-4 h-4 mr-2" />
-                  Add Password
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Two-Factor Authentication</p>
-                  <p className="text-xs text-gray-500">Add an extra layer of security</p>
-                </div>
-              </div>
-              <Link
-                href="/security/2fa"
-                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-200"
+              <button
+                onClick={() => router.push("/billing/upgrade")}
+                className="w-full sm:w-auto bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white px-4 py-2 rounded-lg hover:opacity-90"
               >
-                Setup
-              </Link>
-            </div>
-          </div>
+                Upgrade Plan
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-gray-600 mb-4">
+                Update your payment method, download invoices, or cancel your subscription.
+              </p>
+
+              <button
+                onClick={handleCustomerPortal}
+                className="w-full sm:w-auto bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white px-4 py-2 rounded-lg hover:opacity-90"
+              >
+                Manage Subscription
+              </button>
+
+              <p className="text-xs text-gray-500 mt-2">
+                You’ll be redirected to our secure billing partner (Stripe).
+              </p>
+            </>
+          )}
         </div>
-      </div> */}
+      </div>
 
       <ChangePasswordModal
         isOpen={isChangePasswordOpen}
