@@ -75,7 +75,7 @@ export default function OtpVerification() {
         sessionStorage.removeItem('pendingVerificationEmail');
       }
       // Registration and verification complete
-      router.push('/');
+      router.push('/pricing');
     }
   }, [auth.isAuthenticated, auth.user, router]);
 
