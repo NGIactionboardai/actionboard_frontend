@@ -10,6 +10,7 @@ const PUBLIC_PATHS = [
     '/',
   '/auth/login',
   '/auth/register',
+  '/auth/otp-verification',
   '/terms',
   '/privacy-policy',
   '/help',

@@ -64,12 +64,6 @@ export default function RegistrationPage() {
     { label: 'Contains special character', test: (pwd) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd) }
   ];
 
-  // Common countries list
-  // const countries = [
-  //   'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany', 'France', 'Italy', 'Spain',
-  //   'Netherlands', 'Sweden', 'Norway', 'Denmark', 'Switzerland', 'Austria', 'Belgium', 'Japan',
-  //   'South Korea', 'Singapore', 'New Zealand', 'Ireland', 'India', 'Brazil', 'Mexico', 'Other'
-  // ];
 
   // Normalize incoming country (if user.country might be a name or a code)
   const normalizeToCode = (value) => {
@@ -100,6 +94,7 @@ export default function RegistrationPage() {
 
   // Handle successful registration - redirect to OTP page
   useEffect(() => {
+    console.log("registrationFlow:", registrationFlow);
     if (registrationFlow.email) {
       // Navigate to OTP verification page with email parameter
       router.push(`/auth/otp-verification?email=${encodeURIComponent(registrationFlow.email)}`);
