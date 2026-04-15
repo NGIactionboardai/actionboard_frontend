@@ -20,7 +20,7 @@ import {
 
 
 export default function OtpVerification() {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
   
