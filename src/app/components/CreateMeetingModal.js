@@ -1,3 +1,4 @@
+// src/app/components/CreateMeetingModal.js
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from "axios";
@@ -30,6 +31,10 @@ const CreateMeetingModal = ({
   const [nextUrl, setNextUrl] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [newMember, setNewMember] = useState({ name: "", email: "" });
+  const [addingMember, setAddingMember] = useState(false);
+  const [addError, setAddError] = useState("");
 
   const memberListRef = useRef(null);
 
@@ -147,6 +152,46 @@ const CreateMeetingModal = ({
       return true;
     } catch (err) {
       console.error("Failed to send invites", err);
+    }
+  };
+
+  const handleAddMember = async () => {
+    if (!newMember.email.trim()) {
+      setAddError("Email is required");
+      return;
+    }
+  
+    try {
+      setAddingMember(true);
+      setAddError("");
+  
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${organizationId}/members/`,
+        newMember
+      );
+  
+      const createdMember = res.data;
+  
+      // Update list instantly
+      setMembers(prev => [createdMember, ...prev]);
+  
+      // Auto-select new member
+      setSelectedMembers(prev => [...prev, createdMember.id]);
+  
+      // Reset UI
+      setNewMember({ name: "", email: "" });
+      setShowAddMember(false);
+  
+      toast.success("Member added");
+  
+    } catch (err) {
+      if (err.response?.data?.email) {
+        setAddError(err.response.data.email[0]);
+      } else {
+        setAddError("Failed to add member");
+      }
+    } finally {
+      setAddingMember(false);
     }
   };
   
@@ -370,11 +415,63 @@ const CreateMeetingModal = ({
                       onChange={(e) => setMemberSearch(e.target.value)}
                       className="flex-1 border border-gray-300 rounded-md px-2.5 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500"
                     />
-
-                    
                   </div>
+                  {showAddMember && (
+                      <div className="border border-gray-200 rounded-lg p-3 mb-3 bg-gray-50 space-y-2">
+                        
+                        <input
+                          type="text"
+                          placeholder="Name"
+                          value={newMember.name}
+                          onChange={(e) =>
+                            setNewMember(prev => ({ ...prev, name: e.target.value }))
+                          }
+                          className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm"
+                        />
+
+                        <input
+                          type="email"
+                          placeholder="Email"
+                          value={newMember.email}
+                          onChange={(e) =>
+                            setNewMember(prev => ({ ...prev, email: e.target.value }))
+                          }
+                          className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm"
+                        />
+
+                        {addError && (
+                          <p className="text-xs text-red-500">{addError}</p>
+                        )}
+
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowAddMember(false)}
+                            className="text-xs text-gray-500"
+                          >
+                            Cancel
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleAddMember}
+                            disabled={addingMember}
+                            className="text-xs bg-indigo-600 text-white px-2 py-1 rounded"
+                          >
+                            {addingMember ? "Adding..." : "Add"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                   <div className="flex items-center justify-end gap-2 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddMember(prev => !prev)}
+                      className="text-sm text-indigo-600 hover:underline font-medium"
+                    >
+                      + Add Member
+                    </button>
                     <button
                         type="button"
                         onClick={selectAllMembers}
