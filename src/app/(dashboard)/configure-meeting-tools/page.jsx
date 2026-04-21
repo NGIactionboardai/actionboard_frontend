@@ -210,6 +210,7 @@ function ConfigureMeetingToolsPage() {
         isOpen={isZoomConnectionModalOpen}
         onClose={() => setIsZoomConnectionModalOpen(false)}
       />
+      <JiraConfig />
     </main>
   );
 }
