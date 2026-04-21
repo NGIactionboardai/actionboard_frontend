@@ -8,6 +8,7 @@ import { selectZoomIsConnected, selectZoomSuccessMessage, setShowConnectionModal
 import { selectJiraIsConnected, setShowJiraConnectionModal, setShowJiraDisconnectModal } from '@/redux/auth/jiraSlice';
 import { useMeetingsModal } from '../../hooks/useMeetings';
 import ZoomConfig from '../../components/ZoomConfig';
+import JiraConfig from '../../components/JiraConfig';
 import ZoomAccountCard from '../../components/ZoomAccountCard';
 import withProfileCompletionGuard from '../../components/withProfileCompletionGuard';
 import { ChevronLeft } from 'lucide-react';
