@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../../../redux/auth/authSlices';
 import { selectZoomIsConnected, selectZoomSuccessMessage, setShowConnectionModal, setShowDisconnectModal } from '@/redux/auth/zoomSlice';
+import { selectJiraIsConnected, setShowJiraConnectionModal, setShowJiraDisconnectModal } from '@/redux/auth/jiraSlice';
 import { useMeetingsModal } from '../../hooks/useMeetings';
 import ZoomConfig from '../../components/ZoomConfig';
 import ZoomAccountCard from '../../components/ZoomAccountCard';
@@ -17,6 +18,7 @@ function ConfigureMeetingToolsPage() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const router = useRouter();
   const isZoomConnected = useSelector(selectZoomIsConnected);
+  const isJiraConnected = useSelector(selectJiraIsConnected);
   const successMessage = useSelector(selectZoomSuccessMessage);
 
 
@@ -52,6 +54,13 @@ function ConfigureMeetingToolsPage() {
         dispatch(setShowConnectionModal(true));
       }
    };
+  const handleJiraConnectionClick = () => {
+      if (isJiraConnected) {
+        dispatch(setShowJiraDisconnectModal(true));
+      } else {
+        dispatch(setShowJiraConnectionModal(true));
+  }
+};
 
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -82,7 +91,7 @@ function ConfigureMeetingToolsPage() {
           Configure Your Meeting Platforms
         </h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 justify-items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 justify-items-center">
             {/* Zoom Card */}
             <div
                 onClick={handleZoomConnectionClick}
@@ -128,6 +137,39 @@ function ConfigureMeetingToolsPage() {
                     {isZoomConnected ? 'Connected' : 'Not Connected'}
                 </span>
             </div>
+
+          {/* Jira Card */}
+<div
+  onClick={handleJiraConnectionClick}
+  className="relative flex flex-col items-center group cursor-pointer transition-transform hover:scale-105"
+>
+  {isJiraConnected && (
+    <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center shadow-md z-10">
+      ✓
+    </div>
+  )}
+
+  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-white shadow-lg border border-gray-200 flex items-center justify-center group-hover:shadow-xl transition-all duration-300">
+    <img
+      src="https://cdn.worldvectorlogo.com/logos/jira-1.svg"
+      alt="Jira"
+      className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
+    />
+  </div>
+
+  <div className="mt-4 text-center">
+    <h2 className="text-lg font-semibold text-gray-900">Jira</h2>
+    <span
+      className={`mt-1 inline-block px-3 py-1 text-sm rounded-full font-medium ${
+        isJiraConnected
+          ? 'bg-green-100 text-green-700'
+          : 'bg-gray-200 text-gray-600'
+      }`}
+    >
+      {isJiraConnected ? 'Connected' : 'Not Connected'}
+    </span>
+  </div>
+</div>
 
             {/* Google Meet Card (disabled) */}
             <div className="flex flex-col items-center opacity-50 cursor-not-allowed group transition-transform hover:scale-105">
