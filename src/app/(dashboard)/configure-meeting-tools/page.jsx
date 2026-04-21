@@ -12,7 +12,7 @@ import JiraConfig from '../../components/JiraConfig';
 import ZoomAccountCard from '../../components/ZoomAccountCard';
 import withProfileCompletionGuard from '../../components/withProfileCompletionGuard';
 import { ChevronLeft } from 'lucide-react';
-
+import JiraWorkspaceMappings from '../../components/JiraWorkspaceMappings';
 
 function ConfigureMeetingToolsPage() {
   const dispatch = useDispatch();
