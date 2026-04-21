@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from '@/utils/axios'; // IMPORTANT: use global axios
+import axios from '@/utils/axios';
 
 // ======================
 // THUNKS
@@ -13,7 +13,11 @@ export const getJiraConnectionStatus = createAsyncThunk(
       const res = await axios.get('/api/integrations/jira/status/');
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data || 'Error fetching Jira status');
+      return rejectWithValue(
+        err.response?.data?.message ||
+          err.response?.data ||
+          'Error fetching Jira status'
+      );
     }
   }
 );
@@ -24,9 +28,19 @@ export const startJiraOAuth = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get('/api/integrations/jira/oauth/start/');
+
+      // Redirect here, not inside reducer
+      if (res.data?.auth_url) {
+        window.location.href = res.data.auth_url;
+      }
+
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data || 'Error starting OAuth');
+      return rejectWithValue(
+        err.response?.data?.message ||
+          err.response?.data ||
+          'Error starting OAuth'
+      );
     }
   }
 );
@@ -39,7 +53,11 @@ export const getJiraWorkspaceMappings = createAsyncThunk(
       const res = await axios.get('/api/integrations/jira/workspace-mappings/');
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data || 'Error fetching mappings');
+      return rejectWithValue(
+        err.response?.data?.message ||
+          err.response?.data ||
+          'Error fetching mappings'
+      );
     }
   }
 );
@@ -52,7 +70,11 @@ export const saveJiraWorkspaceMappings = createAsyncThunk(
       const res = await axios.post('/api/integrations/jira/map-workspaces/', payload);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data || 'Error saving mappings');
+      return rejectWithValue(
+        err.response?.data?.message ||
+          err.response?.data ||
+          'Error saving mappings'
+      );
     }
   }
 );
@@ -65,7 +87,11 @@ export const syncJiraMeeting = createAsyncThunk(
       const res = await axios.post('/api/integrations/jira/sync-meeting/', payload);
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data || 'Error syncing meeting');
+      return rejectWithValue(
+        err.response?.data?.message ||
+          err.response?.data ||
+          'Error syncing meeting'
+      );
     }
   }
 );
@@ -78,7 +104,11 @@ export const disconnectJira = createAsyncThunk(
       const res = await axios.post('/api/integrations/jira/disconnect/');
       return res.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data || 'Error disconnecting Jira');
+      return rejectWithValue(
+        err.response?.data?.message ||
+          err.response?.data ||
+          'Error disconnecting Jira'
+      );
     }
   }
 );
@@ -121,23 +151,40 @@ const jiraSlice = createSlice({
       state.error = null;
       state.successMessage = null;
     },
+    resetJiraState: (state) => {
+      state.isConnected = false;
+      state.siteName = null;
+      state.siteUrl = null;
+      state.workspaces = [];
+      state.jiraProjects = [];
+      state.loading = false;
+      state.error = null;
+      state.successMessage = null;
+      state.showConnectionModal = false;
+      state.showDisconnectModal = false;
+    },
   },
   extraReducers: (builder) => {
     builder
 
       // STATUS
       .addCase(getJiraConnectionStatus.fulfilled, (state, action) => {
-        state.isConnected = action.payload.connected;
+        state.isConnected = !!action.payload.connected;
 
         if (action.payload.connected) {
-          state.siteName = action.payload.site_name;
-          state.siteUrl = action.payload.site_url;
+          state.siteName = action.payload.site_name || null;
+          state.siteUrl = action.payload.site_url || null;
+        } else {
+          state.siteName = null;
+          state.siteUrl = null;
+          state.workspaces = [];
+          state.jiraProjects = [];
         }
       })
 
       // OAUTH
-      .addCase(startJiraOAuth.fulfilled, (_, action) => {
-        window.location.href = action.payload.auth_url;
+      .addCase(startJiraOAuth.fulfilled, (state) => {
+        state.successMessage = null;
       })
 
       // MAPPINGS
@@ -147,23 +194,27 @@ const jiraSlice = createSlice({
       })
 
       // SAVE MAPPINGS
-      .addCase(saveJiraWorkspaceMappings.fulfilled, (state) => {
-        state.successMessage = 'Mappings saved successfully';
+      .addCase(saveJiraWorkspaceMappings.fulfilled, (state, action) => {
+        state.successMessage =
+          action.payload?.message || 'Mappings saved successfully';
       })
 
       // SYNC
-      .addCase(syncJiraMeeting.fulfilled, (state) => {
-        state.successMessage = 'Sync triggered';
+      .addCase(syncJiraMeeting.fulfilled, (state, action) => {
+        state.successMessage = action.payload?.message || 'Sync triggered';
       })
 
       // DISCONNECT
-      .addCase(disconnectJira.fulfilled, (state) => {
+      .addCase(disconnectJira.fulfilled, (state, action) => {
         state.isConnected = false;
         state.siteName = null;
         state.siteUrl = null;
         state.workspaces = [];
         state.jiraProjects = [];
-        state.successMessage = 'Jira disconnected';
+        state.showConnectionModal = false;
+        state.showDisconnectModal = false;
+        state.successMessage =
+          action.payload?.message || 'Jira disconnected successfully';
       })
 
       // COMMON
@@ -172,6 +223,7 @@ const jiraSlice = createSlice({
         (state) => {
           state.loading = true;
           state.error = null;
+          state.successMessage = null;
         }
       )
       .addMatcher(
@@ -198,6 +250,7 @@ export const {
   setShowJiraConnectionModal,
   setShowJiraDisconnectModal,
   clearJiraMessages,
+  resetJiraState,
 } = jiraSlice.actions;
 
 // SELECTORS
@@ -209,4 +262,7 @@ export const selectJiraError = (state) => state.jira.error;
 export const selectJiraSuccessMessage = (state) => state.jira.successMessage;
 export const selectJiraSiteName = (state) => state.jira.siteName;
 export const selectJiraSiteUrl = (state) => state.jira.siteUrl;
+export const selectShowJiraConnectionModal = (state) => state.jira.showConnectionModal;
+export const selectShowJiraDisconnectModal = (state) => state.jira.showDisconnectModal;
+
 export default jiraSlice.reducer;
