@@ -205,5 +205,8 @@ export const selectJiraIsConnected = (state) => state.jira.isConnected;
 export const selectJiraProjects = (state) => state.jira.jiraProjects;
 export const selectJiraWorkspaces = (state) => state.jira.workspaces;
 export const selectJiraLoading = (state) => state.jira.loading;
-
+export const selectJiraError = (state) => state.jira.error;
+export const selectJiraSuccessMessage = (state) => state.jira.successMessage;
+export const selectJiraSiteName = (state) => state.jira.siteName;
+export const selectJiraSiteUrl = (state) => state.jira.siteUrl;
 export default jiraSlice.reducer;
