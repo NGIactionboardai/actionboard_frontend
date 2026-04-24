@@ -1,16 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from '@/utils/axios';
+import axios from 'axios';
+
 
 // ======================
 // THUNKS
 // ======================
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // 1. Check connection status
 export const getJiraConnectionStatus = createAsyncThunk(
   'jira/getStatus',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('/api/integrations/jira/status/');
+      const res = await axios.get(`${API_BASE_URL}/integrations/jira/status/`);
       return res.data;
     } catch (err) {
       return rejectWithValue(
@@ -27,7 +30,7 @@ export const startJiraOAuth = createAsyncThunk(
   'jira/startOAuth',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('/api/integrations/jira/oauth/start/');
+      const res = await axios.get(`${API_BASE_URL}/integrations/jira/oauth/start/`);
 
       // Redirect here, not inside reducer
       if (res.data?.auth_url) {
@@ -50,7 +53,7 @@ export const getJiraWorkspaceMappings = createAsyncThunk(
   'jira/getMappings',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('/api/integrations/jira/workspace-mappings/');
+      const res = await axios.get(`${API_BASE_URL}/integrations/jira/workspace-mappings/`);
       return res.data;
     } catch (err) {
       return rejectWithValue(
@@ -67,7 +70,7 @@ export const saveJiraWorkspaceMappings = createAsyncThunk(
   'jira/saveMappings',
   async (payload, { rejectWithValue }) => {
     try {
-      const res = await axios.post('/api/integrations/jira/map-workspaces/', payload);
+      const res = await axios.post(`${API_BASE_URL}/integrations/jira/map-workspaces/`, payload);
       return res.data;
     } catch (err) {
       return rejectWithValue(
@@ -84,7 +87,7 @@ export const syncJiraMeeting = createAsyncThunk(
   'jira/syncMeeting',
   async (payload, { rejectWithValue }) => {
     try {
-      const res = await axios.post('/api/integrations/jira/sync-meeting/', payload);
+      const res = await axios.post(`${API_BASE_URL}/integrations/jira/sync-meeting/`, payload);
       return res.data;
     } catch (err) {
       return rejectWithValue(
@@ -101,7 +104,7 @@ export const disconnectJira = createAsyncThunk(
   'jira/disconnect',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.post('/api/integrations/jira/disconnect/');
+      const res = await axios.post(`${API_BASE_URL}/integrations/jira/disconnect/`);
       return res.data;
     } catch (err) {
       return rejectWithValue(
