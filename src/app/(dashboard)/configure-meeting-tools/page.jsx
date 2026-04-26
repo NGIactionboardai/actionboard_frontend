@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../../../redux/auth/authSlices';
 import {
@@ -19,16 +19,14 @@ import {
 import { useMeetingsModal } from '../../hooks/useMeetings';
 import ZoomConfig from '../../components/ZoomConfig';
 import JiraConfig from '../../components/JiraConfig';
-import JiraWorkspaceMappings from '../../components/JiraWorkspaceMappings';
-import JiraManualSync from '../../components/JiraManualSync';
 import ZoomAccountCard from '../../components/ZoomAccountCard';
+import JiraAccountCard from '../../components/JiraAccountCard';
 import withProfileCompletionGuard from '../../components/withProfileCompletionGuard';
 import { ChevronLeft } from 'lucide-react';
 
 function ConfigureMeetingToolsPage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isZoomConnected = useSelector(selectZoomIsConnected);
@@ -36,49 +34,13 @@ function ConfigureMeetingToolsPage() {
   const successMessage = useSelector(selectZoomSuccessMessage);
 
   const {
-    isCreateMeetingModalOpen,
-    setIsCreateMeetingModalOpen,
     isZoomConnectionModalOpen,
     setIsZoomConnectionModalOpen,
-    handleCreateMeetingClick,
   } = useMeetingsModal(successMessage);
 
-  // Load Jira status whenever this page opens
   useEffect(() => {
     dispatch(getJiraConnectionStatus());
   }, [dispatch]);
-
-  // Handle OAuth callback query params
-  useEffect(() => {
-    const connected = searchParams.get('connected');
-    const jiraError = searchParams.get('jira');
-
-    if (connected === 'true') {
-      dispatch(getJiraConnectionStatus());
-    }
-
-    if (jiraError === 'error') {
-      console.error('Jira connection failed');
-    }
-  }, [searchParams, dispatch]);
-
-  // Optional auth guard if you want it back later
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     router.push('/auth/login');
-  //   }
-  // }, [isAuthenticated, router]);
-
-  // if (!isAuthenticated) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen">
-  //       <div className="text-center">
-  //         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-  //         <p>Checking authentication...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   const handleZoomConnectionClick = () => {
     if (isZoomConnected) {
@@ -125,15 +87,7 @@ function ConfigureMeetingToolsPage() {
           >
             {isZoomConnected && (
               <div className="absolute top-2 right-2 bg-[#00BA00] text-white rounded-full p-1 shadow-md">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+                ✓
               </div>
             )}
 
@@ -152,6 +106,7 @@ function ConfigureMeetingToolsPage() {
             <p className="mt-4 text-lg font-semibold text-blue-700 group-hover:text-blue-800">
               Zoom
             </p>
+
             <span
               className={`mt-1 inline-block px-3 py-1 text-sm rounded-full font-medium ${
                 isZoomConnected ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
@@ -167,29 +122,34 @@ function ConfigureMeetingToolsPage() {
             className="relative flex flex-col items-center group cursor-pointer transition-transform hover:scale-105"
           >
             {isJiraConnected && (
-              <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center shadow-md z-10">
+              <div className="absolute top-2 right-2 bg-[#00BA00] text-white rounded-full p-1 shadow-md">
                 ✓
               </div>
             )}
 
-            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-white shadow-lg border border-gray-200 flex items-center justify-center group-hover:shadow-xl transition-all duration-300">
+            <div
+              className={`rounded-2xl p-10 shadow-lg w-48 h-48 flex items-center justify-center transition-all duration-200 group-hover:shadow-xl ${
+                isJiraConnected ? 'border-[3px] border-[#00BA00]' : 'border-2 border-gray-300'
+              }`}
+            >
               <img
                 src="https://cdn.worldvectorlogo.com/logos/jira-1.svg"
                 alt="Jira"
-                className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
+                className="h-24 w-24 object-contain"
               />
             </div>
 
-            <div className="mt-4 text-center">
-              <h2 className="text-lg font-semibold text-gray-900">Jira</h2>
-              <span
-                className={`mt-1 inline-block px-3 py-1 text-sm rounded-full font-medium ${
-                  isJiraConnected ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
-                }`}
-              >
-                {isJiraConnected ? 'Connected' : 'Not Connected'}
-              </span>
-            </div>
+            <p className="mt-4 text-lg font-semibold text-blue-700 group-hover:text-blue-800">
+              Jira
+            </p>
+
+            <span
+              className={`mt-1 inline-block px-3 py-1 text-sm rounded-full font-medium ${
+                isJiraConnected ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
+              }`}
+            >
+              {isJiraConnected ? 'Connected' : 'Not Connected'}
+            </span>
           </div>
 
           {/* Google Meet Card */}
@@ -225,14 +185,14 @@ function ConfigureMeetingToolsPage() {
         isZoomConnected={isZoomConnected}
       />
 
+      <JiraAccountCard onDisconnect={handleJiraConnectionClick} />
+
       <ZoomConfig
         isOpen={isZoomConnectionModalOpen}
         onClose={() => setIsZoomConnectionModalOpen(false)}
       />
 
       <JiraConfig />
-      <JiraWorkspaceMappings />
-      <JiraManualSync />
     </main>
   );
 }
