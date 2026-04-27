@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../../../redux/auth/authSlices';
 import {
@@ -16,17 +16,20 @@ import {
   setShowJiraConnectionModal,
   setShowJiraDisconnectModal,
 } from '@/redux/auth/jiraSlice';
+
 import { useMeetingsModal } from '../../hooks/useMeetings';
 import ZoomConfig from '../../components/ZoomConfig';
 import JiraConfig from '../../components/JiraConfig';
+import JiraWorkspaceMappings from '../../components/JiraWorkspaceMappings';
+import JiraManualSync from '../../components/JiraManualSync';
 import ZoomAccountCard from '../../components/ZoomAccountCard';
-import JiraAccountCard from '../../components/JiraAccountCard';
 import withProfileCompletionGuard from '../../components/withProfileCompletionGuard';
 import { ChevronLeft } from 'lucide-react';
 
 function ConfigureMeetingToolsPage() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isZoomConnected = useSelector(selectZoomIsConnected);
@@ -38,9 +41,24 @@ function ConfigureMeetingToolsPage() {
     setIsZoomConnectionModalOpen,
   } = useMeetingsModal(successMessage);
 
+  // ✅ STEP 6A — Load Jira status on page load
   useEffect(() => {
     dispatch(getJiraConnectionStatus());
   }, [dispatch]);
+
+  // ✅ STEP 6B — Handle OAuth callback
+  useEffect(() => {
+    const connected = searchParams.get('connected');
+    const jiraError = searchParams.get('jira');
+
+    if (connected === 'true') {
+      dispatch(getJiraConnectionStatus());
+    }
+
+    if (jiraError === 'error') {
+      console.error('Jira integration failed');
+    }
+  }, [searchParams, dispatch]);
 
   const handleZoomConnectionClick = () => {
     if (isZoomConnected) {
@@ -60,6 +78,8 @@ function ConfigureMeetingToolsPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+
+      {/* Back Button */}
       <button
         onClick={() => {
           if (window.history.length > 1) {
@@ -80,6 +100,7 @@ function ConfigureMeetingToolsPage() {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 justify-items-center">
+
           {/* Zoom Card */}
           <div
             onClick={handleZoomConnectionClick}
@@ -91,27 +112,17 @@ function ConfigureMeetingToolsPage() {
               </div>
             )}
 
-            <div
-              className={`rounded-2xl p-10 shadow-lg w-48 h-48 flex items-center justify-center transition-all duration-200 group-hover:shadow-xl ${
-                isZoomConnected ? 'border-[3px] border-[#00BA00]' : 'border-2 border-gray-300'
-              }`}
-            >
-              <img
-                src="/meeting-tools-icons/zoom-logo.png"
-                alt="Zoom"
-                className="h-24 w-24 object-contain"
-              />
+            <div className={`rounded-2xl p-10 shadow-lg w-48 h-48 flex items-center justify-center ${
+              isZoomConnected ? 'border-[3px] border-[#00BA00]' : 'border-2 border-gray-300'
+            }`}>
+              <img src="/meeting-tools-icons/zoom-logo.png" className="h-24 w-24" />
             </div>
 
-            <p className="mt-4 text-lg font-semibold text-blue-700 group-hover:text-blue-800">
-              Zoom
-            </p>
+            <p className="mt-4 text-lg font-semibold text-blue-700">Zoom</p>
 
-            <span
-              className={`mt-1 inline-block px-3 py-1 text-sm rounded-full font-medium ${
-                isZoomConnected ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
-              }`}
-            >
+            <span className={`mt-1 px-3 py-1 text-sm rounded-full ${
+              isZoomConnected ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
+            }`}>
               {isZoomConnected ? 'Connected' : 'Not Connected'}
             </span>
           </div>
@@ -127,72 +138,40 @@ function ConfigureMeetingToolsPage() {
               </div>
             )}
 
-            <div
-              className={`rounded-2xl p-10 shadow-lg w-48 h-48 flex items-center justify-center transition-all duration-200 group-hover:shadow-xl ${
-                isJiraConnected ? 'border-[3px] border-[#00BA00]' : 'border-2 border-gray-300'
-              }`}
-            >
-              <img
-                src="https://cdn.worldvectorlogo.com/logos/jira-1.svg"
-                alt="Jira"
-                className="h-24 w-24 object-contain"
-              />
+            <div className={`rounded-2xl p-10 shadow-lg w-48 h-48 flex items-center justify-center ${
+              isJiraConnected ? 'border-[3px] border-[#00BA00]' : 'border-2 border-gray-300'
+            }`}>
+              <img src="https://cdn.worldvectorlogo.com/logos/jira-1.svg" className="h-24 w-24" />
             </div>
 
-            <p className="mt-4 text-lg font-semibold text-blue-700 group-hover:text-blue-800">
-              Jira
-            </p>
+            <p className="mt-4 text-lg font-semibold text-blue-700">Jira</p>
 
-            <span
-              className={`mt-1 inline-block px-3 py-1 text-sm rounded-full font-medium ${
-                isJiraConnected ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
-              }`}
-            >
+            <span className={`mt-1 px-3 py-1 text-sm rounded-full ${
+              isJiraConnected ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
+            }`}>
               {isJiraConnected ? 'Connected' : 'Not Connected'}
             </span>
           </div>
 
-          {/* Google Meet Card */}
-          <div className="flex flex-col items-center opacity-50 cursor-not-allowed group transition-transform hover:scale-105">
-            <div className="rounded-2xl border-2 p-10 border-gray-300 shadow-md w-48 h-48 flex items-center justify-center transition-all duration-200 group-hover:shadow-lg">
-              <img
-                src="/meeting-tools-icons/meet-logo.png"
-                alt="Google Meet"
-                className="h-24 w-24 object-contain"
-              />
-            </div>
-            <p className="mt-4 text-lg font-medium text-gray-700">Google Meet</p>
-            <p className="mt-1 text-sm text-gray-500">Coming Soon</p>
-          </div>
-
-          {/* Microsoft Teams Card */}
-          <div className="flex flex-col items-center opacity-50 cursor-not-allowed group transition-transform hover:scale-105">
-            <div className="rounded-2xl border-2 p-10 border-gray-300 shadow-md w-48 h-48 flex items-center justify-center transition-all duration-200 group-hover:shadow-lg">
-              <img
-                src="/meeting-tools-icons/teams-logo.png"
-                alt="Microsoft Teams"
-                className="h-24 w-24 object-contain"
-              />
-            </div>
-            <p className="mt-4 text-lg font-medium text-gray-700">Microsoft Teams</p>
-            <p className="mt-1 text-sm text-gray-500">Coming Soon</p>
-          </div>
         </div>
       </div>
 
+      {/* Existing Components */}
       <ZoomAccountCard
         onDisconnect={handleZoomConnectionClick}
         isZoomConnected={isZoomConnected}
       />
-
-      <JiraAccountCard onDisconnect={handleJiraConnectionClick} />
 
       <ZoomConfig
         isOpen={isZoomConnectionModalOpen}
         onClose={() => setIsZoomConnectionModalOpen(false)}
       />
 
+      {/* Jira Components */}
       <JiraConfig />
+      <JiraWorkspaceMappings />
+      <JiraManualSync />
+
     </main>
   );
 }
