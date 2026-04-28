@@ -171,18 +171,19 @@ export default function MeetingDetails() {
 
   // Fetch meeting details on component mount
   useEffect(() => {
-    // Check if we have authentication
+    dispatch(getJiraConnectionStatus());
+  }, [dispatch]);
+  
+  useEffect(() => {
     if (!authToken && !localStorage.getItem('token')) {
       setError('Please log in to view meeting details.');
       setLoading(false);
       return;
     }
-  useEffect(() => {
-  dispatch(getJiraConnectionStatus());
-}, [dispatch]);
+  
     if (meetingId) {
       fetchMeetingDetails();
-      checkTranscriptionStatus()
+      checkTranscriptionStatus();
     }
   }, [meetingId, authToken]);
 
