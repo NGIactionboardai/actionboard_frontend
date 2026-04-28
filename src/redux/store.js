@@ -6,6 +6,7 @@ import authReducer from '../redux/auth/authSlices';
 import organizationReducer from '../redux/auth/organizationSlice';
 import meetingReducer from '../redux/auth/organizationSlice';
 import zoomSlice from '../redux/auth/zoomSlice';
+import jiraReducer from '../redux/auth/jiraSlice';
 import billingReducer from "../redux/billing/billingSlice";
 
 // Persist config for zoom slice
@@ -18,28 +19,48 @@ const zoomPersistConfig = {
     'tokenExpiry', 
     'currentOrganizationId',
     'connectionStatus'
-  ], // Only persist these fields
+  ],
   blacklist: [
     'loading', 
     'error', 
     'successMessage', 
     'showConnectionModal', 
     'showDisconnectModal'
-  ] // Don't persist UI state
+  ]
+};
+
+// Persist config for jira slice
+const jiraPersistConfig = {
+  key: 'jira',
+  storage,
+  whitelist: [
+    'isConnected',
+    'siteName',
+    'siteUrl'
+  ],
+  blacklist: [
+    'loading',
+    'error',
+    'successMessage',
+    'showConnectionModal',
+    'showDisconnectModal',
+    'workspaces',
+    'jiraProjects'
+  ]
 };
 
 // Persist config for auth slice
 const authPersistConfig = {
   key: 'auth',
   storage,
-  whitelist: ['token', 'user', 'isAuthenticated'] // Only persist essential auth data
+  whitelist: ['token', 'user', 'isAuthenticated']
 };
 
 // Root persist config
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist: ['zoom', 'auth'] // We handle these separately
+  blacklist: ['zoom', 'jira', 'auth']
 };
 
 const rootReducer = combineReducers({
@@ -47,6 +68,7 @@ const rootReducer = combineReducers({
   organization: organizationReducer,
   meeting: meetingReducer,
   zoom: persistReducer(zoomPersistConfig, zoomSlice),
+  jira: persistReducer(jiraPersistConfig, jiraReducer),
   billing: billingReducer,
 });
 

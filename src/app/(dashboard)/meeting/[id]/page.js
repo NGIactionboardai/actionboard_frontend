@@ -21,7 +21,8 @@ import SendSummaryModal from '@/app/components/meeting/SendSummaryModal';
 import { motion, AnimatePresence } from "framer-motion";
 import { useFeature } from "@/app/hooks/useFeature";
 import UpgradeModal from '@/app/components/billing/UpgradeModal';
-
+import JiraManualSync from '@/app/components/JiraManualSync';
+import { getJiraConnectionStatus } from '@/redux/auth/jiraSlice';
 
 
 
@@ -170,16 +171,19 @@ export default function MeetingDetails() {
 
   // Fetch meeting details on component mount
   useEffect(() => {
-    // Check if we have authentication
+    dispatch(getJiraConnectionStatus());
+  }, [dispatch]);
+  
+  useEffect(() => {
     if (!authToken && !localStorage.getItem('token')) {
       setError('Please log in to view meeting details.');
       setLoading(false);
       return;
     }
-    
+  
     if (meetingId) {
       fetchMeetingDetails();
-      checkTranscriptionStatus()
+      checkTranscriptionStatus();
     }
   }, [meetingId, authToken]);
 
@@ -975,7 +979,10 @@ export default function MeetingDetails() {
           </dl>
         </div>
       </div>
-
+      <JiraManualSync
+  meetingId={meeting?.meeting_id || meetingId}
+  source="normal"
+/>
 
 
       {/* Action Buttons */}
