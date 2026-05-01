@@ -12,10 +12,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useSelector, useDispatch } from 'react-redux';
 
 import toast from 'react-hot-toast';
-import AddEventModal from '../modals/AddEventModal';
 import EditEventModal from '../modals/EditEventModal';
-import SearchEventsComponent from '../SearchEventsComponent';
-import EventReportsComponent from '../EventReportsComponent';
 import OrgAddEventModal from './OrgAddEventModal';
 import OrgSearchEventsComponent from './OrgSearchEventsComponent';
 import OrgEventReportsComponent from './OrgEventReportsComponent';
@@ -24,6 +21,8 @@ import axios from 'axios';
 import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ORG_COLORS } from '@/app/constants/orgColors';
 import { useRouter } from "next/navigation";
+import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
+import EventDetailsModal from '../modals/EventDetailsModal';
 
 
 
@@ -36,6 +35,7 @@ export default function OrgCalendar({ orgId }) {
 
     const dispatch = useDispatch();
     const isZoomConnected = useSelector(selectZoomIsConnected);
+    const isGoogleConnected = useSelector(selectGoogleIsConnected);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -260,6 +260,7 @@ export default function OrgCalendar({ orgId }) {
               title: event.title,
               description: event.description,
               join_url: event.meeting?.join_url || null,
+              provider: event.meeting?.provider || null,
               organization: isCurrentOrg ? orgName : 'Occupied',
               event_type: event.event_type,
               organisation_id: event.org_id,
@@ -497,6 +498,7 @@ export default function OrgCalendar({ orgId }) {
           organization: info.event.extendedProps.organization,
           isOccupiedEvent: info.event.extendedProps.isOccupiedEvent,
           join_url: info.event.extendedProps.join_url,
+          provider: info.event.extendedProps.provider,
           start: info.event.start,
           end: info.event.end,
           description: info.event.extendedProps.description,
@@ -645,160 +647,7 @@ export default function OrgCalendar({ orgId }) {
   
     return (
       <div className="flex flex-col h-screen border-t border-gray-200">
-        <Transition appear show={isEventModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setIsEventModalOpen(false)}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            {/* <div className="fixed inset-0 bg-gray-500/20 backdrop-blur-sm" /> */}
-            <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  {/* Header */}
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: selectedEvent?.color }}
-                      />
-                      <Dialog.Title
-                        as="h3"
-                        className="text-lg font-semibold leading-6 text-gray-900 flex items-center gap-2"
-                      >
-                        {selectedEvent?.title}
-                        {selectedEvent?.join_url && !selectedEvent?.isOccupiedEvent && (
-                          <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                            Zoom Meeting
-                          </span>
-                        )}
-                      </Dialog.Title>
-                    </div>
-                    <button
-                      type="button"
-                      className="text-gray-400 hover:text-gray-500"
-                      onClick={() => setIsEventModalOpen(false)}
-                    >
-                      <XMarkIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-
-                  {/* Body */}
-                  <div className="mt-6 space-y-5">
-                    {/* Organization (skip for skeleton) */}
-                    {!selectedEvent?.isOccupiedEvent && selectedEvent?.organization !== 'Personal' && (
-                      <div className="flex items-start">
-                        <div className="w-24 text-sm text-gray-500">Organization</div>
-                        <div className="text-sm text-gray-900">{selectedEvent?.organization}</div>
-                      </div>
-                    )}
-
-                    {/* When */}
-                    <div className="flex items-start">
-                      <div className="w-24 text-sm text-gray-500">When</div>
-                      <div className="text-sm text-gray-900">
-                        {selectedEvent?.start?.toLocaleString()}
-                        {selectedEvent?.end && (
-                          <>
-                            <br />
-                            to {selectedEvent.end.toLocaleString()}
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Details */}
-                    {!selectedEvent?.isOccupiedEvent && selectedEvent?.description && (
-                      <div className="flex items-start">
-                        <div className="w-24 text-sm text-gray-500">Details</div>
-                        <div className="text-sm text-gray-900">{selectedEvent.description}</div>
-                      </div>
-                    )}
-
-                    {/* Join URL */}
-                    {!selectedEvent?.isOccupiedEvent && selectedEvent?.join_url && (
-                      <div className="flex items-start">
-                        <div className="w-24 text-sm text-gray-500">Join URL</div>
-                        <div className="text-sm text-gray-900 max-w-xs truncate">
-                          <a
-                            href={selectedEvent.join_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                            title={selectedEvent.join_url}
-                          >
-                            {selectedEvent.join_url}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer buttons */}
-                  <div className="mt-8 flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      className="inline-flex justify-center rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-                      onClick={() => setIsEventModalOpen(false)}
-                    >
-                      Close
-                    </button>
-
-                    {/* Hide Edit/Delete for skeleton */}
-                    {!selectedEvent?.isOccupiedEvent && (
-                      <>
-                        <button
-                          type="button"
-                          className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                          onClick={() => {
-                            setIsEventModalOpen(false);
-                            setTimeout(() => {
-                              setEventBeingEdited(selectedEvent);
-                              setIsEditModalOpen(true);
-                            }, 100);
-                          }}
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          className="inline-flex justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                          onClick={() => {
-                            handleDelete(selectedEvent.id);
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </Dialog.Panel>
-
-
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition>
+      
 
         <div className="flex flex-1 overflow-hidden">
 
@@ -1119,6 +968,7 @@ export default function OrgCalendar({ orgId }) {
 
               <OrgAddEventModal
                 isZoomConnected={isZoomConnected}
+                isGoogleConnected={isGoogleConnected}
                 isOpen={isAddModalOpen}
                 onClose={() => {
                   setIsAddModalOpen(false);
@@ -1191,6 +1041,7 @@ export default function OrgCalendar({ orgId }) {
 
               <EditEventModal
                 isOpen={isEditModalOpen}
+                isGoogleConnected={isGoogleConnected}
                 onClose={() => {
                   setIsEditModalOpen(false);
                   setEventBeingEdited(null);
@@ -1225,6 +1076,21 @@ export default function OrgCalendar({ orgId }) {
                   setIsEditModalOpen(false);
                   setEventBeingEdited(null);
                 }}
+              />
+
+
+              <EventDetailsModal
+                isOpen={isEventModalOpen}
+                onClose={() => setIsEventModalOpen(false)}
+                selectedEvent={selectedEvent}
+                onEdit={() => {
+                  setIsEventModalOpen(false);
+                  setTimeout(() => {
+                    setEventBeingEdited(selectedEvent);
+                    setIsEditModalOpen(true);
+                  }, 100);
+                }}
+                onDelete={() => handleDelete(selectedEvent.id)}
               />
             
             </div>

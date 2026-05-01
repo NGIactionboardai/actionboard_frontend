@@ -17,13 +17,14 @@ export default function OrgAddEventModal({
   onEventCreated,
   getAuthHeaders,
   makeApiCall,
-  isZoomConnected
+  isZoomConnected,
+  isGoogleConnected
 }) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [createZoom, setCreateZoom] = useState(false);
+  const [meetingProvider, setMeetingProvider] = useState(null); 
   const [loading, setLoading] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -39,6 +40,13 @@ export default function OrgAddEventModal({
   const [eventType, setEventType] = useState('organization');
   const [selectedOrg, setSelectedOrg] = useState(orgId || "");
 
+
+  const isFormInvalid =
+    loading ||
+    !title.trim() ||
+    !description.trim() ||
+    !startHour || !startMinute || !endHour || !endMinute ||
+    (eventType === 'organization' && !selectedOrg);
 
   useEffect(() => {
     if (initialDate) {
@@ -62,7 +70,7 @@ export default function OrgAddEventModal({
   const resetForm = () => {
     setTitle('');
     setDescription('');
-    setCreateZoom(false);
+    setMeetingProvider(null);
     // setSelectedDate(new Date());
     setStartHour('09');
     setStartMinute('00');
@@ -122,9 +130,10 @@ export default function OrgAddEventModal({
         end_time: convertToUTCISOString(selectedDate, endHour, endMinute, endAmpm),
         event_type: 'organization',
         org_id: orgId,
+        ...(meetingProvider && { provider: meetingProvider }),
       };
   
-      const endpoint = createZoom
+      const endpoint = meetingProvider
         ? '/calendar/events/create-with-meeting/'
         : '/calendar/events/';
   
@@ -277,37 +286,93 @@ export default function OrgAddEventModal({
                     Your timezone: <span className="font-medium">{userTimeZone}</span>
                   </p>
   
-                  {/* Zoom toggle */}
-                      <label
-                        className={`inline-flex items-center space-x-2 text-sm mt-2 transition-opacity ${
-                          !isZoomConnected ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={createZoom}
-                          onChange={e => setCreateZoom(e.target.checked)}
-                          className="rounded"
-                          disabled={!isZoomConnected}
-                        />
-                        <span className="flex items-center gap-1">
-                          <img
-                            src="/images/zoom02.png"
-                            alt="Zoom"
-                            className="w-4 h-4 object-contain"
-                          />
-                          <span>Create Zoom Meeting</span>
-                        </span>
-                      </label>
-                      {!isZoomConnected && (
-                        <button
-                          type="button"
-                          onClick={() => window.location.href = '/configure-meeting-tools'}
-                          className="mt-1 ml-6 text-xs text-blue-600 hover:underline"
-                        >
-                          Connect Zoom
-                        </button>
-                      )}
+                  <div className="space-y-3">
+
+                      {/* 🔗 Meeting Provider */}
+                      <div className="mt-2 space-y-2">
+                        <label className="text-sm font-medium text-gray-700">
+                          Add Meeting (Optional)
+                        </label>
+
+                        <div className="flex gap-3">
+
+                          {/* Zoom */}
+                          <button
+                            type="button"
+                            disabled={!isZoomConnected || !selectedOrg}
+                            onClick={() => {
+                              if (!isZoomConnected || !selectedOrg) return;
+                              setMeetingProvider(meetingProvider === 'zoom' ? null : 'zoom');
+                            }}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md border text-sm transition
+                              ${meetingProvider === 'zoom'
+                                ? 'bg-indigo-100 border-indigo-400'
+                                : 'bg-white border-gray-300'}
+                              ${(!isZoomConnected || !selectedOrg)
+                                ? 'opacity-50 cursor-not-allowed'
+                                : 'hover:bg-gray-50'}
+                            `}
+                          >
+                            <img src="/images/zoom02.png" className="w-4 h-4" />
+                            Zoom
+                          </button>
+
+                          {/* Google Meet */}
+                          <button
+                            type="button"
+                            disabled={!isGoogleConnected || !selectedOrg}
+                            onClick={() => {
+                              if (!isGoogleConnected || !selectedOrg) return;
+                              setMeetingProvider(meetingProvider === 'google' ? null : 'google');
+                            }}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md border text-sm transition
+                              ${meetingProvider === 'google'
+                                ? 'bg-indigo-100 border-indigo-400'
+                                : 'bg-white border-gray-300'}
+                              ${(!isGoogleConnected || !selectedOrg)
+                                ? 'opacity-50 cursor-not-allowed'
+                                : 'hover:bg-gray-50'}
+                            `}
+                          >
+                            <img src="/images/meet.png" className="w-4 h-4" />
+                            Google Meet
+                          </button>
+
+                        </div>
+
+                        {/* 🧠 Helper Text */}
+                        {!selectedOrg && (
+                          <p className="text-xs text-gray-500">
+                            Select an organization to enable meeting options
+                          </p>
+                        )}
+
+                        {/* 🔌 Connection CTAs */}
+                        {selectedOrg && (!isZoomConnected || !isGoogleConnected) && (
+                          <div className="flex flex-col gap-1 mt-1">
+                            {!isZoomConnected && (
+                              <button
+                                type="button"
+                                onClick={() => window.location.href = '/configure-meeting-tools'}
+                                className="text-xs text-blue-600 hover:underline text-left"
+                              >
+                                Connect Zoom
+                              </button>
+                            )}
+
+                            {!isGoogleConnected && (
+                              <button
+                                type="button"
+                                onClick={() => window.location.href = '/configure-meeting-tools'}
+                                className="text-xs text-blue-600 hover:underline text-left"
+                              >
+                                Connect Google Calendar
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
   
                   {/* Actions */}
@@ -320,19 +385,9 @@ export default function OrgAddEventModal({
                     </button>
                     <button
                       onClick={handleSubmit}
-                      disabled={
-                        loading ||
-                        !title.trim() ||
-                        !description.trim() ||
-                        !startHour || !startMinute || !endHour || !endMinute ||
-                        (eventType === 'organization' && !selectedOrg)
-                      }
+                      disabled={isFormInvalid}
                       className={`px-4 py-2 text-sm rounded-md text-white ${
-                        loading ||
-                        !title.trim() ||
-                        !description.trim() ||
-                        !startHour || !startMinute || !endHour || !endMinute ||
-                        (eventType === 'organization' && !selectedOrg)
+                        isFormInvalid
                           ? 'bg-indigo-300 cursor-not-allowed'
                           : 'bg-indigo-600 hover:bg-indigo-700'
                       }`}

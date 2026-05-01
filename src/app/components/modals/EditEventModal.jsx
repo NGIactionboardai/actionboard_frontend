@@ -14,7 +14,8 @@ export default function EditEventModal({
   getAuthHeaders,
   makeApiCall,
   onEventUpdated,
-  isZoomConnected
+  isZoomConnected,
+  isGoogleConnected
 }) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 

@@ -23,6 +23,8 @@ import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-r
 import Link from 'next/link';
 import { ORG_COLORS } from '../constants/orgColors';
 import { useRouter } from "next/navigation";
+import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
+import EventDetailsModal from './modals/EventDetailsModal';
 
 
   
@@ -34,6 +36,7 @@ export default function Calendar() {
   
   const dispatch = useDispatch();
   const isZoomConnected = useSelector(selectZoomIsConnected);
+  const isGoogleConnected = useSelector(selectGoogleIsConnected);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   
 
@@ -231,6 +234,7 @@ export default function Calendar() {
         // Fetch events
         const eventResponse = await axios.get(`${API_BASE_URL}/calendar/all-events/`);
         const rawEvents = eventResponse.data?.events || [];
+
   
         const enriched = rawEvents.map(event => {
           const orgName = event.organisation_name;
@@ -249,6 +253,7 @@ export default function Calendar() {
               title: event.title,
               description: event.description,
               join_url: event.meeting?.join_url || null,
+              provider: event.meeting?.provider || null,
               organization: event.event_type === 'organization' ? orgName : 'Personal',
               event_type: event.event_type,
               organisation_id: event.org_id,
@@ -257,7 +262,7 @@ export default function Calendar() {
           };
         });
   
-        console.log("enriched events: ", enriched);
+        // console.log("enriched events: ", enriched);
         setApiEvents(enriched);
         setLoadingEvents(false);
   
@@ -328,22 +333,7 @@ export default function Calendar() {
       setIsAddModalOpen(true);
     };
 
-    // const handleCalendarSelect = (info) => {
-    //   let start = new Date(info.startStr);
-    //   let end = new Date(info.endStr);
     
-    //   // Helper to get just the time portion in milliseconds since midnight
-    //   const timeOfDay = (date) => date.getHours() * 3600000 + date.getMinutes() * 60000 + date.getSeconds() * 1000 + date.getMilliseconds();
-    
-    //   if (timeOfDay(start) === timeOfDay(end)) {
-    //     end = new Date(start.getTime() + 30 * 60 * 1000); // add 30 mins to start
-    //   }
-    
-    //   setAddEventStart(start);
-    //   setAddEventEnd(end);
-    //   setIsAddModalOpen(true);
-    // };
-
     const parseDateStrAsLocal = (s) => {
       if (!s) return null;
       // date-only "YYYY-MM-DD" -> construct local-midnight
@@ -500,6 +490,7 @@ export default function Calendar() {
           event_type: info.event.extendedProps.event_type,
           organization: info.event.extendedProps.organization,
           join_url: info.event.extendedProps.join_url,
+          provider: info.event.extendedProps.provider,
           start: info.event.start,
           end: info.event.end,
           description: info.event.extendedProps.description,
@@ -648,156 +639,7 @@ export default function Calendar() {
   
     return (
       <div className="flex flex-col h-screen border-t border-gray-200">
-        <Transition appear show={isEventModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setIsEventModalOpen(false)}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            {/* <div className="fixed inset-0 bg-gray-500/20 backdrop-blur-sm" /> */}
-            <div className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  {/* Header */}
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center space-x-3">
-                      <div 
-                        className="w-3 h-3 rounded-full flex-shrink-0" 
-                        style={{ backgroundColor: selectedEvent?.color }}
-                      />
-                      <Dialog.Title
-                        as="h3"
-                        className="text-lg font-semibold leading-6 text-gray-900 flex items-center gap-2"
-                      >
-                        {selectedEvent?.title}
-                        {selectedEvent?.join_url && (
-                          <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                            Zoom Meeting
-                          </span>
-                        )}
-                      </Dialog.Title>
-                    </div>
-                    <button
-                      type="button"
-                      className="text-gray-400 hover:text-gray-500"
-                      onClick={() => setIsEventModalOpen(false)}
-                    >
-                      <XMarkIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-
-                  {/* Body */}
-                  <div className="mt-6 space-y-5">
-                    {/* Organization */}
-                    {selectedEvent?.organization !== 'Personal' && (
-                      <div className="flex items-start">
-                        <div className="w-24 text-sm text-gray-500">Organization</div>
-                        <div className="text-sm text-gray-900">{selectedEvent?.organization}</div>
-                      </div>
-                    )}
-
-                    {/* When */}
-                    <div className="flex items-start">
-                      <div className="w-24 text-sm text-gray-500">When</div>
-                      <div className="text-sm text-gray-900">
-                        {selectedEvent?.start?.toLocaleString()}
-                        {selectedEvent?.end && (
-                          <>
-                            <br />
-                            to {selectedEvent.end.toLocaleString()}
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Details */}
-                    {selectedEvent?.description && (
-                      <div className="flex items-start">
-                        <div className="w-24 text-sm text-gray-500">Details</div>
-                        <div className="text-sm text-gray-900">{selectedEvent.description}</div>
-                      </div>
-                    )}
-
-                    {/* Join URL */}
-                    {selectedEvent?.join_url && (
-                      <div className="flex items-start">
-                        <div className="w-24 text-sm text-gray-500">Join URL</div>
-                        <div className="text-sm text-gray-900 max-w-xs truncate">
-                          <a
-                            href={selectedEvent.join_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                            title={selectedEvent.join_url}
-                          >
-                            {selectedEvent.join_url}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer buttons */}
-                  <div className="mt-8 flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      className="inline-flex justify-center rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-                      onClick={() => setIsEventModalOpen(false)}
-                    >
-                      Close
-                    </button>
-
-                    <button
-                      type="button"
-                      className="inline-flex justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                      onClick={() => {
-                        setIsEventModalOpen(false);
-                        setTimeout(() => {
-                          setEventBeingEdited(selectedEvent);
-                          setIsEditModalOpen(true);
-                        }, 100);
-                      }}
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      type="button"
-                      className="inline-flex justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                      onClick={() => {
-                        // You can trigger a confirmation modal here or call a delete handler
-                        handleDelete(selectedEvent.id); // implement this in your component
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </Dialog.Panel>
-
-
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-        </Transition>
+        
 
         <div className="flex flex-1 overflow-hidden relative">
 
@@ -1113,11 +955,7 @@ export default function Calendar() {
                         handleEventClick(info);
                       }, 40); // 20-60 ms usually fine; increase if needed
                     }}
-                    // windowResize={(arg) => {
-                    //   if (window.innerWidth < 768 && currentView !== 'timeGridDay') {
-                    //     arg.view.calendar.changeView('timeGridDay');
-                    //   }
-                    // }}
+                   
                   />
               )}
 
@@ -1127,6 +965,7 @@ export default function Calendar() {
 
           <AddEventModal
                 isZoomConnected={isZoomConnected}
+                isGoogleConnected={isGoogleConnected}
                 isOpen={isAddModalOpen}
                 onClose={() => {
                   setIsAddModalOpen(false);
@@ -1197,6 +1036,7 @@ export default function Calendar() {
 
               <EditEventModal
                 isZoomConnected={isZoomConnected}
+                isGoogleConnected={isGoogleConnected}
                 isOpen={isEditModalOpen}
                 onClose={() => {
                   setIsEditModalOpen(false);
@@ -1233,6 +1073,21 @@ export default function Calendar() {
                   setEventBeingEdited(null);
                 }}
               />
+
+
+            <EventDetailsModal
+              isOpen={isEventModalOpen}
+              onClose={() => setIsEventModalOpen(false)}
+              selectedEvent={selectedEvent}
+              onEdit={() => {
+                setIsEventModalOpen(false);
+                setTimeout(() => {
+                  setEventBeingEdited(selectedEvent);
+                  setIsEditModalOpen(true);
+                }, 100);
+              }}
+              onDelete={() => handleDelete(selectedEvent.id)}
+            />
         </div>
 
         <style jsx global>{`
