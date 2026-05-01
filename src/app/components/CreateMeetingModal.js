@@ -9,16 +9,19 @@ import {
   selectZoomLoading,
   selectZoomUserInfo
 } from '../../redux/auth/zoomSlice'; // Adjust import path as needed
+import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
+import { createMeeting, getMeetings, selectMeetingLoading } from '@/redux/meetings/meetingSlice';
 
 const CreateMeetingModal = ({ 
   isOpen, 
   onClose, 
   organizationId,
   isZoomConnected,
-  setShowRecordingInfoModal
+  setShowRecordingInfoModal,
+  provider
 }) => {
   const dispatch = useDispatch();
-  const zoomLoading = useSelector(selectZoomLoading);
+  const meetingLoading = useSelector(selectMeetingLoading);
   const zoomUserInfo = useSelector(selectZoomUserInfo);
 
   const [members, setMembers] = useState([]);
@@ -28,6 +31,9 @@ const CreateMeetingModal = ({
   const [memberSearch, setMemberSearch] = useState("");
 
 
+  // const [provider, setProvider] = useState("zoom");
+
+
   const [nextUrl, setNextUrl] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -35,6 +41,8 @@ const CreateMeetingModal = ({
   const [newMember, setNewMember] = useState({ name: "", email: "" });
   const [addingMember, setAddingMember] = useState(false);
   const [addError, setAddError] = useState("");
+
+  const isGoogleConnected = useSelector(selectGoogleIsConnected);
 
   const memberListRef = useRef(null);
 
@@ -219,29 +227,42 @@ const CreateMeetingModal = ({
   const handleCreateMeeting = async (e) => {
     e.preventDefault();
   
-    if (!isZoomConnected) {
-      alert('Please connect to Zoom first to create meetings.');
+    if (provider === "zoom" && !isZoomConnected) {
+      alert("Please connect Zoom first");
+      return;
+    }
+    
+    if (provider === "google" && !isGoogleConnected) {
+      alert("Please connect Google Calendar first");
       return;
     }
   
     try {
       const meetingData = {
+        provider,
         topic: meetingForm.topic,
         start_time: new Date(meetingForm.start_time).toISOString(),
         duration: parseInt(meetingForm.duration),
         ...(meetingForm.agenda && { agenda: meetingForm.agenda }),
-        ...(meetingForm.password && { password: meetingForm.password }),
-        settings: {
+      };
+
+      if (provider === "zoom") {
+        meetingData.password = meetingForm.password;
+      
+        meetingData.settings = {
           waiting_room: meetingForm.waiting_room,
           auto_recording: meetingForm.auto_recording,
           join_before_host: meetingForm.join_before_host,
-          audio: meetingForm.audio ? 'both' : 'none',
+          audio: meetingForm.audio ? "both" : "none",
           video: meetingForm.video,
-        }
-      };
+        };
+      }
   
       const res = await dispatch(
-        createZoomMeeting({ meetingData, organizationId })
+        createMeeting({
+          organizationId,
+          data: meetingData,
+        })
       ).unwrap();
   
       const meetingId = res?.meeting?.id;
@@ -255,7 +276,7 @@ const CreateMeetingModal = ({
 
       // Toast feedback
       if (selectedMembers.length === 0) {
-        toast.success("Meeting created successfully");
+        toast.success(`${provider === "zoom" ? "Zoom" : "Google"} meeting created`);
       } else if (invitesSent) {
         toast.success(`Meeting created and ${selectedMembers.length} invite${selectedMembers.length > 1 ? "s" : ""} sent`);
       } else {
@@ -279,7 +300,7 @@ const CreateMeetingModal = ({
   
       onClose();
       setTimeout(() => setShowRecordingInfoModal(true), 300);
-      dispatch(getZoomMeetings(organizationId));
+      dispatch(getMeetings(organizationId));
   
     } catch (error) {
       console.error('Failed to create meeting:', error);
@@ -330,8 +351,9 @@ const CreateMeetingModal = ({
           {/* Fixed Header */}
           <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
             <h3 className="text-xl font-semibold text-gray-900" id="modal-title">
-              Create Zoom Meeting
+              Create {provider === "zoom" ? "Zoom" : "Google Calendar"} Meeting
             </h3>
+
           </div>
 
           {/* Scrollable Content */}
@@ -547,109 +569,116 @@ const CreateMeetingModal = ({
                   )}
                 </div>
 
+                {provider === "zoom" && (
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                      Meeting Password (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      id="password"
+                      name="password"
+                      className="mt-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-lg px-3 py-2 transition-colors"
+                      placeholder="Enter meeting password"
+                      value={meetingForm.password}
+                      onChange={handleMeetingFormChange}
+                    />
+                  </div>
+                )}
 
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Meeting Password (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    id="password"
-                    name="password"
-                    className="mt-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-lg px-3 py-2 transition-colors"
-                    placeholder="Enter meeting password"
-                    value={meetingForm.password}
-                    onChange={handleMeetingFormChange}
-                  />
-                </div>
 
-                <div>
-                  <label htmlFor="auto_recording" className="block text-sm font-medium text-gray-700 mb-1">
-                    Auto Recording
-                  </label>
-                  <select
-                    id="auto_recording"
-                    name="auto_recording"
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 
-                              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
-                              sm:text-sm rounded-lg transition-colors"
-                    value={meetingForm.auto_recording}
-                    onChange={handleMeetingFormChange}
-                  >
-                    <option value="none">No Recording</option>
-                    <option value="local">Local Recording</option>
+                {provider === "zoom" && (
+                  <div>
+                    <label htmlFor="auto_recording" className="block text-sm font-medium text-gray-700 mb-1">
+                      Auto Recording
+                    </label>
+                    <select
+                      id="auto_recording"
+                      name="auto_recording"
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 
+                                focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
+                                sm:text-sm rounded-lg transition-colors"
+                      value={meetingForm.auto_recording}
+                      onChange={handleMeetingFormChange}
+                    >
+                      <option value="none">No Recording</option>
+                      <option value="local">Local Recording</option>
 
-                    {/* Only show Cloud Recording if account_type is 2 (Licensed) or 3 (On-Prem) */}
-                    {zoomUserInfo?.account_type && zoomUserInfo.account_type !== 1 && (
-                      <option value="cloud">Cloud Recording</option>
+                      {/* Only show Cloud Recording if account_type is 2 (Licensed) or 3 (On-Prem) */}
+                      {zoomUserInfo?.account_type && zoomUserInfo.account_type !== 1 && (
+                        <option value="cloud">Cloud Recording</option>
+                      )}
+                    </select>
+
+                    {/* Optional helper text */}
+                    {zoomUserInfo?.account_type === 1 && (
+                      <p className="mt-1.5 text-xs text-gray-500">
+                        Cloud recording is available only for Licensed or On-Prem Zoom accounts.
+                      </p>
                     )}
-                  </select>
-
-                  {/* Optional helper text */}
-                  {zoomUserInfo?.account_type === 1 && (
-                    <p className="mt-1.5 text-xs text-gray-500">
-                      Cloud recording is available only for Licensed or On-Prem Zoom accounts.
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center">
-                    <input
-                      id="waiting_room"
-                      name="waiting_room"
-                      type="checkbox"
-                      className="h-4 w-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 rounded"
-                      checked={meetingForm.waiting_room}
-                      onChange={handleMeetingFormChange}
-                    />
-                    <label htmlFor="waiting_room" className="ml-2.5 block text-sm text-gray-700">
-                      Enable Waiting Room
-                    </label>
                   </div>
+                  
+                )}
 
-                  <div className="flex items-center">
-                    <input
-                      id="join_before_host"
-                      name="join_before_host"
-                      type="checkbox"
-                      className="h-4 w-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 rounded"
-                      checked={meetingForm.join_before_host}
-                      onChange={handleMeetingFormChange}
-                    />
-                    <label htmlFor="join_before_host" className="ml-2.5 block text-sm text-gray-700">
-                      Enable Join Before Host
-                    </label>
-                  </div>
+                {provider === "zoom" && (
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center">
+                      <input
+                        id="waiting_room"
+                        name="waiting_room"
+                        type="checkbox"
+                        className="h-4 w-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 rounded"
+                        checked={meetingForm.waiting_room}
+                        onChange={handleMeetingFormChange}
+                      />
+                      <label htmlFor="waiting_room" className="ml-2.5 block text-sm text-gray-700">
+                        Enable Waiting Room
+                      </label>
+                    </div>
 
-                  <div className="flex items-center">
-                    <input
-                      id="audio"
-                      name="audio"
-                      type="checkbox"
-                      className="h-4 w-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 rounded"
-                      checked={meetingForm.audio}
-                      onChange={handleMeetingFormChange}
-                    />
-                    <label htmlFor="audio" className="ml-2.5 block text-sm text-gray-700">
-                      Enable Audio <span className="text-xs text-gray-500">(default ON)</span>
-                    </label>
-                  </div>
+                    <div className="flex items-center">
+                      <input
+                        id="join_before_host"
+                        name="join_before_host"
+                        type="checkbox"
+                        className="h-4 w-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 rounded"
+                        checked={meetingForm.join_before_host}
+                        onChange={handleMeetingFormChange}
+                      />
+                      <label htmlFor="join_before_host" className="ml-2.5 block text-sm text-gray-700">
+                        Enable Join Before Host
+                      </label>
+                    </div>
 
-                  <div className="flex items-center">
-                    <input
-                      id="video"
-                      name="video"
-                      type="checkbox"
-                      className="h-4 w-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 rounded"
-                      checked={meetingForm.video}
-                      onChange={handleMeetingFormChange}
-                    />
-                    <label htmlFor="video" className="ml-2.5 block text-sm text-gray-700">
-                      Enable Video <span className="text-xs text-gray-500">(default OFF)</span>
-                    </label>
+                    <div className="flex items-center">
+                      <input
+                        id="audio"
+                        name="audio"
+                        type="checkbox"
+                        className="h-4 w-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 rounded"
+                        checked={meetingForm.audio}
+                        onChange={handleMeetingFormChange}
+                      />
+                      <label htmlFor="audio" className="ml-2.5 block text-sm text-gray-700">
+                        Enable Audio <span className="text-xs text-gray-500">(default ON)</span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center">
+                      <input
+                        id="video"
+                        name="video"
+                        type="checkbox"
+                        className="h-4 w-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 rounded"
+                        checked={meetingForm.video}
+                        onChange={handleMeetingFormChange}
+                      />
+                      <label htmlFor="video" className="ml-2.5 block text-sm text-gray-700">
+                        Enable Video <span className="text-xs text-gray-500">(default OFF)</span>
+                      </label>
+                    </div>
                   </div>
-                </div>
+                )}
 
               </div>
             </div>
@@ -665,10 +694,10 @@ const CreateMeetingModal = ({
               </button>
               <button
                 type="submit"
-                disabled={zoomLoading || !meetingForm.topic.trim() || !meetingForm.start_time}
+                disabled={meetingLoading || !meetingForm.topic.trim() || !meetingForm.start_time}
                 className="w-full sm:w-auto inline-flex justify-center items-center rounded-lg border border-transparent shadow-sm px-4 py-2.5 bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {zoomLoading ? (
+                {meetingLoading ? (
                   <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

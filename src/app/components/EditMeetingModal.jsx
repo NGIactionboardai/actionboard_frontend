@@ -2,10 +2,11 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { editZoomMeeting, getZoomMeetings, selectZoomLoading, selectZoomUserInfo } from "../../redux/auth/zoomSlice";
+import { getMeetings, selectMeetingLoading, updateMeeting } from "@/redux/meetings/meetingSlice";
 
-const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConnected }) => {
+const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConnected, provider }) => {
   const dispatch = useDispatch();
-  const zoomLoading = useSelector(selectZoomLoading);
+  const meetingLoading = useSelector(selectMeetingLoading);
   const zoomUserInfo = useSelector(selectZoomUserInfo);
 
   const [form, setForm] = useState({
@@ -51,8 +52,8 @@ const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConn
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isZoomConnected) {
-      alert("Please connect to Zoom first.");
+    if (provider === "zoom" && !isZoomConnected) {
+      alert("Please connect Zoom first.");
       return;
     }
     try {
@@ -63,23 +64,33 @@ const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConn
         start_time: new Date(form.start_time).toISOString(),
         duration: parseInt(form.duration, 10),
         agenda: form.agenda,
-        password: form.password,
-        waiting_room: form.waiting_room,
-        join_before_host: form.join_before_host,
-        auto_recording: form.auto_recording,
-        audio: form.audio ? "both" : "none",
-        video: form.video,
         timezone,
       };
-      await dispatch(editZoomMeeting({
+      
+      if (provider === "zoom") {
+        meetingData.password = form.password;
+        meetingData.waiting_room = form.waiting_room;
+        meetingData.join_before_host = form.join_before_host;
+        meetingData.auto_recording = form.auto_recording;
+        meetingData.audio = form.audio ? "both" : "none";
+        meetingData.video = form.video;
+      }
+
+
+
+      await dispatch(updateMeeting({
         organizationId,
         meetingId: meeting.id,
-        meetingData,
-        resendInvites
+        data: {
+          ...meetingData,
+          resend_invites: resendInvites
+        }
       })).unwrap();
+      
+      dispatch(getMeetings(organizationId));
 
       // close & refresh
-      dispatch(getZoomMeetings(organizationId));
+      
       onClose();
     } catch (err) {
       console.error("Failed to edit meeting", err);
@@ -110,7 +121,7 @@ const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConn
                     <div className="sm:flex sm:items-start">
                       <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
                         <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                          Edit Zoom Meeting
+                          Edit {provider === "zoom" ? "Zoom" : "Google Meet"} Meeting
                         </h3>
                         <div className="mt-4 space-y-4">
                           <div>
@@ -175,106 +186,157 @@ const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConn
                             />
                           </div>
 
-                          <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                              Meeting Password (Optional)
-                            </label>
-                            <input
-                              type="text"
-                              id="password"
-                              name="password"
-                              className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md px-3 py-2"
-                              placeholder="Enter meeting password"
-                              value={form.password}
-                              onChange={handleChange}
-                            />
-                          </div>
 
-                          <div>
-                            <label htmlFor="auto_recording" className="block text-sm font-medium text-gray-700">
-                              Auto Recording
-                            </label>
-                            <select
-                              id="auto_recording"
-                              name="auto_recording"
-                              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 
-                                        focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 
-                                        sm:text-sm rounded-md"
-                              value={form.auto_recording}
-                              onChange={handleChange}
-                            >
-                              <option value="none">No Recording</option>
-                              <option value="local">Local Recording</option>
+                          {provider === "zoom" && (
 
-                              {/* Only show Cloud Recording if account_type is 2 (Licensed) or 3 (On-Prem) */}
-                              {zoomUserInfo?.account_type && zoomUserInfo.account_type !== 1 && (
-                                <option value="cloud">Cloud Recording</option>
+                            <div>
+                              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                                Meeting Password (Optional)
+                              </label>
+                              <input
+                                type="text"
+                                id="password"
+                                name="password"
+                                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md px-3 py-2"
+                                placeholder="Enter meeting password"
+                                value={form.password}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                          )}
+
+
+                          {provider === "zoom" && (
+
+                            <div>
+                              <label htmlFor="auto_recording" className="block text-sm font-medium text-gray-700">
+                                Auto Recording
+                              </label>
+                              <select
+                                id="auto_recording"
+                                name="auto_recording"
+                                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 
+                                          focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 
+                                          sm:text-sm rounded-md"
+                                value={form.auto_recording}
+                                onChange={handleChange}
+                              >
+                                <option value="none">No Recording</option>
+                                <option value="local">Local Recording</option>
+
+                                {/* Only show Cloud Recording if account_type is 2 (Licensed) or 3 (On-Prem) */}
+                                {zoomUserInfo?.account_type && zoomUserInfo.account_type !== 1 && (
+                                  <option value="cloud">Cloud Recording</option>
+                                )}
+                              </select>
+
+                              {/* Optional helper text */}
+                              {zoomUserInfo?.account_type === 1 && (
+                                <p className="mt-1 text-xs text-gray-500">
+                                  Cloud recording is available only for Licensed or On-Prem Zoom accounts.
+                                </p>
                               )}
-                            </select>
+                            </div>
+                            
+                          )}
 
-                            {/* Optional helper text */}
-                            {zoomUserInfo?.account_type === 1 && (
-                              <p className="mt-1 text-xs text-gray-500">
-                                Cloud recording is available only for Licensed or On-Prem Zoom accounts.
-                              </p>
-                            )}
-                          </div>
 
-                          <div className="flex items-center">
-                            <input
-                              id="waiting_room"
-                              name="waiting_room"
-                              type="checkbox"
-                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                              checked={form.waiting_room}
-                              onChange={handleChange}
-                            />
-                            <label htmlFor="waiting_room" className="ml-2 block text-sm text-gray-900">
-                              Enable Waiting Room
-                            </label>
-                          </div>
+                          {provider === "zoom" && (
 
-                          <div className="flex items-center">
-                            <input
-                              id="join_before_host"
-                              name="join_before_host"
-                              type="checkbox"
-                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                              checked={form.join_before_host}
-                              onChange={handleChange}
-                            />
-                            <label htmlFor="join_before_host" className="ml-2 block text-sm text-gray-900">
-                              Enable Join Before host
-                            </label>
-                          </div>
+                            <div>
+                              <label htmlFor="auto_recording" className="block text-sm font-medium text-gray-700">
+                                Auto Recording
+                              </label>
+                              <select
+                                id="auto_recording"
+                                name="auto_recording"
+                                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 
+                                          focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 
+                                          sm:text-sm rounded-md"
+                                value={form.auto_recording}
+                                onChange={handleChange}
+                              >
+                                <option value="none">No Recording</option>
+                                <option value="local">Local Recording</option>
 
-                          <div className="flex items-center">
-                            <input
-                              id="audio"
-                              name="audio"
-                              type="checkbox"
-                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                              checked={form.audio}
-                              onChange={handleChange}
-                            />
-                            <label htmlFor="audio" className="ml-2 block text-sm text-gray-900">
-                              Enable Audio (default ON)
-                            </label>
-                          </div>
+                                {/* Only show Cloud Recording if account_type is 2 (Licensed) or 3 (On-Prem) */}
+                                {zoomUserInfo?.account_type && zoomUserInfo.account_type !== 1 && (
+                                  <option value="cloud">Cloud Recording</option>
+                                )}
+                              </select>
 
-                          <div className="flex items-center">
-                            <input
-                              id="video"
-                              name="video"
-                              type="checkbox"
-                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                              checked={form.video}
-                              onChange={handleChange}
-                            />
-                            <label htmlFor="video" className="ml-2 block text-sm text-gray-900">
-                              Enable Video (default OFF)
-                            </label>
-                          </div>
+                              {/* Optional helper text */}
+                              {zoomUserInfo?.account_type === 1 && (
+                                <p className="mt-1 text-xs text-gray-500">
+                                  Cloud recording is available only for Licensed or On-Prem Zoom accounts.
+                                </p>
+                              )}
+                            </div>
+                            
+                          )}
+
+
+                          {provider === "zoom" && (
+                            <>
+                              <div className="flex items-center">
+                                <input
+                                  id="waiting_room"
+                                  name="waiting_room"
+                                  type="checkbox"
+                                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                  checked={form.waiting_room}
+                                  onChange={handleChange}
+                                />
+                                <label htmlFor="waiting_room" className="ml-2 block text-sm text-gray-900">
+                                  Enable Waiting Room
+                                </label>
+                              </div>
+
+                              <div className="flex items-center">
+                                <input
+                                  id="join_before_host"
+                                  name="join_before_host"
+                                  type="checkbox"
+                                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                  checked={form.join_before_host}
+                                  onChange={handleChange}
+                                />
+                                <label htmlFor="join_before_host" className="ml-2 block text-sm text-gray-900">
+                                  Enable Join Before host
+                                </label>
+                              </div>
+
+                              <div className="flex items-center">
+                                <input
+                                  id="audio"
+                                  name="audio"
+                                  type="checkbox"
+                                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                  checked={form.audio}
+                                  onChange={handleChange}
+                                />
+                                <label htmlFor="audio" className="ml-2 block text-sm text-gray-900">
+                                  Enable Audio (default ON)
+                                </label>
+                              </div>
+
+                              <div className="flex items-center">
+                                <input
+                                  id="video"
+                                  name="video"
+                                  type="checkbox"
+                                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                  checked={form.video}
+                                  onChange={handleChange}
+                                />
+                                <label htmlFor="video" className="ml-2 block text-sm text-gray-900">
+                                  Enable Video (default OFF)
+                                </label>
+                              </div>
+                            </>
+                            
+                          )}
 
                           <div className="flex items-center">
                             <input 
@@ -297,10 +359,10 @@ const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConn
                   <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <button
                       type="submit"
-                      disabled={zoomLoading || !form.topic.trim() || !form.start_time}
+                      disabled={meetingLoading || !form.topic.trim() || !form.start_time}
                       className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {zoomLoading ? 'Updating...' : 'Update Meeting'}
+                      {meetingLoading ? 'Updating...' : 'Update Meeting'}
                     </button>
                     <button
                       type="button"

@@ -2,43 +2,37 @@
 
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
-import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { removeMeetingFromState } from "@/redux/auth/zoomSlice";
 import toast from "react-hot-toast";
+import { deleteMeeting } from "@/redux/meetings/meetingSlice";
 
 
 export default function DeleteMeetingModal({ isOpen, onClose, meeting, onDeleted }) {
   const [loading, setLoading] = useState(false);
-  const token = useSelector((state) => state.auth?.token);
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  const provider = meeting?.source?.toLowerCase();
 
   const dispatch = useDispatch();
 
   if (!meeting) return null;
 
   const handleDelete = async () => {
-    const idToDelete = meeting.meeting_id || meeting.id;
-    console.log("Delete modal meeting:", meeting);
+    const idToDelete = meeting.id || meeting.meeting_id;
+  
     if (!idToDelete) return;
-
+  
     try {
       setLoading(true);
-      await axios.delete(
-        `${API_BASE_URL}/meetings/zoom/meeting/${idToDelete}/delete/`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      dispatch(removeMeetingFromState(idToDelete)); // tell parent to remove it from list
-
+  
+      await dispatch(deleteMeeting({ meetingId: idToDelete })).unwrap();
+  
       toast.success("Meeting deleted successfully");
-
+  
       onClose();
+      onDeleted?.(); // optional refresh hook
     } catch (err) {
       console.error("Failed to delete meeting:", err);
-      alert("Error deleting meeting. Please try again.");
+      toast.error("Error deleting meeting");
     } finally {
       setLoading(false);
     }
@@ -76,16 +70,19 @@ export default function DeleteMeetingModal({ isOpen, onClose, meeting, onDeleted
                   as="h3"
                   className="text-lg font-semibold leading-6 text-gray-900"
                 >
-                  Delete Meeting
+                  Delete {provider === "google" ? "Google Meet" : "Zoom"} Meeting
                 </Dialog.Title>
 
                 <div className="mt-4">
                   <p className="text-sm text-gray-600">
-                    Are you sure you want to delete this meeting?{" "}
+                    Are you sure you want to delete this{" "}
                     <span className="font-medium text-gray-900">
-                      {meeting.topic || meeting.meeting_id}
+                      {provider === "google" ? "Google Meet" : "Zoom"} meeting
+                    </span>{" "}
+                    <span className="font-medium text-gray-900">
+                      {meeting.topic || meeting.id}
                     </span>
-                    .
+                    ?
                   </p>
                   <p className="mt-2 text-sm text-red-600">
                     This will also delete transcripts and any data related to it.

@@ -4,9 +4,12 @@ import storage from 'redux-persist/lib/storage'; // localStorage
 import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from '../redux/auth/authSlices';
 import organizationReducer from '../redux/auth/organizationSlice';
-import meetingReducer from '../redux/auth/organizationSlice';
+// import meetingReducer from '../redux/auth/organizationSlice';
 import zoomSlice from '../redux/auth/zoomSlice';
 import billingReducer from "../redux/billing/billingSlice";
+import googleCalendarReducer from "../redux/integrations/googleCalendarSlice";
+import meetingReducer from '../redux/meetings/meetingSlice';
+
 
 // Persist config for zoom slice
 const zoomPersistConfig = {
@@ -48,6 +51,7 @@ const rootReducer = combineReducers({
   meeting: meetingReducer,
   zoom: persistReducer(zoomPersistConfig, zoomSlice),
   billing: billingReducer,
+  googleCalendar: googleCalendarReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

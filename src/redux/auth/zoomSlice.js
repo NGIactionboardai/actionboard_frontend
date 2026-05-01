@@ -1,3 +1,4 @@
+// src/redux/auth/zoomSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 

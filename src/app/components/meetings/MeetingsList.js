@@ -6,7 +6,8 @@ import Link from 'next/link';
 const MeetingsList = ({ 
   filteredMeetings, 
   loading, 
-  isZoomConnected, 
+  isZoomConnected,
+  isGoogleConnected,
   organizationId,
   orgName,
   onZoomConnectionClick,
@@ -18,8 +19,13 @@ const MeetingsList = ({
   onShareClick,
   onJoinClick,
   onDeleteClick,
-  onEditClick
+  onEditClick,
+  activeTab,
+  
 }) => {
+
+  const isProviderConnected =
+  activeTab === "zoom" ? isZoomConnected : isGoogleConnected;
 
   
   if (loading) {
@@ -90,38 +96,19 @@ const MeetingsList = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">
-                {!isZoomConnected ? 'Connect to Zoom to see meetings' : 'No meetings found'}
+                {!isProviderConnected
+                  ? `Connect to ${
+                      activeTab === "zoom" ? "Zoom" : "Google Meet"
+                    } to see meetings`
+                  : "No meetings found"}
               </h3>
               <p className="mt-1 text-sm text-gray-500">
-                {!isZoomConnected 
-                  ? `You need to connect your Zoom account to create and view meetings for organization ${orgName}.`
-                  : 'Try adjusting your filters or create a new meeting.'}
+                {!isProviderConnected
+                  ? `You need to connect your ${
+                      activeTab === "zoom" ? "Zoom" : "Google Meet"
+                    } account to create and view meetings for organization ${orgName}.`
+                  : "Try adjusting your filters or create a new meeting."}
               </p>
-              {/* <div className="mt-6">
-                {!isZoomConnected ? (
-                  <button
-                    onClick={onZoomConnectionClick}
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Connect to Zoom
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      onClick={clearFilters}
-                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Clear Filters
-                    </button>
-                    <button
-                      onClick={onCreateMeetingClick}
-                      className="ml-3 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    >
-                      Create Meeting
-                    </button>
-                  </>
-                )}
-              </div> */}
             </div>
           </div>
         </div>

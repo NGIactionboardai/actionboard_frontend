@@ -1,4 +1,4 @@
-//  app/meetings/[id]/page.js
+// src/app/(dashboard)/meetings/[id]/page.js
 'use client';
 
 import Link from 'next/link';
@@ -22,17 +22,19 @@ import { useMeetings, useMeetingsFilters, useMeetingsModal } from '../../../hook
 import { formatMeetingDateTime, getMeetingStatus, getTranscriptionStatus } from '../../../utils/meetingsUtils';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import MeetingsSidebar from '@/app/components/meetings/MeetingsSidebar';
 import SendInviteModal from '@/app/components/modals/SendInviteModal';
 import InstructionModal from '@/app/components/meetings/InstructionModal';
 import JoinBtnInstructionModal from '@/app/components/meetings/JoinBtnInstructionModal';
-import { selectZoomUserInfo } from '@/redux/auth/zoomSlice';
+import { selectZoomIsConnected, selectZoomUserInfo } from '@/redux/auth/zoomSlice';
 import { Plus, SlidersHorizontal, X } from 'lucide-react';
 import MeetingsToolbarMobile from '@/app/components/meetings/MeetingsToolbarMobile';
 import DeleteMeetingModal from '@/app/components/meetings/DeleteMeetingModal';
 import EditMeetingModal from '@/app/components/EditMeetingModal';
 import UpgradeModal from '@/app/components/billing/UpgradeModal';
+import { getMeetings, selectMeetingError, selectMeetingLoading, selectMeetings } from '@/redux/meetings/meetingSlice';
+import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
 
 export default function Meetings() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -56,17 +58,22 @@ export default function Meetings() {
   const [hasMore, setHasMore] = useState(true);
 
   const [upgradeConfig, setUpgradeConfig] = useState(null);
-  
 
+  const [activeTab, setActiveTab] = useState("zoom");
+  
+  const dispatch = useDispatch();
+
+  const meetings = useSelector(selectMeetings);
+  const loading = useSelector(selectMeetingLoading);
+  const error = useSelector(selectMeetingError);
 
   // Custom hooks for state management
   const {
-    zoomMeetings,
-    zoomLoading,
-    zoomError,
-    isZoomConnected,
     successMessage
   } = useMeetings(organizationId);
+
+  const isZoomConnected = useSelector(selectZoomIsConnected);
+  const isGoogleConnected = useSelector(selectGoogleIsConnected);
 
   const {
     searchTerm,
@@ -81,7 +88,25 @@ export default function Meetings() {
     uniqueSources,
     uniqueStatuses,
     filteredMeetings
-  } = useMeetingsFilters(zoomMeetings);
+  } = useMeetingsFilters(meetings);
+
+  const tabMeetings = filteredMeetings.filter((meeting) => {
+    const source = meeting.source?.toLowerCase();
+  
+    if (activeTab === "zoom") {
+      if (!isZoomConnected) return false;
+      return source === "zoom";
+    }
+  
+    if (activeTab === "google") {
+      if (!isGoogleConnected) return false;
+      return source === "google";
+    }
+  
+    return false;
+  });
+
+
 
   const {
     isCreateMeetingModalOpen,
@@ -94,7 +119,12 @@ export default function Meetings() {
 
   const [isEditMeetingModalOpen, setIsEditMeetingModalOpen] = useState(false)
 
-  const token = useSelector((state) => state.auth?.token);
+  
+  useEffect(() => {
+    if (organizationId) {
+      dispatch(getMeetings(organizationId));
+    }
+  }, [organizationId, dispatch]);
 
   useEffect(() => {
     const fetchOrg = async () => {
@@ -187,6 +217,7 @@ export default function Meetings() {
           setUpgradeConfig={setUpgradeConfig}
           isZoomConnected={isZoomConnected}
           orgName={orgName}
+          activeTab={activeTab}
         />
       </aside>
 
@@ -209,20 +240,37 @@ export default function Meetings() {
               organizationId={organizationId}
               onCreateMeetingClick={handleCreateMeetingClick}
               setUpgradeConfig={setUpgradeConfig}
+              activeTab={activeTab}
           />
 
-        <AlertMessages
+        {/* <AlertMessages
           successMessage={successMessage}
           error={zoomError}
           isZoomConnected={isZoomConnected}
           organizationId={organizationId}
           onZoomConnectionClick={handleZoomConnectionClick}
-        />
+        /> */}
+
+        <div className="flex gap-2 mb-4 border-b border-gray-200">
+          {["zoom", "google"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 text-sm font-medium capitalize border-b-2 transition-colors ${
+                activeTab === tab
+                  ? "border-indigo-600 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {tab === "zoom" ? "Zoom" : "Google Meet"}
+            </button>
+          ))}
+        </div>
   
         <MeetingsFilters
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          loading={zoomLoading}
+          loading={loading}
           sourceFilter={sourceFilter}
           setSourceFilter={setSourceFilter}
           statusFilter={statusFilter}
@@ -232,12 +280,14 @@ export default function Meetings() {
           clearFilters={clearFilters}
           uniqueSources={uniqueSources}
           uniqueStatuses={uniqueStatuses}
+          activeTab={activeTab}
         />
   
         <MeetingsList
-          filteredMeetings={filteredMeetings}
-          loading={zoomLoading}
+          filteredMeetings={tabMeetings}
+          loading={loading}
           isZoomConnected={isZoomConnected}
+          isGoogleConnected={isGoogleConnected}
           orgName={orgName}
           organizationId={organizationId}
           onZoomConnectionClick={handleZoomConnectionClick}
@@ -262,6 +312,7 @@ export default function Meetings() {
             setSelectedMeeting(meeting);
             setIsEditMeetingModalOpen(true);
           }}
+          activeTab={activeTab}
         />
   
         {/* Modals */}
@@ -271,6 +322,7 @@ export default function Meetings() {
           organizationId={organizationId}
           isZoomConnected={isZoomConnected}
           setShowRecordingInfoModal={setShowRecordingInfoModal}
+          provider={activeTab}
         />
 
       {selectedMeeting && (
@@ -280,6 +332,7 @@ export default function Meetings() {
           organizationId={organizationId}
           meeting={selectedMeeting}
           isZoomConnected={isZoomConnected}
+          provider={activeTab}
         />
       )}
         

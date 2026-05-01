@@ -747,7 +747,7 @@ export const ZoomConnectionStatus = ({ showDetails = false }) => {
       <span className="text-sm text-gray-600">
         {connectionDisplay.status === "Connected"
           ? 'Connected to zoom'
-          : connectionDisplay.status}
+          : "Not Connected"}
       </span>
       {showDetails && isConnected && userInfo && (
         <span className="text-xs text-gray-500">

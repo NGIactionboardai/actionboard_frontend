@@ -14,7 +14,8 @@ const MeetingsFilters = ({
   handleDateFilterChange,
   clearFilters,
   uniqueStatuses,
-  loading
+  loading,
+  activeTab
 }) => {
   return (
     <div className="bg-white shadow sm:rounded-lg mb-6">

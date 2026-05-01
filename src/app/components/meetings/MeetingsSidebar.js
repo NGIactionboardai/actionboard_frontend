@@ -1,3 +1,4 @@
+// src/app/components/meetings/MeetingsSidebar.js
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -16,18 +17,23 @@ import { Video, MessageSquare, CalendarDays, Users, Settings, BotIcon, Crown } f
 import ManualBotJoinModal from '../bots/ManualBotJoinModal';
 import { useFeature } from "@/app/hooks/useFeature";
 import UpgradeModal from '../billing/UpgradeModal';
+import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
+import { GoogleConnectionStatus } from '../googleCalendar/GoogleConnectionStatus';
 
-export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, setUpgradeConfig}) {
+export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, setUpgradeConfig, activeTab}) {
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth?.token);
   const isZoomConnected = useSelector(selectZoomIsConnected);
+  const isGoogleConnected = useSelector(selectGoogleIsConnected);
   const [organizations, setOrganizations] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(organizationId);
   const [loading, setLoading] = useState(true); // New loading state
   const [showManualBotModal, setShowManualBotModal] = useState(false);
+
+  const isConnected = activeTab === "zoom" ? isZoomConnected : isGoogleConnected;
   
 
   // billing
@@ -56,33 +62,6 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
       featureKey,  // "ai_assistant", etc
     });
   };
-  
-  // const closeUpgrade = () => {
-  //   setUpgradeConfig(null);
-  // };
-
-
-  // useEffect(() => {
-  //   const fetchOrgs = async () => {
-  //     try {
-  //       const res = await makeApiCall(
-  //         'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
-  //         {
-  //           method: 'GET',
-  //           headers: getAuthHeaders(token)
-  //         }
-  //       );
-  //       const data = await res.json();
-  //       setOrganizations(data || []);
-  //     } catch (err) {
-  //       console.error('Failed to fetch organizations');
-  //     } finally {
-  //       setLoading(false); // Stop loading
-  //     }
-  //   };
-
-  //   fetchOrgs();
-  // }, []);
 
 
   useEffect(() => {
@@ -139,14 +118,31 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
         </div>
       ) : (
         <div className="mb-4 flex items-center justify-between">
-          <ZoomConnectionStatus organizationId={organizationId} showDetails={false} />
-          {!isZoomConnected && (
-            <button
-              onClick={() => window.location.href = '/configure-meeting-tools'}
-              className="ml-4 px-3 py-1.5 text-xs rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition cursor-pointer"
-            >
-              Connect Zoom
-            </button>
+          {activeTab === "zoom" ? (
+            <>
+              <ZoomConnectionStatus organizationId={organizationId} showDetails={false} />
+              {!isZoomConnected && (
+                <button
+                  onClick={() => window.location.href = '/configure-meeting-tools'}
+                  className="ml-4 px-3 py-1.5 text-xs rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition cursor-pointer"
+                >
+                  Connect Zoom
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <GoogleConnectionStatus showDetails={false} />
+
+              {!isGoogleConnected && (
+                <button
+                  onClick={() => window.location.href = '/configure-meeting-tools'}
+                  className="ml-4 px-3 py-1.5 text-xs rounded-md bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 transition cursor-pointer"
+                >
+                  Connect Google
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
@@ -173,14 +169,14 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
           <>
             <button
               onClick={onCreateMeetingClick}
-              disabled={!isZoomConnected}
+              disabled={!isConnected}
               className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
-                ${isZoomConnected
+                ${isConnected
                   ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
                   : 'opacity-50 cursor-not-allowed'}
               `}
-              title={!isZoomConnected ? 'Connect to Zoom first' : 'Create new meeting'}
+              title={!isConnected ? `Connect ${activeTab} first` : 'Create new meeting'}
             >
               <Video className="w-5 h-5" />
               Create Meeting
@@ -200,12 +196,12 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
                   // if (!handleFeatureGate(aiNotetaker, "ai_notetaker")) return;
                   window.location.href = `/nous-bot/meetings/${organizationId}`;
                 }}
-                disabled={!isZoomConnected}
+                disabled={!isConnected}
                 className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
-                  bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white cursor-pointer
-                  ${aiNotetaker.canUse
-                    ? "hover:from-[#080aa8] hover:to-[#6d0668]"
-                    : "opacity-50"}
+                  bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                  ${isConnected
+                    ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
+                    : 'opacity-50 cursor-not-allowed'}
                 `}
               >
                 <BotIcon className="w-5 h-5" />
@@ -227,12 +223,12 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
                   // if (!handleFeatureGate(aiAssistant, "ai_assistant")) return;
                   window.location.href = `/org-ai-chat/${organizationId}`;
                 }}
-                disabled={!isZoomConnected}
+                disabled={!isConnected}
                 className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
-                  bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white cursor-pointer
-                  ${aiAssistant.canUse
-                    ? " hover:from-[#080aa8] hover:to-[#6d0668]"
-                    : "opacity-50"}
+                  bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                  ${isConnected
+                    ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
+                    : 'opacity-50 cursor-not-allowed'}
                 `}
               >
                 <MessageSquare className="w-5 h-5" />
@@ -244,11 +240,11 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
               href={`/calendar/${organizationId}`}
               className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
-                ${isZoomConnected
+                ${isConnected
                   ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
                   : 'opacity-50 cursor-not-allowed pointer-events-none'}
               `}
-              title={!isZoomConnected ? 'Connect to Zoom first' : 'Go to Org Calendar'}
+              title={!isConnected ? `Connect ${activeTab} first` : 'Create new meeting'}
             >
               <CalendarDays className="w-5 h-5" />
               Org Calendar
@@ -258,11 +254,11 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
               href={`/member-list/${organizationId}`}
               className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
-                ${isZoomConnected
+                ${isConnected
                   ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
                   : 'opacity-50 cursor-not-allowed pointer-events-none'}
               `}
-              title={!isZoomConnected ? 'Connect to Zoom first' : 'View Members'}
+              title={!isConnected ? `Connect ${activeTab} first` : 'Create new meeting'}
             >
               <Users className="w-5 h-5" />
               Member List
