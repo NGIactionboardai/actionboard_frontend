@@ -204,14 +204,14 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
           <span>Member List</span>
         </Link>
 
-        {/* Meeting Platforms */}
+        {/* Integrations */}
         <button
-          onClick={() => (window.location.href = '/configure-meeting-tools')}
+          onClick={() => (window.location.href = '/integrations')}
           className="w-full max-w-xs mx-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
             bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668]"
         >
           <Settings className="w-4 h-4" />
-          <span>Meeting Platforms</span>
+          <span>Integrations</span>
         </button>
       </div>
 

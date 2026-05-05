@@ -401,12 +401,12 @@ export default function NewNavbar({ variant = "default" }) {
                                 Help & Support
                               </Link>
                               <Link
-                                href="/configure-meeting-tools"
+                                href='/integrations'
                                 className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors mx-2 rounded-lg"
                                 onClick={() => setDropdownOpen(false)}
                               >
                                 <Settings className="mr-3 h-4 w-4 text-gray-400" />
-                                Meeting Platforms
+                                Integrations
                               </Link>
                               <div className="border-t border-gray-100 my-2"></div>
                               <button
@@ -562,8 +562,8 @@ export default function NewNavbar({ variant = "default" }) {
                 </MobileNavLink>
 
                 {/* Configure */}
-                <MobileNavLink href="/configure-meeting-tools" onClick={() => setMobileMenuOpen(false)} icon={<Settings className="w-5 h-5" />}>
-                  Meeting Platforms
+                <MobileNavLink href='/integrations' onClick={() => setMobileMenuOpen(false)} icon={<Settings className="w-5 h-5" />}>
+                  Integrations
                 </MobileNavLink>
 
                 {/* Profile */}

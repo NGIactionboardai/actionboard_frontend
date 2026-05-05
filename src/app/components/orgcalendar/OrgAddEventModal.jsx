@@ -353,7 +353,7 @@ export default function OrgAddEventModal({
                             {!isZoomConnected && (
                               <button
                                 type="button"
-                                onClick={() => window.location.href = '/configure-meeting-tools'}
+                                onClick={() => window.location.href = '/integrations'}
                                 className="text-xs text-blue-600 hover:underline text-left"
                               >
                                 Connect Zoom
@@ -363,7 +363,7 @@ export default function OrgAddEventModal({
                             {!isGoogleConnected && (
                               <button
                                 type="button"
-                                onClick={() => window.location.href = '/configure-meeting-tools'}
+                                onClick={() => window.location.href = '/integrations'}
                                 className="text-xs text-blue-600 hover:underline text-left"
                               >
                                 Connect Google Calendar

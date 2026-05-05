@@ -142,11 +142,11 @@ export default function HomeNavbar() {
                           <HelpCircle className="mr-2 h-4 w-4 text-gray-500" /> Help
                         </Link>
                         <Link
-                          href="/configure-meeting-tools"
+                          href='/integrations'
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setDropdownOpen(false)}
                         >
-                          Configure Meeting Platforms
+                          Integrations
                         </Link>
                         <div className="border-t border-gray-100"></div>
                         <button
@@ -255,7 +255,7 @@ export default function HomeNavbar() {
                   Help
                 </Link>
                 <Link
-                  href="/configure-meeting-tools"
+                  href='/integrations'
                   className="text-gray-700 hover:text-blue-600 transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >

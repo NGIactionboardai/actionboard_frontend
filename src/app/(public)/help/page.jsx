@@ -42,7 +42,7 @@ const HelpPage = () => {
     },
     {
       q: "Can I integrate with Zoom?",
-      a: "Yes. Navigate to Meeting Platforms > Zoom. From there, connect your Zoom account and manage the integration, including automatic recording and transcription."
+      a: "Yes. Navigate to Integrations > Zoom. From there, connect your Zoom account and manage the integration, including automatic recording and transcription."
     },
     {
       q: "Do I need Zoom for Nous Meeting to work?",

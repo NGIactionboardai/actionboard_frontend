@@ -302,14 +302,14 @@ export default function Navbar() {
                               Help
                             </Link>
                             <Link
-                              href="/configure-meeting-tools"
+                              href='/integrations'
                               className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                               onClick={() => setDropdownOpen(false)}
                             >
                               <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M4 3a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h12a1 1 0 100-2H4zm0 4a1 1 0 000 2h8a1 1 0 100-2H4z" clipRule="evenodd" />
                               </svg>
-                              Configure Meeting Platforms
+                              Integrations
                             </Link>
                             <div className="border-t border-gray-100"></div>
                             <button
@@ -422,8 +422,8 @@ export default function Navbar() {
                 </MobileNavLinkDark>
 
                 {/* Configure */}
-                <MobileNavLinkDark href="/configure-meeting-tools" onClick={() => setMobileMenuOpen(false)}>
-                  Configure Meeting Platforms
+                <MobileNavLinkDark href='/integrations' onClick={() => setMobileMenuOpen(false)}>
+                  Integrations
                 </MobileNavLinkDark>
 
                 {/* Profile */}
