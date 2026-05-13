@@ -32,17 +32,6 @@ import {
   getJiraConnectionStatus,
   selectJiraLoading
 } from "@/redux/integrations/jiraSlice";
-
-// SLACK
-import {
-  selectSlackConnected,
-  selectSlackWorkspaceCount,
-  selectSlackMappedOrgCount,
-  selectSlackActionLoading,
-  fetchSlackStatus,
-  startSlackOAuth,
-} from "@/redux/integrations/slackSlice";
-
 import { useMeetingsModal } from "@/app/hooks/useMeetings";
 import ZoomConfig from "@/app/components/ZoomConfig";
 import ConfirmModal from "@/app/components/integrations/ConfirmModal";
@@ -71,18 +60,11 @@ export default function IntegrationsPage() {
   const [showJiraConnectModal, setShowJiraConnectModal] = useState(false);
   const [showJiraDisconnectModal, setShowJiraDisconnectModal] = useState(false);
 
-  const isSlackConnected = useSelector(selectSlackConnected);
-  const slackWorkspaceCount = useSelector(selectSlackWorkspaceCount);
-  const slackMappedOrgCount = useSelector(selectSlackMappedOrgCount);
-  const slackActionLoading = useSelector(selectSlackActionLoading);
-  const [showSlackConnectModal, setShowSlackConnectModal] = useState(false);
-
   const [expanded, setExpanded] = useState(null);
 
   useEffect(() => {
     dispatch(getJiraConnectionStatus());
     dispatch(fetchGoogleStatus());
-    dispatch(fetchSlackStatus());
   }, [dispatch]);
 
   const toggleExpand = (key) => {
@@ -125,11 +107,6 @@ export default function IntegrationsPage() {
     setShowJiraDisconnectModal(false);
   };
 
-  const handleSlackConnect = async () => {
-    setShowSlackConnectModal(false);
-    dispatch(startSlackOAuth());
-  };
-
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-10">
       <div className="max-w-5xl mx-auto">
@@ -139,7 +116,7 @@ export default function IntegrationsPage() {
           <h1 className="text-3xl font-semibold text-gray-900">
             Integrations
           </h1>
-          <p className="text-base text-gray-500 mt-1">
+          <p className="text-lg text-gray-500 mt-1">
             Connect your tools to automate meetings, sync data, and boost productivity.
           </p>
         </div>
@@ -200,32 +177,6 @@ export default function IntegrationsPage() {
             <DetailItem label="Status" value="Connected workspace" />
           </IntegrationRow>
 
-          {/* SLACK */}
-          <IntegrationRow
-            name="Slack"
-            icon="/integrations/slack-logo.png"
-            description="Post meeting summaries to Slack channels."
-            isConnected={isSlackConnected}
-            expanded={expanded === "slack"}
-            onToggle={() => toggleExpand("slack")}
-            onConnect={() => setShowSlackConnectModal(true)}
-            onDisconnect={() => (window.location.href = "/integrations/slack")}
-            extraAction={{
-              label: "Manage",
-              onClick: () => (window.location.href = "/integrations/slack")
-            }}
-            loading={slackActionLoading}
-          >
-            <DetailItem
-              label="Workspaces"
-              value={`${slackWorkspaceCount} workspace${slackWorkspaceCount !== 1 ? "s" : ""} connected`}
-            />
-            <DetailItem
-              label="Org Mappings"
-              value={`${slackMappedOrgCount} organisation${slackMappedOrgCount !== 1 ? "s" : ""} mapped`}
-            />
-          </IntegrationRow>
-
         </Section>
 
       </div>
@@ -279,17 +230,7 @@ export default function IntegrationsPage() {
             onCancel={() => setShowJiraDisconnectModal(false)}
         />
     )}
-
-    {showSlackConnectModal && (
-        <ConfirmModal
-            title="Connect Slack"
-            description="You will be redirected to Slack to authorise Nous Meeting. After approval, you can map your organisations to Slack workspaces."
-            confirmText="Continue to Slack"
-            onConfirm={handleSlackConnect}
-            onCancel={() => setShowSlackConnectModal(false)}
-        />
-    )}
-
+    
     </main>
   );
 }
@@ -299,7 +240,7 @@ export default function IntegrationsPage() {
 function Section({ title, children }) {
     return (
       <div className="mb-10">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+        <h2 className="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-3">
           {title}
         </h2>
   
@@ -342,16 +283,16 @@ function IntegrationRow({
   
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-base md:text-lg font-semibold text-gray-900">{name}</p>
+                <p className="text-xl font-semibold text-gray-900">{name}</p>
   
-                <span className={`text-sm px-2.5 py-0.5 rounded-full font-medium ${
+                <span className={`text-sm px-2 py-0.5 rounded-full font-medium ${
                   isConnected ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
                 }`}>
                   {isConnected ? "Connected" : "Not Connected"}
                 </span>
               </div>
   
-              <p className="text-sm text-gray-500 mt-1 leading-relaxed">{description}</p>
+              <p className="text-sm text-gray-500 mt-1">{description}</p>
             </div>
           </div>
   
@@ -366,7 +307,7 @@ function IntegrationRow({
                 {extraAction && (
                   <button
                     onClick={extraAction.onClick}
-                    className="px-3 py-1.5 text-sm font-medium rounded-full border hover:bg-gray-100"
+                    className="px-3 py-1.5 text-base rounded-full border hover:bg-gray-100"
                   >
                     {extraAction.label}
                   </button>
@@ -374,7 +315,7 @@ function IntegrationRow({
   
                 <button
                   onClick={onDisconnect}
-                  className="px-3 py-1.5 text-sm font-medium rounded-full text-white bg-red-500 hover:bg-red-600"
+                  className="px-3 py-1.5 text-base rounded-full text-white bg-red-500 hover:bg-red-600"
                 >
                   Disconnect
                 </button>
@@ -383,7 +324,7 @@ function IntegrationRow({
               <button
                 onClick={onConnect}
                 disabled={loading}
-                className="px-4 py-1.5 text-sm font-medium rounded-full text-white shadow
+                className="px-4 py-1.5 text-base rounded-full text-white shadow
                 bg-gradient-to-r from-[#0A0DC4] to-[#8B0782]
                 hover:from-[#080aa8] hover:to-[#6d0668]"
               >
@@ -414,7 +355,7 @@ function DetailItem({ label, value }) {
     return (
       <div>
         <p className="text-sm text-gray-500">{label}</p>
-        <p className="text-base font-medium text-gray-800">{value || "—"}</p>
+        <p className="font-medium text-gray-800">{value || "—"}</p>
       </div>
     );
 }

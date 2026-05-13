@@ -14,7 +14,8 @@ import SentimentSummaryTable from '@/app/components/meetings/SentimentSummaryTab
 import axios from 'axios';
 import { format } from "date-fns";
 import { generateMeetingPDF } from '@/app/utils/pdfGenerator';
-import { ArrowLeft, Building2, FileDown, Crown } from 'lucide-react';
+import { ArrowLeft, Building2, FileDown, Crown, Send } from 'lucide-react';
+import toast from 'react-hot-toast';
 import EditStructuredSummary from '@/app/components/meeting/EditStructuredSummary';
 import _ from "lodash";
 import SendSummaryModal from '@/app/components/meeting/SendSummaryModal';
@@ -97,9 +98,33 @@ export default function MeetingDetails() {
   const [members, setMembers] = useState([]);
   const [isSendSummaryModalOpen, setIsSendSummaryModalOpen] = useState(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState('');
+  const [slackSending, setSlackSending] = useState(false);
 
 
   const isTranscriptionOngoing = transcriptionStatus === 'pending' || transcriptionStatus === 'processing';
+
+  const handleSendToSlack = async () => {
+    if (slackSending) return;
+    try {
+      setSlackSending(true);
+      const res = await axios.post(`${API_BASE_URL}/integrations/slack/send-meeting/`, {
+        meeting_id: meeting.meeting_id || meetingId,
+        source: 'normal',
+      });
+      toast.success(`Summary posted to #${res.data.channel}.`);
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 400) {
+        toast.error('No Slack channel configured for this organisation. Visit Integrations to set one up.');
+      } else if (status === 403) {
+        toast.error('Only org admins can send meeting summaries to Slack.');
+      } else {
+        toast.error('Failed to send to Slack. Please try again.');
+      }
+    } finally {
+      setSlackSending(false);
+    }
+  };
 
   // billing
   const [upgradeState, setUpgradeState] = useState(null);
@@ -1264,6 +1289,15 @@ export default function MeetingDetails() {
                           </button>
 
                           
+
+                          <button
+                            onClick={handleSendToSlack}
+                            disabled={slackSending}
+                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Send className="w-4 h-4" />
+                            {slackSending ? 'Sending…' : 'Send to Slack'}
+                          </button>
 
                           <button
                             onClick={() => {

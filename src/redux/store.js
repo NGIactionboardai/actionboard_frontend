@@ -10,6 +10,7 @@ import billingReducer from "../redux/billing/billingSlice";
 import googleCalendarReducer from "../redux/integrations/googleCalendarSlice";
 import meetingReducer from '../redux/meetings/meetingSlice';
 import jiraReducer from '../redux/integrations/jiraSlice';
+import slackReducer from '../redux/integrations/slackSlice';
 
 
 // Persist config for zoom slice
@@ -54,6 +55,7 @@ const rootReducer = combineReducers({
   billing: billingReducer,
   googleCalendar: googleCalendarReducer,
   jira: jiraReducer,
+  slack: slackReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

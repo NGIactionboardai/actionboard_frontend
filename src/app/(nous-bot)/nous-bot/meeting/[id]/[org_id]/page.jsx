@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { FileText, LayoutGrid, Edit3, Save, User, Video, CheckSquare, Square, Building2, ArrowLeft } from "lucide-react";
+import { FileText, LayoutGrid, Edit3, Save, User, Video, CheckSquare, Square, Building2, ArrowLeft, Send } from "lucide-react";
+import toast from 'react-hot-toast';
 import { useParams } from "next/navigation";
 import axios from "axios";
 import LiveTranscriptionPanel from "@/app/components/bots/LiveTranscriptionPanel";
@@ -111,6 +112,30 @@ export default function MeetingNotesPage() {
 
   const [summaryActionLoading, setSummaryActionLoading] = useState(false);
   const [refreshingMeeting, setRefreshingMeeting] = useState(false);
+  const [slackSending, setSlackSending] = useState(false);
+
+  const handleSendToSlack = async () => {
+    if (slackSending) return;
+    try {
+      setSlackSending(true);
+      const res = await axios.post(`${API_BASE_URL}/integrations/slack/send-meeting/`, {
+        meeting_id: meetingId,
+        source: 'bot',
+      });
+      toast.success(`Summary posted to #${res.data.channel}.`);
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 400) {
+        toast.error('No Slack channel configured for this organisation. Visit Integrations to set one up.');
+      } else if (status === 403) {
+        toast.error('Only org admins can send meeting summaries to Slack.');
+      } else {
+        toast.error('Failed to send to Slack. Please try again.');
+      }
+    } finally {
+      setSlackSending(false);
+    }
+  };
 
   const fetchMeetingDetails = async () => {
     try {
@@ -500,24 +525,37 @@ export default function MeetingNotesPage() {
                     </h3>
                   </div>
 
-                  <button
-                    onClick={triggerSummaryGeneration}
-                    disabled={summaryActionLoading}
-                    className={`
-                      text-sm font-medium px-4 py-1.5 rounded-md
-                      border border-[#8B0782]/30
-                      text-[#8B0782]
-                      bg-gradient-to-r from-[#0A0DC4]/5 to-[#8B0782]/5
-                      transition cursor-pointer
-                      ${
-                        summaryActionLoading
-                          ? "opacity-60 cursor-not-allowed"
-                          : "hover:from-[#0A0DC4]/10 hover:to-[#8B0782]/10"
-                      }
-                    `}
-                  >
-                    {summaryActionLoading ? "Regenerating…" : "Regenerate"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {activeTemplate === "general" && (
+                      <button
+                        onClick={handleSendToSlack}
+                        disabled={slackSending}
+                        className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                      >
+                        <Send size={14} />
+                        {slackSending ? 'Sending…' : 'Send to Slack'}
+                      </button>
+                    )}
+
+                    <button
+                      onClick={triggerSummaryGeneration}
+                      disabled={summaryActionLoading}
+                      className={`
+                        text-sm font-medium px-4 py-1.5 rounded-md
+                        border border-[#8B0782]/30
+                        text-[#8B0782]
+                        bg-gradient-to-r from-[#0A0DC4]/5 to-[#8B0782]/5
+                        transition cursor-pointer
+                        ${
+                          summaryActionLoading
+                            ? "opacity-60 cursor-not-allowed"
+                            : "hover:from-[#0A0DC4]/10 hover:to-[#8B0782]/10"
+                        }
+                      `}
+                    >
+                      {summaryActionLoading ? "Regenerating…" : "Regenerate"}
+                    </button>
+                  </div>
 
                   {/* {activeTemplate === "general" && (
 
