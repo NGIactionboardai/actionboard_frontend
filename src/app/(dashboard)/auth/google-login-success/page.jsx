@@ -15,7 +15,7 @@ const GoogleLoginSuccessPage = () => {
       const url = new URL(window.location.href);
       const code = url.searchParams.get('code');
 
-      const redirect_uri = `${window.location.origin}/auth/google-login-success/`;
+      const redirect_uri = `https://www.nousmeeting.com/auth/google-login-success/`;
       // const redirect_uri = 'http://localhost:3000/auth/google-login-success/';
 
 
