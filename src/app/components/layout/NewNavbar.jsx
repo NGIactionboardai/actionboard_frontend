@@ -140,6 +140,8 @@ export default function NewNavbar({ variant = "default" }) {
       : "bg-transparent"
     : "backdrop-blur-md bg-white shadow-sm";
 
+  const logoHref = isAuthenticated ? "/organizations" : "/";
+
   const isActive = (path) => activePath === path;
 
   const handleSignOut = async () => {
@@ -181,7 +183,7 @@ export default function NewNavbar({ variant = "default" }) {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center group">
+            <Link href={logoHref} className="flex-shrink-0 flex items-center group">
               <div className="relative">
                 <img 
                   src="/nous_logo.png" 
