@@ -4,7 +4,7 @@ import React from 'react';
 
 const GoogleLoginButton = () => {
   const handleGoogleLogin = () => {
-    const redirectUri = `https://www.nousmeeting.com/auth/google-login-success/`;
+    const redirectUri = `https://nousmeeting.com/auth/google-login-success/`;
     // const redirectUri = 'http://localhost:3000/auth/google-login-success/';
     // const redirectUri = 'http://localhost:3000/';
 
