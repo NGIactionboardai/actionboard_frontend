@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   '/auth/login',
   '/auth/register',
   '/auth/otp-verification',
+  '/auth/google-login-success',
   '/terms',
   '/privacy-policy',
   '/help',
