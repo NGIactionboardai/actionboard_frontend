@@ -27,6 +27,7 @@ import {
 } from '@/redux/auth/organizationSlice';
 
 import ConfirmModal from '@/app/components/integrations/ConfirmModal';
+import SlackDepartmentModal from '@/app/components/slack/SlackDepartmentModal';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -62,6 +63,9 @@ export default function SlackIntegrationPage() {
   const [channelsLoading, setChannelsLoading] = useState(false);
   const [channelSearch, setChannelSearch] = useState('');
   const [selectedChannel, setSelectedChannel] = useState(null); // { id, name }
+
+  // Configure departments modal
+  const [departmentTarget, setDepartmentTarget] = useState(null); // { mapping, workspaceId }
 
   // Load data + check URL params on mount
   useEffect(() => {
@@ -149,6 +153,11 @@ export default function SlackIntegrationPage() {
       toast.error('Failed to remove mapping. Please try again.');
     }
     setRemoveTarget(null);
+  };
+
+  const openConfigureDepartments = (mapping) => {
+    const workspace = workspaces.find((ws) => ws.team_id === mapping.workspace_team_id);
+    setDepartmentTarget({ mapping, workspaceId: workspace?.id || null });
   };
 
   const openChangeChannel = async (mapping) => {
@@ -324,6 +333,7 @@ export default function SlackIntegrationPage() {
                     key={mapping.id}
                     mapping={mapping}
                     onChangeChannel={() => openChangeChannel(mapping)}
+                    onConfigureDepartments={() => openConfigureDepartments(mapping)}
                     onRemove={() => setRemoveTarget({ id: mapping.id, orgName: mapping.organisation_name })}
                   />
                 ))}
@@ -394,6 +404,15 @@ export default function SlackIntegrationPage() {
           onCancel={() => setChannelTarget(null)}
         />
       )}
+
+      {/* Configure departments modal */}
+      {departmentTarget && (
+        <SlackDepartmentModal
+          mapping={departmentTarget.mapping}
+          workspaceId={departmentTarget.workspaceId}
+          onClose={() => setDepartmentTarget(null)}
+        />
+      )}
     </main>
   );
 }
@@ -442,47 +461,101 @@ function WorkspaceCard({ workspace, onDisconnect }) {
 // MAPPING ROW
 // ======================
 
-function MappingRow({ mapping, onChangeChannel, onRemove }) {
+function MappingRow({ mapping, onChangeChannel, onConfigureDepartments, onRemove }) {
   const hasChannel = !!mapping.default_channel_id;
 
+  // Fetch department count for this mapping to drive the warning
+  const [deptCount, setDeptCount] = useState(null); // null = still loading
+
+  useEffect(() => {
+    let cancelled = false;
+    axios
+      .get(`${API_BASE_URL}/integrations/slack/mappings/${mapping.id}/departments/`)
+      .then((res) => {
+        if (!cancelled) {
+          setDeptCount((res.data?.department_mappings || []).length);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setDeptCount(0);
+      });
+    return () => { cancelled = true; };
+  }, [mapping.id]);
+
+  const noDepts = deptCount === 0;
+
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 hover:bg-gray-50">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-semibold text-gray-900">{mapping.organisation_name}</span>
-          <span className="text-gray-400">→</span>
-          <span className="text-gray-700">{mapping.workspace_team_name}</span>
+    <div className="flex flex-col gap-2 px-5 py-4 hover:bg-gray-50">
+
+      {/* Main row */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-gray-900">{mapping.organisation_name}</span>
+            <span className="text-gray-400">→</span>
+            <span className="text-gray-700">{mapping.workspace_team_name}</span>
+          </div>
+          <div className="mt-1 flex items-center gap-3 flex-wrap">
+            {hasChannel ? (
+              <span className="inline-flex items-center gap-1 text-sm text-gray-500">
+                <Hash size={13} className="text-gray-400" />
+                {mapping.default_channel_name}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-sm text-amber-600 font-medium">
+                <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
+                No default channel configured
+              </span>
+            )}
+            {deptCount !== null && (
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                deptCount > 0 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+              }`}>
+                {deptCount} dept{deptCount !== 1 ? 's' : ''} mapped
+              </span>
+            )}
+          </div>
         </div>
-        <div className="mt-1">
-          {hasChannel ? (
-            <span className="inline-flex items-center gap-1 text-sm text-gray-500">
-              <Hash size={13} className="text-gray-400" />
-              {mapping.default_channel_name}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-sm text-amber-600 font-medium">
-              <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
-              No default channel configured
-            </span>
-          )}
+
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={onConfigureDepartments}
+            className="px-3 py-1.5 text-sm font-medium rounded-full border border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+          >
+            Configure Departments
+          </button>
+          <button
+            onClick={onChangeChannel}
+            className="px-3 py-1.5 text-sm font-medium rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100"
+          >
+            {hasChannel ? 'Change Channel' : 'Set Channel'}
+          </button>
+          <button
+            onClick={onRemove}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full text-red-600 border border-red-200 hover:bg-red-50"
+          >
+            <Trash2 size={13} />
+            Remove
+          </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <button
-          onClick={onChangeChannel}
-          className="px-3 py-1.5 text-sm font-medium rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100"
-        >
-          {hasChannel ? 'Change Channel' : 'Set Channel'}
-        </button>
-        <button
-          onClick={onRemove}
-          className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full text-red-600 border border-red-200 hover:bg-red-50"
-        >
-          <Trash2 size={13} />
-          Remove
-        </button>
-      </div>
+      {/* Warning — only shown once we know the count is actually 0 */}
+      {noDepts && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+          <span className="text-amber-500 flex-shrink-0">⚠</span>
+          <p className="text-xs text-amber-700">
+            No departments configured. Action items from meetings won&apos;t be routed
+            automatically.{' '}
+            <button
+              onClick={onConfigureDepartments}
+              className="font-medium underline underline-offset-2 hover:text-amber-900"
+            >
+              Configure now
+            </button>
+          </p>
+        </div>
+      )}
     </div>
   );
 }

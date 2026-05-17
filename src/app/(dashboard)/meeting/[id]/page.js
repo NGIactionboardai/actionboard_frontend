@@ -19,6 +19,7 @@ import toast from 'react-hot-toast';
 import EditStructuredSummary from '@/app/components/meeting/EditStructuredSummary';
 import _ from "lodash";
 import SendSummaryModal from '@/app/components/meeting/SendSummaryModal';
+import ActionItemRoutingModal from '@/app/components/slack/ActionItemRoutingModal';
 import { motion, AnimatePresence } from "framer-motion";
 import { useFeature } from "@/app/hooks/useFeature";
 import UpgradeModal from '@/app/components/billing/UpgradeModal';
@@ -97,6 +98,7 @@ export default function MeetingDetails() {
 
   const [members, setMembers] = useState([]);
   const [isSendSummaryModalOpen, setIsSendSummaryModalOpen] = useState(false);
+  const [isRoutingModalOpen, setIsRoutingModalOpen] = useState(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState('');
   const [slackSending, setSlackSending] = useState(false);
 
@@ -1300,6 +1302,14 @@ export default function MeetingDetails() {
                           </button>
 
                           <button
+                            onClick={() => setIsRoutingModalOpen(true)}
+                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-100 focus:outline-none"
+                          >
+                            <Send className="w-4 h-4 text-indigo-500" />
+                            Send Action Items to Slack
+                          </button>
+
+                          <button
                             onClick={() => {
                               setIsSendSummaryModalOpen(true);
                             }}
@@ -1917,6 +1927,14 @@ export default function MeetingDetails() {
           setIsSendSummaryModalOpen(false);
         }}
       />
+
+      {isRoutingModalOpen && (
+        <ActionItemRoutingModal
+          meetingId={meeting?.meeting_id || meetingId}
+          source="normal"
+          onClose={() => setIsRoutingModalOpen(false)}
+        />
+      )}
 
 
       {upgradeState && (
