@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, Plus, Trash2, Edit2, Sparkles, AlertTriangle, Hash, Loader2 } from 'lucide-react';
+import { X, Plus, Trash2, Edit2, Sparkles, AlertTriangle, Hash, Loader2, Copy, Check, Lock } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import DepartmentFormModal from './DepartmentFormModal';
@@ -17,6 +17,8 @@ export default function SlackDepartmentModal({ mapping, workspaceId, onClose }) 
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [copiedCommand, setCopiedCommand] = useState(false);
 
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -141,6 +143,15 @@ export default function SlackDepartmentModal({ mapping, workspaceId, onClose }) 
     }));
   };
 
+  const INVITE_COMMAND = '/invite @Nous Meeting';
+
+  const copyInviteCommand = () => {
+    navigator.clipboard.writeText(INVITE_COMMAND).then(() => {
+      setCopiedCommand(true);
+      setTimeout(() => setCopiedCommand(false), 2000);
+    });
+  };
+
   const hasDepts = departments.length > 0;
 
   return (
@@ -194,6 +205,29 @@ export default function SlackDepartmentModal({ mapping, workspaceId, onClose }) 
                   <Plus size={13} />
                   Add Department
                 </button>
+              </div>
+            </div>
+
+            {/* Private channel notice */}
+            <div className="flex items-start gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
+              <Lock size={15} className="text-blue-500 mt-0.5 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-blue-800">Private channels not showing up?</p>
+                <p className="text-xs text-blue-700 mt-0.5">
+                  To display a private channel here, you must invite the bot into it first. Run this command inside the channel:
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <code className="flex-1 text-xs bg-white border border-blue-200 text-blue-900 font-mono px-3 py-1.5 rounded-lg">
+                    {INVITE_COMMAND}
+                  </code>
+                  <button
+                    onClick={copyInviteCommand}
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-blue-200 bg-white text-blue-700 hover:bg-blue-50 shrink-0 transition-colors"
+                  >
+                    {copiedCommand ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+                    {copiedCommand ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
               </div>
             </div>
 
