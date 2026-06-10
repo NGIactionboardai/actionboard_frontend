@@ -13,6 +13,7 @@ import OrgSwitcher from './OrgSwitcher';
 import { ZoomConnectionStatus } from '../ZoomConfig';
 import { Video, MessageSquare, CalendarDays, Users, Settings, BotIcon, Crown } from "lucide-react";
 import { useFeature } from "@/app/hooks/useFeature";
+import { useOrgRole } from "@/app/hooks/useOrgRole";
 import UpgradeModal from '../billing/UpgradeModal';
 
 
@@ -30,6 +31,7 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
 
   const aiNotetaker = useFeature("ai_notetaker");
   const aiAssistant = useFeature("ai_assistant");
+  const { isViewer, canSendBot } = useOrgRole();
 
   const handleFeatureGate = (feature, key) => {
     if (!feature.enabled) {
@@ -107,46 +109,50 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
       {/* Action Buttons */}
       <div className="grid grid-cols-1 gap-3">
         {/* Create Meeting */}
-        <button
-          onClick={onCreateMeetingClick}
-          disabled={!isZoomConnected}
-          className={`w-full max-w-xs mx-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
-            bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
-            ${isZoomConnected
-              ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
-              : 'opacity-50 cursor-not-allowed'}
-          `}
-        >
-          <Video className="w-4 h-4" />
-          <span>Create Meeting</span>
-        </button>
-
-        {/* AI Note Taker */}
-        <div className="relative w-full max-w-xs mx-auto">
-          {!aiNotetaker.enabled && (
-            <div className="absolute -top-2 -right-2 z-10">
-              <div className="bg-yellow-400 text-white rounded-full p-1 shadow-md">
-                <Crown className="w-3 h-3" />
-              </div>
-            </div>
-          )}
-
+        {!isViewer && (
           <button
-            onClick={() => {
-              window.location.href = `/nous-bot/meetings/${organizationId}`;
-            }}
+            onClick={onCreateMeetingClick}
             disabled={!isZoomConnected}
-            className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
-              bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
-              ${isZoomConnected && aiNotetaker.canUse
+            className={`w-full max-w-xs mx-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
+              bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
+              ${isZoomConnected
                 ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
                 : 'opacity-50 cursor-not-allowed'}
             `}
           >
-            <BotIcon className="w-4 h-4" />
-            <span>Add Notetaker</span>
+            <Video className="w-4 h-4" />
+            <span>Create Meeting</span>
           </button>
-        </div>
+        )}
+
+        {/* AI Note Taker */}
+        {canSendBot && (
+          <div className="relative w-full max-w-xs mx-auto">
+            {!aiNotetaker.enabled && (
+              <div className="absolute -top-2 -right-2 z-10">
+                <div className="bg-yellow-400 text-white rounded-full p-1 shadow-md">
+                  <Crown className="w-3 h-3" />
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                window.location.href = `/nous-bot/meetings/${organizationId}`;
+              }}
+              disabled={!isZoomConnected}
+              className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
+                bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                ${isZoomConnected && aiNotetaker.canUse
+                  ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
+                  : 'opacity-50 cursor-not-allowed'}
+              `}
+            >
+              <BotIcon className="w-4 h-4" />
+              <span>Add Notetaker</span>
+            </button>
+          </div>
+        )}
 
         {/* AI Assistant */}
         <div className="relative w-full max-w-xs mx-auto">
@@ -164,7 +170,7 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
             }}
             disabled={!isZoomConnected}
             className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
-              bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+              bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
               ${isZoomConnected && aiAssistant.canUse
                 ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
                 : 'opacity-50 cursor-not-allowed'}
@@ -180,7 +186,7 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
         <Link
           href={`/calendar/${organizationId}`}
           className={`w-full max-w-xs mx-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
-            bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+            bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
             ${isZoomConnected
               ? 'hover:from-[#080aa8] hover:to-[#6d0668]'
               : 'opacity-50 pointer-events-none'}
@@ -194,7 +200,7 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
         <Link
           href={`/member-list/${organizationId}`}
           className={`w-full max-w-xs mx-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
-            bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+            bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
             ${isZoomConnected
               ? 'hover:from-[#080aa8] hover:to-[#6d0668]'
               : 'opacity-50 pointer-events-none'}
@@ -208,7 +214,7 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
         <button
           onClick={() => (window.location.href = '/integrations')}
           className="w-full max-w-xs mx-auto inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-all
-            bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668]"
+            bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668]"
         >
           <Settings className="w-4 h-4" />
           <span>Integrations</span>

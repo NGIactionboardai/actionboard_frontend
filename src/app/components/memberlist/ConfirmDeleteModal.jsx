@@ -12,8 +12,9 @@ export default function ConfirmDeleteModal({ member, orgId, onClose, onSuccess }
     setError("");
 
     try {
+      // RBAC: DELETE /api/organisations/<org_id>/memberships/<user_id>/
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${orgId}/members/${member.id}/`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${orgId}/memberships/${member.id}/`
       );
 
       onSuccess();

@@ -18,10 +18,28 @@ import {
 } from '../../../redux/auth/organizationSlice'; // Adjust import path as needed
 import { Popover } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
+import { LayoutGrid, LayoutList } from 'lucide-react';
 import withProfileCompletionGuard from '../withProfileCompletionGuard';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { ORG_COLORS } from '@/app/constants/orgColors';
+
+const ROLE_STYLES = {
+  owner:  { label: 'Owner',  cls: 'bg-purple-100 text-purple-700' },
+  admin:  { label: 'Admin',  cls: 'bg-blue-100   text-blue-700'   },
+  member: { label: 'Member', cls: 'bg-green-100  text-green-700'  },
+  viewer: { label: 'Viewer', cls: 'bg-gray-100   text-gray-600'   },
+};
+
+function RoleBadge({ role }) {
+  const meta = ROLE_STYLES[role];
+  if (!meta) return null;
+  return (
+    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${meta.cls}`}>
+      {meta.label}
+    </span>
+  );
+}
 
 
 
@@ -68,6 +86,21 @@ const ManageOrganizations = ({
   const error = useSelector(selectOrganizationError);
   const successMessage = useSelector(selectOrganizationSuccessMessage);
   const currentOrganization = useSelector(selectCurrentOrganization);
+
+  const currentUser = useSelector((state) => state.auth?.user);
+
+  // View mode — persisted in localStorage
+  const [viewMode, setViewMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('nous_org_view_mode') || 'grid';
+    }
+    return 'grid';
+  });
+
+  const setView = (mode) => {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') localStorage.setItem('nous_org_view_mode', mode);
+  };
 
   // Local state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -308,7 +341,7 @@ const ManageOrganizations = ({
       {/* {successMessage && (
         <div className="mb-4 rounded-md bg-green-50 p-4">
           <div className="flex">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
@@ -323,7 +356,7 @@ const ManageOrganizations = ({
       {/* {error && (
         <div className="mb-4 rounded-md bg-red-50 p-4">
           <div className="flex">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
@@ -335,10 +368,10 @@ const ManageOrganizations = ({
         </div>
       )} */}
 
-      {/* Search */}
-      {showSearch && (
-        <div className="mb-6">
-          <div className="max-w-md">
+      {/* Search + View Toggle */}
+      <div className="flex items-center gap-3 mb-6">
+        {showSearch && (
+          <div className="flex-1 max-w-md">
             <div className="relative rounded-md shadow-sm">
               <input
                 type="text"
@@ -354,8 +387,26 @@ const ManageOrganizations = ({
               </div>
             </div>
           </div>
+        )}
+
+        {/* View mode toggle */}
+        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 ml-auto">
+          <button
+            onClick={() => setView('grid')}
+            className={`p-1.5 rounded-md transition ${viewMode === 'grid' ? 'bg-white shadow text-gray-800' : 'text-gray-400 hover:text-gray-600'}`}
+            title="Grid view"
+          >
+            <LayoutGrid size={16} />
+          </button>
+          <button
+            onClick={() => setView('list')}
+            className={`p-1.5 rounded-md transition ${viewMode === 'list' ? 'bg-white shadow text-gray-800' : 'text-gray-400 hover:text-gray-600'}`}
+            title="List view"
+          >
+            <LayoutList size={16} />
+          </button>
         </div>
-      )}
+      </div>
 
       <div className="text-center mt-6">
         <h4 className="text-lg sm:text-xl font-bold pb-1 leading-snug text-gray-900">
@@ -364,9 +415,6 @@ const ManageOrganizations = ({
               ? "Create your first organization"
               : title}
           </span>
-          {/* {filteredOrganizations.length === 0
-            ? "Create your first organization"
-            : title} */}
         </h4>
       </div>
 
@@ -374,80 +422,134 @@ const ManageOrganizations = ({
       <div className="sm:rounded-lg">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {/* Repeat placeholder skeletons */}
             {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-40 p-4 rounded-xl shadow-md border border-gray-200 bg-gray-100 animate-pulse"
-              >
+              <div key={i} className="h-40 p-4 rounded-xl shadow-md border border-gray-200 bg-gray-100 animate-pulse">
                 <div className="flex items-center justify-center h-full">
                   <div className="w-3/4 h-6 bg-gray-300 rounded"></div>
                 </div>
               </div>
             ))}
           </div>
-        ) : (
+        ) : viewMode === 'grid' ? (
+          /* ── GRID VIEW ── */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-              {/* Add Organization Card */}
-              <div
-                onClick={openCreateModal}
-                className="flex flex-col justify-center items-center p-6 rounded-lg border border-gray-300 shadow hover:shadow-md cursor-pointer transition bg-white"
-              >
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-white text-2xl font-bold">
-                  +
-                </div>
-                <p className="mt-4 text-sm font-medium text-gray-600">Add Organization</p>
+            {/* Add Organization Card */}
+            <div
+              onClick={openCreateModal}
+              className="flex flex-col justify-center items-center p-6 rounded-lg border border-gray-300 shadow hover:shadow-md cursor-pointer transition bg-white"
+            >
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-linear-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-white text-2xl font-bold">
+                +
               </div>
+              <p className="mt-4 text-sm font-medium text-gray-600">Add Organization</p>
+            </div>
 
-              {/* Organization Cards */}
-              {filteredOrganizations.map((org) => (
-                <div key={org.org_id || org.id} className="relative group">
-                  {/* Card clickable area */}
+            {filteredOrganizations.map((org) => {
+              const orgId = org.org_id || org.id;
+              const isOwner = !org.role || org.role === 'owner';
+              return (
+                <div key={orgId} className="relative group">
                   <Link
-                    href={`${viewMeetingsPath}/${org.org_id || org.id}`}
-                    className="block h-40 p-4 rounded-xl shadow-md bg-white border border-gray-200 hover:shadow-xl hover:scale-[1.015] transition-transform duration-200 ease-in-out"
+                    href={`${viewMeetingsPath}/${orgId}`}
+                    className={`block h-40 p-4 rounded-xl shadow-md bg-white border hover:shadow-xl hover:scale-[1.015] transition-transform duration-200 ease-in-out ${
+                      isOwner ? 'border-gray-200' : 'border-dashed border-gray-300'
+                    }`}
                   >
+                    {/* Role badge — top-left, only for non-owners */}
+                    {org.role && !isOwner && (
+                      <div className="absolute top-2 left-2">
+                        <RoleBadge role={org.role} />
+                      </div>
+                    )}
                     <div className="flex items-center justify-center h-full">
-                      <h3 className="text-xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-[#0A0DC4] to-[#8B0782]">
+                      <h3 className={`text-xl font-bold text-center bg-clip-text text-transparent ${
+                        isOwner
+                          ? 'bg-linear-to-r from-[#0A0DC4] to-[#8B0782]'
+                          : 'bg-linear-to-r from-gray-500 to-gray-700'
+                      }`}>
                         {org.name}
                       </h3>
                     </div>
                   </Link>
 
-                  {/* Popover menu */}
-                  <Popover className="absolute top-2 right-2 z-10">
-                    <Popover.Button
-                      className="bg-white p-1 rounded-full hover:bg-gray-100 focus:outline-none"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <EllipsisVerticalIcon className="h-6 w-6 text-gray-500" />
-                    </Popover.Button>
-                    <Popover.Panel className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
-                      <div className="py-1 text-sm text-gray-700">
-                        {/* <button
-                          onClick={() => handleSetCurrentOrg(org)}
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                        >
-                          Set as Current
-                        </button> */}
-                        <button
-                          onClick={() => openEditModal(org)}
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(org)}
-                          className="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </Popover.Panel>
-                  </Popover>
+                  {/* Popover — only for owners */}
+                  {isOwner && (
+                    <Popover className="absolute top-2 right-2 z-10">
+                      <Popover.Button
+                        className="bg-white p-1 rounded-full hover:bg-gray-100 focus:outline-none"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <EllipsisVerticalIcon className="h-6 w-6 text-gray-500" />
+                      </Popover.Button>
+                      <Popover.Panel className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
+                        <div className="py-1 text-sm text-gray-700">
+                          <button onClick={() => openEditModal(org)} className="w-full text-left px-4 py-2 hover:bg-gray-100">Edit</button>
+                          <button onClick={() => openDeleteModal(org)} className="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600">Delete</button>
+                        </div>
+                      </Popover.Panel>
+                    </Popover>
+                  )}
                 </div>
-              ))}
-            </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* ── LIST VIEW ── */
+          <div className="mt-8 bg-white border border-gray-200 rounded-2xl divide-y overflow-hidden">
+            {/* Add org row */}
+            <button
+              onClick={openCreateModal}
+              className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition text-left"
+            >
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white text-lg font-bold shrink-0">
+                +
+              </div>
+              <span className="text-sm font-medium text-gray-500">Add Organization</span>
+            </button>
+
+            {filteredOrganizations.map((org) => {
+              const orgId = org.org_id || org.id;
+              const isOwner = !org.role || org.role === 'owner';
+              return (
+                <div key={orgId} className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition">
+                  {/* Left: color dot + name + badge */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className="w-3 h-3 rounded-full shrink-0"
+                      style={{ backgroundColor: org.color || '#4F46E5' }}
+                    />
+                    <span className={`font-semibold truncate ${isOwner ? 'text-gray-900' : 'text-gray-500'}`}>
+                      {org.name}
+                    </span>
+                    {org.role && <RoleBadge role={org.role} />}
+                  </div>
+
+                  {/* Right: Open link + actions */}
+                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                    <Link
+                      href={`${viewMeetingsPath}/${orgId}`}
+                      className="px-3 py-1.5 text-sm font-medium rounded-full bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668]"
+                    >
+                      Open
+                    </Link>
+                    {isOwner && (
+                      <Popover className="relative">
+                        <Popover.Button className="p-1 rounded-full hover:bg-gray-100 focus:outline-none">
+                          <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
+                        </Popover.Button>
+                        <Popover.Panel className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
+                          <div className="py-1 text-sm text-gray-700">
+                            <button onClick={() => openEditModal(org)} className="w-full text-left px-4 py-2 hover:bg-gray-100">Edit</button>
+                            <button onClick={() => openDeleteModal(org)} className="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600">Delete</button>
+                          </div>
+                        </Popover.Panel>
+                      </Popover>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 
@@ -601,7 +703,7 @@ const ManageOrganizations = ({
             <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                  <div className="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
                     <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>

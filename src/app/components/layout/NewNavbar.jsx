@@ -9,7 +9,7 @@ import { userLogout, selectIsAuthenticated, selectUser, selectAuthLoading } from
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import axios from 'axios';
 import { getUserOrganizations, selectUserOrganizations } from '@/redux/auth/organizationSlice';
-import { HelpCircle, ChevronDown, Menu, X, Building2, Calendar, Settings, User, LogOut } from 'lucide-react';
+import { HelpCircle, ChevronDown, Menu, X, Building2, Calendar, Settings, User, LogOut, Bell } from 'lucide-react';
 import { useRouter } from "next/navigation";
 
 export default function NewNavbar({ variant = "default" }) {
@@ -22,8 +22,12 @@ export default function NewNavbar({ variant = "default" }) {
   const [hasMounted, setHasMounted] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [orgsOpen, setOrgsOpen] = useState(false);
+  const [inviteDropdownOpen, setInviteDropdownOpen] = useState(false);
+  const [pendingInvitations, setPendingInvitations] = useState([]);
+  const [respondingToken, setRespondingToken] = useState(null);
   const calendarRef = useRef(null);
   const orgRef = useRef(null);
+  const inviteRef = useRef(null);
   const [orgs, setOrgs] = useState([]);
 
   const router = useRouter();
@@ -123,6 +127,31 @@ export default function NewNavbar({ variant = "default" }) {
   }, [dispatch]);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchInvitations = async () => {
+      try {
+        const res = await axios.get(
+          `${API_BASE_URL}/organisations/invitations/mine/`
+        );
+        setPendingInvitations(res.data.invitations || []);
+      } catch {
+        // silently ignore — non-critical
+      }
+    };
+    fetchInvitations();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (inviteRef.current && !inviteRef.current.contains(event.target)) {
+        setInviteDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -143,6 +172,24 @@ export default function NewNavbar({ variant = "default" }) {
   const logoHref = isAuthenticated ? "/organizations" : "/";
 
   const isActive = (path) => activePath === path;
+
+  const handleInviteResponse = async (token, action) => {
+    setRespondingToken(token);
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/organisations/invitations/${token}/${action}/`
+      );
+      setPendingInvitations((prev) => prev.filter((inv) => inv.token !== token));
+      if (action === 'accept' && res.data.org_id) {
+        dispatch(getUserOrganizations());
+        router.push(`/meetings/${res.data.org_id}`);
+      }
+    } catch (err) {
+      console.error('Invitation response failed', err.response?.data);
+    } finally {
+      setRespondingToken(null);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -301,6 +348,60 @@ export default function NewNavbar({ variant = "default" }) {
                             </Link>
                           ))}
                         </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Invitation notification bell */}
+                  <div className="relative" ref={inviteRef}>
+                    <button
+                      type="button"
+                      onClick={() => setInviteDropdownOpen((prev) => !prev)}
+                      className="relative p-2 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-blue-50/50 transition-all duration-200"
+                      title="Pending invitations"
+                    >
+                      <Bell className="h-5 w-5" />
+                      {pendingInvitations.length > 0 && (
+                        <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
+                      )}
+                    </button>
+
+                    {inviteDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-80 rounded-xl shadow-lg bg-white/95 backdrop-blur-md ring-1 ring-gray-200/50 z-50 border border-gray-100">
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <p className="text-sm font-semibold text-gray-800">Pending Invitations</p>
+                        </div>
+                        {pendingInvitations.length === 0 ? (
+                          <p className="px-4 py-4 text-sm text-gray-500 text-center">No pending invitations</p>
+                        ) : (
+                          <ul className="py-1 max-h-72 overflow-y-auto">
+                            {pendingInvitations.map((inv) => (
+                              <li key={inv.token} className="px-4 py-3 border-b border-gray-50 last:border-0">
+                                <p className="text-sm font-medium text-gray-800 truncate">{inv.org_name}</p>
+                                <p className="text-xs text-gray-500 mb-2">
+                                  Invited as <span className="capitalize font-medium">{inv.role}</span>
+                                  {' · '}by {inv.invited_by}
+                                </p>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleInviteResponse(inv.token, 'accept')}
+                                    disabled={respondingToken === inv.token}
+                                    className="flex-1 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] rounded-md hover:opacity-90 disabled:opacity-50"
+                                  >
+                                    {respondingToken === inv.token ? '...' : 'Accept'}
+                                  </button>
+                                  <button
+                                    onClick={() => handleInviteResponse(inv.token, 'decline')}
+                                    disabled={respondingToken === inv.token}
+                                    className="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50"
+                                  >
+                                    Decline
+                                  </button>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
                     )}
                   </div>

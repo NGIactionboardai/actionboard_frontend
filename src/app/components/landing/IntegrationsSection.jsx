@@ -34,12 +34,6 @@ const integrations = [
     logo: "/integrations/slack-logo.png",
     available: false,
   },
-  {
-    name: "WhatsApp",
-    desc: "Coming Soon",
-    logo: "/integrations/whatsapp-logo.png",
-    available: false,
-  },
 ];
 
 export default function IntegrationsSection() {

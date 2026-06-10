@@ -3,9 +3,9 @@
 
 import Link from 'next/link';
 
-const MeetingsList = ({ 
-  filteredMeetings, 
-  loading, 
+const MeetingsList = ({
+  filteredMeetings,
+  loading,
   isZoomConnected,
   isGoogleConnected,
   organizationId,
@@ -21,7 +21,7 @@ const MeetingsList = ({
   onDeleteClick,
   onEditClick,
   activeTab,
-  
+  canShareMeeting = false,
 }) => {
 
   const isProviderConnected =
@@ -193,16 +193,18 @@ const MeetingsList = ({
                           Start
                         </button>
                       )}
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          onShareClick(meeting);
-                        }}
-                        className="px-4 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
-                      >
-                        Invite
-                      </button>
+                      {canShareMeeting && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onShareClick(meeting);
+                          }}
+                          className="px-4 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
+                        >
+                          Invite
+                        </button>
+                      )}
 
                       <button
                         onClick={(e) => {
@@ -241,16 +243,18 @@ const MeetingsList = ({
                           Start
                         </button>
                       )}
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          onShareClick(meeting);
-                        }}
-                        className="w-full px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
-                      >
-                        Invite
-                      </button>
+                      {canShareMeeting && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onShareClick(meeting);
+                          }}
+                          className="w-full px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-blue-100 hover:bg-blue-200 transition"
+                        >
+                          Invite
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.preventDefault();

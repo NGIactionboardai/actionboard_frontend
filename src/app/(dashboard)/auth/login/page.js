@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Eye, EyeOff, User, Mail, Lock, X, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   userLogin, 
   clearError, 
@@ -21,6 +21,8 @@ import GoogleLoginButton from '@/app/components/auth/GoogleLoginButton';
 export default function LoginPage() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect');
   
   // Redux state selectors
   const auth = useSelector(selectAuth);
@@ -39,12 +41,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Redirect if already authenticated
+  // Redirect after authentication — honour ?redirect= if present
   useEffect(() => {
     if (isAuthenticated && auth.user) {
-      router.push('/');
+      router.push(redirectTo || '/');
     }
-  }, [isAuthenticated, auth.user, router]);
+  }, [isAuthenticated, auth.user, router, redirectTo]);
 
   // Auto-clear messages after 5 seconds
   useEffect(() => {

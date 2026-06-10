@@ -99,7 +99,7 @@ export default function MeetingDetails() {
   const [members, setMembers] = useState([]);
   const [isSendSummaryModalOpen, setIsSendSummaryModalOpen] = useState(false);
   const [isRoutingModalOpen, setIsRoutingModalOpen] = useState(false);
-  const [selectedSpeaker, setSelectedSpeaker] = useState('');
+const [selectedSpeaker, setSelectedSpeaker] = useState('');
   const [slackSending, setSlackSending] = useState(false);
 
 

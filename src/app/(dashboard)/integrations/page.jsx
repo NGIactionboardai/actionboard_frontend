@@ -44,6 +44,7 @@ import {
 } from "@/redux/integrations/slackSlice";
 
 import { useMeetingsModal } from "@/app/hooks/useMeetings";
+import { useOrgRole } from "@/app/hooks/useOrgRole";
 import ZoomConfig from "@/app/components/ZoomConfig";
 import ConfirmModal from "@/app/components/integrations/ConfirmModal";
 
@@ -78,6 +79,7 @@ export default function IntegrationsPage() {
   const [showSlackConnectModal, setShowSlackConnectModal] = useState(false);
 
   const [expanded, setExpanded] = useState(null);
+  const { canManageOrgIntegrations } = useOrgRole();
 
   useEffect(() => {
     dispatch(getJiraConnectionStatus());
@@ -196,6 +198,7 @@ export default function IntegrationsPage() {
               onClick: () => (window.location.href = "/integrations/jira")
             }}
             loading={jiraLoading}
+            locked={!canManageOrgIntegrations}
           >
             <DetailItem label="Status" value="Connected workspace" />
           </IntegrationRow>
@@ -215,6 +218,7 @@ export default function IntegrationsPage() {
               onClick: () => (window.location.href = "/integrations/slack")
             }}
             loading={slackActionLoading}
+            locked={!canManageOrgIntegrations}
           >
             <DetailItem
               label="Workspaces"
@@ -323,7 +327,8 @@ function IntegrationRow({
     expanded,
     onToggle,
     children,
-    loading
+    loading,
+    locked = false,
   }) {
     return (
       <div className="transition">
@@ -360,8 +365,11 @@ function IntegrationRow({
             className="flex items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
-  
-            {isConnected ? (
+            {locked ? (
+              <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 font-medium">
+                Owner / Admin only
+              </span>
+            ) : isConnected ? (
               <>
                 {extraAction && (
                   <button
@@ -371,7 +379,6 @@ function IntegrationRow({
                     {extraAction.label}
                   </button>
                 )}
-  
                 <button
                   onClick={onDisconnect}
                   className="px-3 py-1.5 text-sm font-medium rounded-full text-white bg-red-500 hover:bg-red-600"
@@ -384,13 +391,13 @@ function IntegrationRow({
                 onClick={onConnect}
                 disabled={loading}
                 className="px-4 py-1.5 text-sm font-medium rounded-full text-white shadow
-                bg-gradient-to-r from-[#0A0DC4] to-[#8B0782]
+                bg-linear-to-r from-[#0A0DC4] to-[#8B0782]
                 hover:from-[#080aa8] hover:to-[#6d0668]"
               >
                 {loading ? "Connecting..." : "Connect"}
               </button>
             )}
-  
+
             {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </div>
         </div>

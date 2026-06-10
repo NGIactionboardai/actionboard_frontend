@@ -12,7 +12,7 @@ import {
 import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
 import { createMeeting, getMeetings, selectMeetingLoading } from '@/redux/meetings/meetingSlice';
 
-const CreateMeetingModal = ({ 
+const CreateMeetingModal = ({
   isOpen, 
   onClose, 
   organizationId,
@@ -49,17 +49,14 @@ const CreateMeetingModal = ({
   const filteredMembers = members.filter(m => {
     if (!memberSearch.trim()) return true;
     const q = memberSearch.toLowerCase();
-    return (
-      m.name?.toLowerCase().includes(q) ||
-      m.email?.toLowerCase().includes(q)
-    );
+    return m.name?.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q);
   });
 
   const selectAllMembers = () => {
     const allIds = filteredMembers.map(m => m.id);
     setSelectedMembers(prev => Array.from(new Set([...prev, ...allIds])));
   };
-  
+
   const deselectAllMembers = () => {
     const filteredIds = new Set(filteredMembers.map(m => m.id));
     setSelectedMembers(prev => prev.filter(id => !filteredIds.has(id)));
@@ -87,13 +84,10 @@ const CreateMeetingModal = ({
     }));
   };
 
-  const toggleMember = (memberId) => {
+  const toggleMember = (memberId) =>
     setSelectedMembers(prev =>
-      prev.includes(memberId)
-        ? prev.filter(id => id !== memberId)
-        : [...prev, memberId]
+      prev.includes(memberId) ? prev.filter(id => id !== memberId) : [...prev, memberId]
     );
-  };
 
   useEffect(() => {
     if (isOpen) {
@@ -103,14 +97,11 @@ const CreateMeetingModal = ({
 
   const fetchMembers = async () => {
     if (!organizationId) return;
-  
     try {
       setMembersLoading(true);
-  
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${organizationId}/members/`
       );
-  
       setMembers(res.data.members || []);
       setNextUrl(res.data.next);
       setHasMore(Boolean(res.data.next));
@@ -123,18 +114,14 @@ const CreateMeetingModal = ({
 
   const loadMoreMembers = useCallback(async () => {
     if (!nextUrl || isFetchingMore) return;
-  
     setIsFetchingMore(true);
-  
     try {
       const res = await axios.get(nextUrl);
-  
       setMembers(prev => {
         const map = new Map(prev.map(m => [m.id, m]));
-        res.data.members.forEach(m => map.set(m.id, m));
+        (res.data.members || []).forEach(m => map.set(m.id, m));
         return Array.from(map.values());
       });
-  
       setNextUrl(res.data.next);
       setHasMore(Boolean(res.data.next));
     } catch (err) {
@@ -146,7 +133,6 @@ const CreateMeetingModal = ({
 
   const sendInvites = async (meetingId) => {
     if (!selectedMembers.length) return;
-  
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/meetings/send-meeting-invitations/${organizationId}/`,
@@ -156,7 +142,6 @@ const CreateMeetingModal = ({
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }
       );
-
       return true;
     } catch (err) {
       console.error("Failed to send invites", err);
@@ -175,14 +160,17 @@ const CreateMeetingModal = ({
   
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/${organizationId}/members/`,
-        newMember
+        {
+          name: newMember.name,
+          email: newMember.email,
+        }
       );
   
       const createdMember = res.data;
   
       // Update list instantly
       setMembers(prev => [createdMember, ...prev]);
-  
+
       // Auto-select new member
       setSelectedMembers(prev => [...prev, createdMember.id]);
   
@@ -273,7 +261,6 @@ const CreateMeetingModal = ({
         invitesSent = await sendInvites(meetingId);
       }
 
-
       // Toast feedback
       if (selectedMembers.length === 0) {
         toast.success(`${provider === "zoom" ? "Zoom" : "Google"} meeting created`);
@@ -282,7 +269,7 @@ const CreateMeetingModal = ({
       } else {
         toast.success("Meeting created, but invites failed to send");
       }
-  
+
       // reset
       setSelectedMembers([]);
       setMeetingForm({
@@ -514,7 +501,7 @@ const CreateMeetingModal = ({
                   {/* List */}
                   <div
                     ref={memberListRef}
-                    className="border border-gray-300 rounded-lg max-h-40 overflow-y-auto"
+                    className="border border-gray-300 rounded-lg max-h-48 overflow-y-auto"
                   >
                     {membersLoading ? (
                       <p className="text-sm text-gray-500 p-3">Loading members...</p>
@@ -533,38 +520,27 @@ const CreateMeetingModal = ({
                               onChange={() => toggleMember(member.id)}
                               className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500"
                             />
-
                             <div className="flex flex-col min-w-0 flex-1">
                               <span className="text-sm text-gray-900 truncate">
                                 {member.name || member.email}
                               </span>
                               {member.name && (
-                                <span className="text-xs text-gray-500 truncate">
-                                  {member.email}
-                                </span>
+                                <span className="text-xs text-gray-500 truncate">{member.email}</span>
                               )}
                             </div>
                           </label>
                         ))}
 
                         {isFetchingMore && !memberSearch && (
-                          <p className="text-xs text-gray-500 px-3 py-2 text-center">
-                            Loading more...
-                          </p>
+                          <p className="text-xs text-gray-500 px-3 py-2 text-center">Loading more...</p>
                         )}
                       </>
                     )}
                   </div>
 
-                  {/* <p className="text-xs text-indigo-600 font-medium mt-1.5">
-                    {selectedMembers.length} member
-                    {selectedMembers.length !== 1 ? "s" : ""} selected
-                  </p> */}
-
                   {selectedMembers.length > 0 && (
                     <p className="text-xs text-indigo-600 font-medium mt-1.5">
-                      {selectedMembers.length} member
-                      {selectedMembers.length > 1 ? "s" : ""} selected
+                      {selectedMembers.length} member{selectedMembers.length > 1 ? "s" : ""} selected
                     </p>
                   )}
                 </div>

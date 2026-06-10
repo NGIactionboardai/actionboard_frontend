@@ -11,7 +11,7 @@ const API_ENDPOINTS = {
   CREATE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/create-organization/',
   GET_USER_ORGS: 'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
   GET_ALL_ORGS: 'https://actionboard-ai-backend.onrender.com/api/organizations/',
-  GET_ORG_DETAILS: 'https://actionboard-ai-backend.onrender.com/api/organisations/my-organisations/',
+  GET_ORG_DETAILS: `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/`,
   UPDATE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/update-organization/',
   DELETE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/delete-organization/'
 };
@@ -645,5 +645,19 @@ export const selectOrganizationLoading = (state) => state.organization?.loading 
 export const selectOrganizationError = (state) => state.organization?.error || null;
 export const selectOrganizationSuccessMessage = (state) => state.organization?.successMessage || null;
 export const selectSelectedOrgId = (state) => state.organization?.selectedOrgId || null;
+
+// Cross-slice selector: derives current user's role from the org detail response.
+// The org detail endpoint (GET /api/organisations/<org_id>/) returns members[].role.
+// user.id is the Django User pk — matches member.user_id in the response.
+// Returns 'owner' | 'admin' | 'member' | 'viewer' | null (null = not yet loaded).
+export const selectCurrentUserRole = (state) => {
+  const details = state.organization?.organizationDetails;
+  const user = state.auth?.user;
+  // Backend may return the pk as id, user_id, or pk depending on serializer
+  const userId = user?.id ?? user?.user_id ?? user?.pk;
+  if (!details?.members || !userId) return null;
+  const me = details.members.find((m) => m.user_id === userId);
+  return me?.role ?? null;
+};
 
 export default organizationSlice.reducer;

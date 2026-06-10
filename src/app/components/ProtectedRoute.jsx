@@ -11,13 +11,15 @@ const PUBLIC_PATHS = [
   '/auth/login',
   '/auth/register',
   '/auth/otp-verification',
+  '/auth/forgot-password',
   '/auth/google-login-success',
   '/terms',
   '/privacy-policy',
   '/help',
   '/feedback-form',
   '/zoom-connection-doc',
-  '/pricing'
+  '/pricing',
+  '/invitations',
 ];
 
 export default function ProtectedRoute({ children }) {

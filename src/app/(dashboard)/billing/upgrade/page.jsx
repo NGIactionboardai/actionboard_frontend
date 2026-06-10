@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { fetchSubscription } from "@/redux/billing/billingSlice";
 import { ArrowLeft, Crown, Check, X } from "lucide-react";
+import { useOrgRole } from "@/app/hooks/useOrgRole";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return null;
@@ -30,6 +31,8 @@ export default function UpgradePage() {
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(null);
   const [billingCycle, setBillingCycle] = useState("monthly");
+
+  const { canViewBilling, canUpgradePlan, canManagePayment } = useOrgRole();
 
   const sub = billing.subscription;
 
@@ -98,6 +101,17 @@ export default function UpgradePage() {
   const currentPlanId = billing.subscription?.plan?.plan_id;
 
   const sortedPlans = [...plans].sort((a, b) => a.id - b.id);
+
+  if (!canViewBilling) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center max-w-sm">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Restricted</h2>
+          <p className="text-gray-600 text-sm">Billing information is only available to organisation owners and admins.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-10 px-4">
@@ -257,15 +271,23 @@ export default function UpgradePage() {
                     >
                       Not Available
                     </button>
-                  ) : (
+                  ) : canUpgradePlan ? (
                     <button
                       onClick={() => handleCheckout(plan)}
                       disabled={checkoutLoading === plan.id}
-                      className="w-full bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white py-2 rounded-lg hover:opacity-90"
+                      className="w-full bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white py-2 rounded-lg hover:opacity-90"
                     >
                       {checkoutLoading === plan.id
                         ? "Processing..."
                         : isExpired || isCanceled ? "Continue" : "Upgrade"}
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full bg-gray-100 text-gray-400 py-2 rounded-lg cursor-not-allowed"
+                      title="Only the organisation owner can upgrade the plan"
+                    >
+                      Owner Only
                     </button>
                   )}
                 </div>
@@ -279,12 +301,16 @@ export default function UpgradePage() {
             Already have a subscription? Manage billing, update payment method, or cancel anytime.
           </p>
 
-          <button
-            onClick={handleCustomerPortal}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            Manage Subscription
-          </button>
+          {canManagePayment ? (
+            <button
+              onClick={handleCustomerPortal}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Manage Subscription
+            </button>
+          ) : (
+            <p className="text-sm text-gray-400">Only the organisation owner can manage payment details.</p>
+          )}
         </div>
       </div>
     </div>

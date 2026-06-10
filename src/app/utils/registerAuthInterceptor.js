@@ -1,6 +1,7 @@
 // src/app/utils/registerAuthInterceptor.js
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import toast from 'react-hot-toast';
 import { store } from '@/redux/store';
 import { refreshToken, storage } from '@/redux/auth/authSlices';
 
@@ -110,6 +111,17 @@ export function registerAuthInterceptor() {
       const originalRequest = error.config;
 
       if (!originalRequest) return Promise.reject(error);
+
+      // Show the backend's detail message only for explicit user actions (mutations).
+      // Silent GET 403s are expected for role-restricted data — the UI hides it already.
+      if (error.response?.status === 403) {
+        const method = originalRequest.method?.toUpperCase();
+        if (method && method !== 'GET') {
+          const detail = error.response.data?.detail;
+          if (detail) toast.error(detail);
+        }
+        return Promise.reject(error);
+      }
 
       // Only try once
       if (error.response?.status === 401 && !originalRequest._retry) {

@@ -35,6 +35,7 @@ import EditMeetingModal from '@/app/components/EditMeetingModal';
 import UpgradeModal from '@/app/components/billing/UpgradeModal';
 import { getMeetings, selectMeetingError, selectMeetingLoading, selectMeetings } from '@/redux/meetings/meetingSlice';
 import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
+import { useOrgRole } from '@/app/hooks/useOrgRole';
 
 export default function Meetings() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -74,6 +75,7 @@ export default function Meetings() {
 
   const isZoomConnected = useSelector(selectZoomIsConnected);
   const isGoogleConnected = useSelector(selectGoogleIsConnected);
+  const { canShareMeeting } = useOrgRole();
 
   const {
     searchTerm,
@@ -321,6 +323,7 @@ export default function Meetings() {
             setIsEditMeetingModalOpen(true);
           }}
           activeTab={activeTab}
+          canShareMeeting={canShareMeeting}
         />
   
         {/* Modals */}

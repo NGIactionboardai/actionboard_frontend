@@ -16,6 +16,7 @@ import axios from 'axios';
 import { Video, MessageSquare, CalendarDays, Users, Settings, BotIcon, Crown } from "lucide-react";
 import ManualBotJoinModal from '../bots/ManualBotJoinModal';
 import { useFeature } from "@/app/hooks/useFeature";
+import { useOrgRole } from "@/app/hooks/useOrgRole";
 import UpgradeModal from '../billing/UpgradeModal';
 import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
 import { GoogleConnectionStatus } from '../googleCalendar/GoogleConnectionStatus';
@@ -41,6 +42,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
 
   const aiNotetaker = useFeature("ai_notetaker");
   const aiAssistant = useFeature("ai_assistant");
+  const { isViewer, canSendBot } = useOrgRole();
 
   const handleFeatureGate = (feature, key) => {
     if (!feature.enabled) {
@@ -167,47 +169,50 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
           </>
         ) : (
           <>
-            <button
-              onClick={onCreateMeetingClick}
-              disabled={!isConnected}
-              className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
-                bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
-                ${isConnected
-                  ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
-                  : 'opacity-50 cursor-not-allowed'}
-              `}
-              title={!isConnected ? `Connect ${activeTab} first` : 'Create new meeting'}
-            >
-              <Video className="w-5 h-5" />
-              Create Meeting
-            </button>
-
-            <div className="relative w-full">
-              {!aiNotetaker.enabled && (
-                <div className="absolute -top-2 -right-2 z-10">
-                  <div className="bg-yellow-400 text-white rounded-full p-1 shadow-md">
-                    <Crown className="w-3 h-3" />
-                  </div>
-                </div>
-              )}
-
+            {!isViewer && (
               <button
-                onClick={() => {
-                  // if (!handleFeatureGate(aiNotetaker, "ai_notetaker")) return;
-                  window.location.href = `/nous-bot/meetings/${organizationId}`;
-                }}
+                onClick={onCreateMeetingClick}
                 disabled={!isConnected}
                 className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
-                  bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                  bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
                   ${isConnected
                     ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
                     : 'opacity-50 cursor-not-allowed'}
                 `}
+                title={!isConnected ? `Connect ${activeTab} first` : 'Create new meeting'}
               >
-                <BotIcon className="w-5 h-5" />
-                  Add Notetaker
+                <Video className="w-5 h-5" />
+                Create Meeting
               </button>
-            </div>
+            )}
+
+            {canSendBot && (
+              <div className="relative w-full">
+                {!aiNotetaker.enabled && (
+                  <div className="absolute -top-2 -right-2 z-10">
+                    <div className="bg-yellow-400 text-white rounded-full p-1 shadow-md">
+                      <Crown className="w-3 h-3" />
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => {
+                    window.location.href = `/nous-bot/meetings/${organizationId}`;
+                  }}
+                  disabled={!isConnected}
+                  className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
+                    bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                    ${isConnected
+                      ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
+                      : 'opacity-50 cursor-not-allowed'}
+                  `}
+                >
+                  <BotIcon className="w-5 h-5" />
+                  Add Notetaker
+                </button>
+              </div>
+            )}
 
             <div className="relative w-full">
               {!aiAssistant.enabled && (
@@ -225,7 +230,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
                 }}
                 disabled={!isConnected}
                 className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
-                  bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                  bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
                   ${isConnected
                     ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
                     : 'opacity-50 cursor-not-allowed'}
@@ -239,7 +244,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
             <Link
               href={`/calendar/${organizationId}`}
               className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
-                bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
                 ${isConnected
                   ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
                   : 'opacity-50 cursor-not-allowed pointer-events-none'}
@@ -253,7 +258,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
             <Link
               href={`/member-list/${organizationId}`}
               className={`w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
-                bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white
+                bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white
                 ${isConnected
                   ? 'hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer'
                   : 'opacity-50 cursor-not-allowed pointer-events-none'}
@@ -267,7 +272,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
             <button
               onClick={() => window.location.href = '/integrations'}
               className="w-full inline-flex justify-center items-center gap-2 px-4 py-2 text-lg font-bold rounded-md transition-all
-                bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer"
+                bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668] cursor-pointer"
             >
               <Settings className="w-5 h-5" />
               Integrations
