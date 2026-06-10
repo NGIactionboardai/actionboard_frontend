@@ -46,8 +46,9 @@ export default function AuthHydrator({ children }) {
           storage.set(AUTH_STORAGE_KEYS.USER, userInfo);
           dispatch(hydrateAuth());
     
-          // ✅ Step 4: Fetch billing (CRITICAL ADDITION)
-          console.log("🔥 FETCH SUBSCRIPTION DISPATCHED");
+          console.log('[RBAC] AuthHydrator: user validated', { user_id: userInfo?.user_id ?? userInfo?.id });
+          // Step 4: Fetch billing
+          // console.log("🔥 FETCH SUBSCRIPTION DISPATCHED");
           await dispatch(fetchSubscription());
     
         } catch (err) {

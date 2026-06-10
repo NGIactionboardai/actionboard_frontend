@@ -137,7 +137,7 @@ export const createOrganization = createAsyncThunk(
         };
       }
 
-      console.log("Creating organization:", orgData.name);
+      // console.log("Creating organization:", orgData.name);
 
       const response = await axios.post(API_ENDPOINTS.CREATE_ORG, {
         name: orgData.name.trim(),
@@ -154,7 +154,7 @@ export const createOrganization = createAsyncThunk(
         message: response.data.message || 'Organization created successfully'
       };
     } catch (err) {
-        console.log("Create organization error:", err);
+        // console.log("Create organization error:", err);
 
         // return rejectWithValue(err.response.data)
 
@@ -198,7 +198,7 @@ export const getUserOrganizations = createAsyncThunk(
 
       const response = await axios.get(API_ENDPOINTS.GET_USER_ORGS, config);
       const organizations = response.data || []; // Based on your backend, it returns the array directly
-      console.log(organizations)
+      // console.log(organizations)
       
       // Store user organizations
       storage.set(ORG_STORAGE_KEYS.USER_ORGS, organizations);
@@ -242,6 +242,7 @@ export const getOrganizationDetails = createAsyncThunk(
         throw new Error('Organization ID is required');
       }
 
+      console.log('[RBAC] getOrganizationDetails: fetching', { orgId, url: `${API_ENDPOINTS.GET_ORG_DETAILS}${orgId}/` });
       const response = await axios.get(`${API_ENDPOINTS.GET_ORG_DETAILS}${orgId}/`);
       const organization = response.data;
 
@@ -298,7 +299,7 @@ export const updateOrganization = createAsyncThunk(
         message: response.data.message || 'Organization updated successfully'
       };
     } catch (err) {
-      console.log("Update organization error:", err);
+      // console.log("Update organization error:", err);
 
       if (axios.isAxiosError(err)) {
         const data = err.response?.data || {};
@@ -527,11 +528,18 @@ const organizationSlice = createSlice({
         state.loading = false;
         state.organizationDetails = action.payload.organization;
         state.error = null;
+        const members = action.payload.organization?.members;
+        console.log('[RBAC] getOrganizationDetails: success', {
+          orgId: action.payload.organization?.org_id,
+          totalMembers: members?.length,
+          members: members?.map(m => ({ user_id: m.user_id, role: m.role })),
+        });
       })
       .addCase(getOrganizationDetails.rejected, (state, action) => {
         state.fetchingDetails = false;
         state.loading = false;
         state.error = action.payload?.message || 'Failed to load organization details';
+        console.warn('[RBAC] getOrganizationDetails: FAILED', { error: action.payload });
       })
       
       // Update Organization

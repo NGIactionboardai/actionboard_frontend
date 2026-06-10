@@ -145,7 +145,7 @@ export const userRegister = createAsyncThunk(
         throw new Error('Please enter a valid email address');
       }
       
-      console.log("Starting registration process");
+      // console.log("Starting registration process");
 
       const response = await axios.post(API_ENDPOINTS.REGISTER, {
         email: userData.email.trim().toLowerCase(),
@@ -174,7 +174,7 @@ export const userRegister = createAsyncThunk(
 export const verifyOtp = createAsyncThunk(
   'auth/verifyOtp',
   async ({ email, otp }, { rejectWithValue }) => {
-    console.log("Verifying OTP for:", email, otp);
+    // console.log("Verifying OTP for:", email, otp);
     
     try {
       if (!email || !otp) {
@@ -191,7 +191,7 @@ export const verifyOtp = createAsyncThunk(
       });
 
       const { token, refreshToken, user } = response.data;
-      console.log("OTP verification successful:", { token: token ? "present" : "missing", user });
+      // console.log("OTP verification successful:", { token: token ? "present" : "missing", user });
 
       // Store authentication data
       storage.set(AUTH_STORAGE_KEYS.TOKEN, token);
@@ -335,7 +335,7 @@ export const refreshToken = createAsyncThunk(
       // Update axios default Authorization header
       setupAxiosInterceptors(newAccessToken);
 
-      console.log("Token refresh success")
+      // console.log("Token refresh success")
 
       return {
         token: newAccessToken,
@@ -524,6 +524,7 @@ const authSlice = createSlice({
         state.refreshToken = storedRefreshToken;
         state.isAuthenticated = true;
         setupAxiosInterceptors(storedToken);
+        console.log('[RBAC] hydrateAuth: user loaded', { user_id: storedUser?.user_id ?? storedUser?.id ?? storedUser?.pk });
       } else {
         // Clear inconsistent state
         storage.clear();
@@ -531,8 +532,9 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.refreshToken = null;
+        console.log('[RBAC] hydrateAuth: no stored credentials, cleared state');
       }
-      
+
       state.isHydrated = true;
     },
     
@@ -644,7 +646,7 @@ const authSlice = createSlice({
       .addCase(userLogin.rejected, (state, action) => {
         state.loggingIn = false;
         state.loading = false;
-        console.log('Login fail Message: ', action.payload)
+        // console.log('Login fail Message: ', action.payload)
         state.error = action.payload?.message || 'Login failed';
         state.successMessage = null;
       })

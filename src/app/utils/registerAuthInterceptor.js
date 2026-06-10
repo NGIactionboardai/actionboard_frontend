@@ -47,7 +47,7 @@ async function performRefresh() {
         if (newAccess) {
           storage.set(ACCESS_KEY, newAccess);
           if (newRefresh) storage.set(REFRESH_KEY, newRefresh);
-          console.log('[auth] token refreshed');
+          // console.log('[auth] token refreshed');
           return newAccess;
         }
       }
@@ -76,7 +76,7 @@ export function registerAuthInterceptor() {
   if (isRegistered) return; // already registered
 
   isRegistered = true;
-  console.log('[auth] registering axios auth interceptor');
+  // console.log('[auth] registering axios auth interceptor');
 
   // Request interceptor
   axios.interceptors.request.use(
@@ -86,7 +86,7 @@ export function registerAuthInterceptor() {
 
         // If token is expiring soon (or invalid), try refresh once
         if (token && tokenExpiringSoon(token)) {
-          console.log('[auth] token expiring soon, attempting refresh');
+          // console.log('[auth] token expiring soon, attempting refresh');
           const newToken = await performRefresh();
           if (newToken) token = newToken;
         }
@@ -127,7 +127,7 @@ export function registerAuthInterceptor() {
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
         try {
-          console.log('[auth] 401 encountered, attempting refresh & retry');
+          // console.log('[auth] 401 encountered, attempting refresh & retry');
           const newToken = await performRefresh();
           if (newToken) {
             originalRequest.headers = originalRequest.headers || {};

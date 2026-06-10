@@ -5,18 +5,26 @@ import { useDispatch, useSelector } from 'react-redux';
 import ProtectedRoute from '../components/ProtectedRoute';
 import NewNavbar from '../components/layout/NewNavbar';
 import ViewerGuard from '../components/ViewerGuard';
-import { selectCurrentOrganization, getOrganizationDetails } from '@/redux/auth/organizationSlice';
+import { selectCurrentOrganization, selectCurrentUserRole, getOrganizationDetails } from '@/redux/auth/organizationSlice';
 
 export default function DashboardLayout({ children }) {
   const dispatch = useDispatch();
   const currentOrg = useSelector(selectCurrentOrganization);
+  const role = useSelector(selectCurrentUserRole);
 
   useEffect(() => {
     const orgId = currentOrg?.org_id || currentOrg?.id;
+    console.log('[RBAC] DashboardLayout: currentOrg changed', { orgId, currentOrg });
     if (orgId) {
       dispatch(getOrganizationDetails(orgId));
+    } else {
+      console.warn('[RBAC] DashboardLayout: currentOrg is null — getOrganizationDetails will NOT be called');
     }
   }, [currentOrg?.org_id, currentOrg?.id, dispatch]);
+
+  useEffect(() => {
+    console.log('[RBAC] DashboardLayout: resolved role =', role);
+  }, [role]);
 
   return (
     <div className="min-h-screen bg-gray-50">

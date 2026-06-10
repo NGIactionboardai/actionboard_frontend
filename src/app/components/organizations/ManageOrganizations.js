@@ -451,6 +451,7 @@ const ManageOrganizations = ({
                 <div key={orgId} className="relative group">
                   <Link
                     href={`${viewMeetingsPath}/${orgId}`}
+                    onClick={() => handleSetCurrentOrg(org)}
                     className={`block h-40 p-4 rounded-xl shadow-md bg-white border hover:shadow-xl hover:scale-[1.015] transition-transform duration-200 ease-in-out ${
                       isOwner ? 'border-gray-200' : 'border-dashed border-gray-300'
                     }`}
@@ -528,6 +529,7 @@ const ManageOrganizations = ({
                   <div className="flex items-center gap-2 shrink-0 ml-4">
                     <Link
                       href={`${viewMeetingsPath}/${orgId}`}
+                      onClick={() => handleSetCurrentOrg(org)}
                       className="px-3 py-1.5 text-sm font-medium rounded-full bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668]"
                     >
                       Open
