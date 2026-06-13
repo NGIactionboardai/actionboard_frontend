@@ -6,7 +6,7 @@ import axios from 'axios';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parse } from "date-fns";
-import { Calendar, Download, Printer } from "lucide-react";
+import { Calendar, Download } from "lucide-react";
 import { toast } from 'react-hot-toast';
 
 export default function OrgEventReportsComponent({
@@ -96,6 +96,7 @@ export default function OrgEventReportsComponent({
     const { report_metadata, summary, time_breakdown, highlights, duration_type } = report;
     const generatedAt = report_metadata?.generated_at ? format(new Date(report_metadata.generated_at), 'PPp') : '';
     const periodLabel = getPeriodLabel();
+    const logoUrl = `${window.location.origin}/nous_logo.png`;
 
     const timeRows = time_breakdown.map(b => `
       <tr>
@@ -113,9 +114,11 @@ export default function OrgEventReportsComponent({
   <title>${orgName} – Event Report – ${periodLabel}</title>
   <style>
     body{font-family:Arial,sans-serif;margin:40px;color:#1f2937}
-    h1{font-size:22px;margin-bottom:4px}
+    .header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+    .logo{height:40px;width:auto;object-fit:contain}
     .org{font-size:14px;color:#4b5563;margin-bottom:4px}
-    .meta{color:#6b7280;font-size:12px;margin-bottom:28px}
+    h1{font-size:22px;margin:0 0 4px 0}
+    .meta{color:#6b7280;font-size:12px}
     .section{margin-bottom:20px;border:1px solid #e5e7eb;border-radius:6px;padding:16px;page-break-inside:avoid}
     .section h2{font-size:15px;font-weight:600;margin:0 0 12px 0}
     .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -132,9 +135,14 @@ export default function OrgEventReportsComponent({
   </style>
 </head>
 <body>
-  <div class="org">Organization: <strong>${orgName}</strong></div>
-  <h1>Event Report</h1>
-  <div class="meta">Period: ${periodLabel}&nbsp;&nbsp;|&nbsp;&nbsp;Generated: ${generatedAt}</div>
+  <div class="header">
+    <img src="${logoUrl}" alt="Nous Meeting" class="logo" />
+    <div>
+      <div class="org">Organization: <strong>${orgName}</strong></div>
+      <h1>Event Report</h1>
+      <div class="meta">Period: ${periodLabel}&nbsp;&nbsp;|&nbsp;&nbsp;Generated: ${generatedAt}</div>
+    </div>
+  </div>
 
   <div class="section">
     <h2>Summary</h2>
@@ -167,26 +175,13 @@ export default function OrgEventReportsComponent({
 </html>`;
   };
 
-  const handlePrint = () => {
+  const handleDownload = () => {
     const html = generatePrintHTML();
     const win = window.open('', '_blank');
     win.document.write(html);
     win.document.close();
     win.focus();
     setTimeout(() => win.print(), 400);
-  };
-
-  const handleDownload = () => {
-    const html = generatePrintHTML();
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const safeName = (orgName || 'org').replace(/[^\w]/g, '-');
-    const periodLabel = getPeriodLabel().replace(/\s[–-]\s/g, '_to_').replace(/[^\w]/g, '-');
-    a.download = `${safeName}-report-${periodLabel}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -271,20 +266,11 @@ export default function OrgEventReportsComponent({
             />
           </div>
 
-          {/* Print */}
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
-            title="Print report"
-          >
-            <Printer className="w-4 h-4" /> Print
-          </button>
-
           {/* Download */}
           <button
             onClick={handleDownload}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700"
-            title="Download report as HTML"
+            title="Open printable report"
           >
             <Download className="w-4 h-4" /> Download
           </button>

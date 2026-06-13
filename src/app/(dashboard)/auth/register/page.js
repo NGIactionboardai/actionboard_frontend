@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, User, Mail, Lock, Check, X, Globe, Calendar } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
@@ -28,7 +28,9 @@ countries.registerLocale(enLocale);
 export default function RegistrationPage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect');
+
   // Redux state selectors
   const auth = useSelector(selectAuth);
   const registrationFlow = useSelector(selectRegistrationFlow);
@@ -88,18 +90,18 @@ export default function RegistrationPage() {
   // Redirect if user is already authenticated
   useEffect(() => {
     if (auth.isAuthenticated && auth.user) {
-      router.push('/organizations');
+      router.push(redirectTo || '/organizations');
     }
-  }, [auth.isAuthenticated, auth.user, router]);
+  }, [auth.isAuthenticated, auth.user, router, redirectTo]);
 
-  // Handle successful registration - redirect to OTP page
+  // Handle successful registration - redirect to OTP page (thread redirect param through)
   useEffect(() => {
-    console.log("registrationFlow:", registrationFlow);
+    // console.log("registrationFlow:", registrationFlow);
     if (registrationFlow.email) {
-      // Navigate to OTP verification page with email parameter
-      router.push(`/auth/otp-verification?email=${encodeURIComponent(registrationFlow.email)}`);
+      const otpUrl = `/auth/otp-verification?email=${encodeURIComponent(registrationFlow.email)}${redirectTo ? `&redirect=${encodeURIComponent(redirectTo)}` : ''}`;
+      router.push(otpUrl);
     }
-  }, [registrationFlow.email, router]);
+  }, [registrationFlow.email, router, redirectTo]);
 
   // Auto-clear messages after 5 seconds
   useEffect(() => {
@@ -649,6 +651,15 @@ export default function RegistrationPage() {
     </div>
   );
 }
+
+// useSearchParams requires Suspense boundary in Next.js App Router
+const RegistrationPageWithSuspense = () => (
+  <Suspense fallback={null}>
+    <RegistrationPage />
+  </Suspense>
+);
+
+export { RegistrationPageWithSuspense as default };
 
 // Google Icon Component
 function GoogleIcon() {

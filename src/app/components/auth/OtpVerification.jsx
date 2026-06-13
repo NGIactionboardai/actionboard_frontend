@@ -67,17 +67,17 @@ export default function OtpVerification() {
     }
   }, [searchParams, registrationFlow.email, router]);
 
-  // Handle successful verification - redirect to dashboard
+  const redirectTo = searchParams.get('redirect');
+
+  // Handle successful verification - redirect to invite link or default to pricing
   useEffect(() => {
     if (auth.isAuthenticated && auth.user) {
-      // Clear stored email from sessionStorage
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('pendingVerificationEmail');
       }
-      // Registration and verification complete
-      router.push('/pricing');
+      router.push(redirectTo || '/pricing');
     }
-  }, [auth.isAuthenticated, auth.user, router]);
+  }, [auth.isAuthenticated, auth.user, router, redirectTo]);
 
   // Set initial resend timer when component mounts
   useEffect(() => {
