@@ -25,7 +25,7 @@ import { parse, format } from "date-fns";
 
 countries.registerLocale(enLocale);
 
-export default function RegistrationPage() {
+function RegistrationPage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
