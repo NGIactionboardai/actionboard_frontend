@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import ProtectedRoute from '../components/ProtectedRoute';
 import NewNavbar from '../components/layout/NewNavbar';
 import ViewerGuard from '../components/ViewerGuard';
+import UpcomingMeetingNotification from '../components/notifications/UpcomingMeetingNotification';
 import { selectCurrentOrganization, selectCurrentUserRole, getOrganizationDetails } from '@/redux/auth/organizationSlice';
 
 export default function DashboardLayout({ children }) {
@@ -35,6 +36,7 @@ export default function DashboardLayout({ children }) {
           <main className="mt-20 p-0">{children}</main>
         </ViewerGuard>
       </ProtectedRoute>
+      <UpcomingMeetingNotification />
     </div>
   );
 }
