@@ -20,6 +20,8 @@ import { useOrgRole } from "@/app/hooks/useOrgRole";
 import UpgradeModal from '../billing/UpgradeModal';
 import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
 import { GoogleConnectionStatus } from '../googleCalendar/GoogleConnectionStatus';
+import { selectTeamsIsConnected } from '@/redux/integrations/teamsSlice';
+import { TeamsConnectionStatus } from '../teams/TeamsConnectionStatus';
 
 export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, setUpgradeConfig, activeTab}) {
 
@@ -29,12 +31,16 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
   const token = useSelector((state) => state.auth?.token);
   const isZoomConnected = useSelector(selectZoomIsConnected);
   const isGoogleConnected = useSelector(selectGoogleIsConnected);
+  const isTeamsConnected = useSelector(selectTeamsIsConnected);
   const [organizations, setOrganizations] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(organizationId);
   const [loading, setLoading] = useState(true); // New loading state
   const [showManualBotModal, setShowManualBotModal] = useState(false);
 
-  const isConnected = activeTab === "zoom" ? isZoomConnected : isGoogleConnected;
+  const isConnected =
+    activeTab === "zoom" ? isZoomConnected :
+    activeTab === "google" ? isGoogleConnected :
+    isTeamsConnected;
   
 
   // billing
@@ -132,16 +138,27 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
                 </button>
               )}
             </>
-          ) : (
+          ) : activeTab === "google" ? (
             <>
               <GoogleConnectionStatus showDetails={false} />
-
               {!isGoogleConnected && (
                 <button
                   onClick={() => window.location.href = '/integrations'}
                   className="ml-4 px-3 py-1.5 text-xs rounded-md bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 transition cursor-pointer"
                 >
                   Connect Google
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <TeamsConnectionStatus showDetails={false} />
+              {!isTeamsConnected && (
+                <button
+                  onClick={() => window.location.href = '/integrations'}
+                  className="ml-4 px-3 py-1.5 text-xs rounded-md bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition cursor-pointer"
+                >
+                  Connect Teams
                 </button>
               )}
             </>

@@ -8,6 +8,7 @@ const MeetingsList = ({
   loading,
   isZoomConnected,
   isGoogleConnected,
+  isTeamsConnected,
   organizationId,
   orgName,
   onZoomConnectionClick,
@@ -25,7 +26,14 @@ const MeetingsList = ({
 }) => {
 
   const isProviderConnected =
-  activeTab === "zoom" ? isZoomConnected : isGoogleConnected;
+    activeTab === "zoom" ? isZoomConnected :
+    activeTab === "google" ? isGoogleConnected :
+    isTeamsConnected;
+
+  const providerLabel =
+    activeTab === "zoom" ? "Zoom" :
+    activeTab === "google" ? "Google Meet" :
+    "Microsoft Teams";
 
   
   if (loading) {
@@ -97,16 +105,12 @@ const MeetingsList = ({
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">
                 {!isProviderConnected
-                  ? `Connect to ${
-                      activeTab === "zoom" ? "Zoom" : "Google Meet"
-                    } to see meetings`
+                  ? `Connect to ${providerLabel} to see meetings`
                   : "No meetings found"}
               </h3>
               <p className="mt-1 text-sm text-gray-500">
                 {!isProviderConnected
-                  ? `You need to connect your ${
-                      activeTab === "zoom" ? "Zoom" : "Google Meet"
-                    } account to create and view meetings for organization ${orgName}.`
+                  ? `You need to connect your ${providerLabel} account to create and view meetings for organization ${orgName}.`
                   : "Try adjusting your filters or create a new meeting."}
               </p>
             </div>

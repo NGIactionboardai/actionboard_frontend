@@ -121,7 +121,7 @@ const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConn
                     <div className="sm:flex sm:items-start">
                       <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
                         <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                          Edit {provider === "zoom" ? "Zoom" : "Google Meet"} Meeting
+                          Edit {provider === "zoom" ? "Zoom" : provider === "google" ? "Google Meet" : "Microsoft Teams"} Meeting
                         </h3>
                         <div className="mt-4 space-y-4">
                           <div>

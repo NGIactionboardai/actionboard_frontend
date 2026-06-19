@@ -1,27 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Link from 'next/link';
 import axios from 'axios';
-import {
-  selectZoomIsConnected,
-  setShowConnectionModal,
-  setShowDisconnectModal,
-} from '@/redux/auth/zoomSlice';
+import { selectZoomIsConnected } from '@/redux/auth/zoomSlice';
 import OrgSwitcher from './OrgSwitcher';
 import { ZoomConnectionStatus } from '../ZoomConfig';
+import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
+import { GoogleConnectionStatus } from '../googleCalendar/GoogleConnectionStatus';
+import { selectTeamsIsConnected } from '@/redux/integrations/teamsSlice';
+import { TeamsConnectionStatus } from '../teams/TeamsConnectionStatus';
 import { Video, MessageSquare, CalendarDays, Users, Settings, BotIcon, Crown } from "lucide-react";
 import { useFeature } from "@/app/hooks/useFeature";
 import { useOrgRole } from "@/app/hooks/useOrgRole";
 import UpgradeModal from '../billing/UpgradeModal';
 
 
-export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingClick, setUpgradeConfig }) {
+export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingClick, setUpgradeConfig, activeTab }) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const dispatch = useDispatch();
   const isZoomConnected = useSelector(selectZoomIsConnected);
+  const isGoogleConnected = useSelector(selectGoogleIsConnected);
+  const isTeamsConnected = useSelector(selectTeamsIsConnected);
+
+  const isConnected =
+    activeTab === "zoom" ? isZoomConnected :
+    activeTab === "google" ? isGoogleConnected :
+    isTeamsConnected;
 
   const [organizations, setOrganizations] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState(organizationId);
@@ -71,14 +77,6 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
     fetchOrgs();
   }, []);
 
-  const handleZoomConnectionClick = () => {
-    if (isZoomConnected) {
-      dispatch(setShowDisconnectModal(true));
-    } else {
-      dispatch(setShowConnectionModal(true));
-    }
-  };
-
   return (
     <div className="xl:hidden w-full bg-gray-100 border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
       {/* Org Switcher */}
@@ -93,16 +91,44 @@ export default function MeetingsToolbarMobile({ organizationId, onCreateMeetingC
         />
       )}
 
-      {/* Zoom Connection Status */}
+      {/* Connection Status */}
       <div className="flex items-center justify-between mb-4">
-        <ZoomConnectionStatus organizationId={organizationId} showDetails={false} />
-        {!isZoomConnected && (
-          <button
-            onClick={handleZoomConnectionClick}
-            className="ml-2 px-3 py-1.5 text-xs rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition"
-          >
-            Connect Zoom
-          </button>
+        {activeTab === "zoom" ? (
+          <>
+            <ZoomConnectionStatus organizationId={organizationId} showDetails={false} />
+            {!isZoomConnected && (
+              <button
+                onClick={() => window.location.href = '/integrations'}
+                className="ml-2 px-3 py-1.5 text-xs rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition"
+              >
+                Connect Zoom
+              </button>
+            )}
+          </>
+        ) : activeTab === "google" ? (
+          <>
+            <GoogleConnectionStatus showDetails={false} />
+            {!isGoogleConnected && (
+              <button
+                onClick={() => window.location.href = '/integrations'}
+                className="ml-2 px-3 py-1.5 text-xs rounded-md bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 transition"
+              >
+                Connect Google
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <TeamsConnectionStatus showDetails={false} />
+            {!isTeamsConnected && (
+              <button
+                onClick={() => window.location.href = '/integrations'}
+                className="ml-2 px-3 py-1.5 text-xs rounded-md bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition"
+              >
+                Connect Teams
+              </button>
+            )}
+          </>
         )}
       </div>
 

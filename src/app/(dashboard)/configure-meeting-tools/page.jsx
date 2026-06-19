@@ -15,6 +15,8 @@ import { disconnectGoogle, fetchGoogleStatus, selectGoogleEmail, selectGoogleIsC
 import GoogleCalendarAccountCard from '@/app/components/googleCalendar/GoogleCalendarAccountCard';
 import JiraAccountCard from '@/app/components/jira/JiraAccountCard';
 import { disconnectJira, getJiraConnectionStatus, selectJiraIsConnected, selectJiraLoading, startJiraOAuth } from '@/redux/integrations/jiraSlice';
+import { disconnectTeams, fetchTeamsStatus, selectTeamsEmail, selectTeamsIsConnected, selectTeamsName, startTeamsOAuth } from '@/redux/integrations/teamsSlice';
+import TeamsAccountCard from '@/app/components/teams/TeamsAccountCard';
 
 
 function ConfigureMeetingToolsPage() {
@@ -37,6 +39,10 @@ function ConfigureMeetingToolsPage() {
   const [showJiraConnectModal, setShowJiraConnectModal] = useState(false);
   const [showJiraDisconnectModal, setShowJiraDisconnectModal] = useState(false);
 
+  const isTeamsConnected = useSelector(selectTeamsIsConnected);
+  const [showTeamsConnectModal, setShowTeamsConnectModal] = useState(false);
+  const [showTeamsDisconnectModal, setShowTeamsDisconnectModal] = useState(false);
+
 
 
   const {
@@ -50,30 +56,39 @@ function ConfigureMeetingToolsPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-  
+
     // GOOGLE
     if (params.get("google") === "connected") {
       dispatch(fetchGoogleStatus());
     }
-  
+
     if (params.get("google") === "auth-error") {
       console.error("Google authentication failed");
     }
-  
+
     // JIRA
     if (params.get("jira") === "connected") {
       dispatch(getJiraConnectionStatus());
       router.push("/integrations/jira?connected=true");
     }
-  
+
     if (params.get("jira") === "error") {
       console.error("Jira authentication failed");
     }
-  
+
+    // TEAMS
+    if (params.get("teams") === "connected") {
+      dispatch(fetchTeamsStatus());
+      const url = new URL(window.location.href);
+      url.searchParams.delete("teams");
+      window.history.replaceState({}, document.title, url.toString());
+    }
+
   }, [dispatch, router]);
 
   useEffect(() => {
     dispatch(getJiraConnectionStatus());
+    dispatch(fetchTeamsStatus());
   }, [dispatch]);
 
 
@@ -129,6 +144,26 @@ function ConfigureMeetingToolsPage() {
   const handleJiraDisconnect = () => {
     dispatch(disconnectJira());
     setShowJiraDisconnectModal(false);
+  };
+
+  const handleTeamsClick = () => {
+    if (isTeamsConnected) {
+      setShowTeamsDisconnectModal(true);
+    } else {
+      setShowTeamsConnectModal(true);
+    }
+  };
+
+  const handleTeamsConnect = async () => {
+    const res = await dispatch(startTeamsOAuth());
+    if (res.payload?.auth_url) {
+      window.location.href = res.payload.auth_url;
+    }
+  };
+
+  const handleTeamsDisconnect = () => {
+    dispatch(disconnectTeams());
+    setShowTeamsDisconnectModal(false);
   };
 
   return (
@@ -287,17 +322,44 @@ function ConfigureMeetingToolsPage() {
               </span>
             </div>
 
-            {/* Microsoft Teams Card (disabled) */}
-            <div className="flex flex-col items-center opacity-50 cursor-not-allowed group transition-transform hover:scale-105">
-                <div className="rounded-2xl border-2 p-10 border-gray-300 shadow-md w-48 h-48 flex items-center justify-center transition-all duration-200 group-hover:shadow-lg">
-                <img
-                    src="/meeting-tools-icons/teams-logo.png"
-                    alt="Microsoft Teams"
-                    className="h-24 w-24 object-contain"
-                />
+            {/* Microsoft Teams Card */}
+            <div
+              onClick={handleTeamsClick}
+              className="relative flex flex-col items-center group cursor-pointer transition-transform hover:scale-105"
+            >
+              {isTeamsConnected && (
+                <div className="absolute top-2 right-2 bg-[#00BA00] text-white rounded-full p-1 shadow-md">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
-                <p className="mt-4 text-lg font-medium text-gray-700">Microsoft Teams</p>
-                <p className="mt-1 text-sm text-gray-500">Coming Soon</p>
+              )}
+
+              <div
+                className={`rounded-2xl p-10 shadow-lg w-48 h-48 flex items-center justify-center transition-all duration-200 group-hover:shadow-xl ${
+                  isTeamsConnected ? 'border-[3px] border-[#00BA00]' : 'border-2 border-gray-300'
+                }`}
+              >
+                <img
+                  src="/meeting-tools-icons/teams-logo.png"
+                  alt="Microsoft Teams"
+                  className="h-24 w-24 object-contain"
+                />
+              </div>
+
+              <p className="mt-4 text-lg font-semibold text-blue-700 group-hover:text-blue-800">
+                Microsoft Teams
+              </p>
+
+              <span
+                className={`mt-1 inline-block px-3 py-1 text-sm rounded-full font-medium ${
+                  isTeamsConnected
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-200 text-gray-600'
+                }`}
+              >
+                {isTeamsConnected ? 'Connected' : 'Not Connected'}
+              </span>
             </div>
         </div>
 
@@ -318,7 +380,12 @@ function ConfigureMeetingToolsPage() {
         isJiraConnected={isJiraConnected}
       />
 
-      <ZoomConfig 
+      <TeamsAccountCard
+        onDisconnect={() => setShowTeamsDisconnectModal(true)}
+        isTeamsConnected={isTeamsConnected}
+      />
+
+      <ZoomConfig
         isOpen={isZoomConnectionModalOpen}
         onClose={() => setIsZoomConnectionModalOpen(false)}
       />
@@ -430,6 +497,65 @@ function ConfigureMeetingToolsPage() {
 
               <button
                 onClick={handleJiraDisconnect}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg"
+              >
+                Disconnect
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showTeamsConnectModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-[400px] text-center shadow-xl">
+            <h2 className="text-lg font-semibold mb-3">Connect Microsoft Teams</h2>
+
+            <p className="text-sm text-gray-600 mb-6">
+              To create and manage <span className="font-medium">Teams meetings</span>, you need to grant access to your{' '}
+              <span className="font-medium">Microsoft 365</span> account.
+              <br />
+              You will be redirected to Microsoft to complete authorisation.
+            </p>
+
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setShowTeamsConnectModal(false)}
+                className="px-4 py-2 border rounded-lg text-gray-600"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleTeamsConnect}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showTeamsDisconnectModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-[400px] text-center shadow-xl">
+            <h2 className="text-lg font-semibold mb-3">Disconnect Microsoft Teams</h2>
+
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to disconnect your Microsoft Teams account?
+            </p>
+
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setShowTeamsDisconnectModal(false)}
+                className="px-4 py-2 border rounded-lg text-gray-600"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleTeamsDisconnect}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg"
               >
                 Disconnect

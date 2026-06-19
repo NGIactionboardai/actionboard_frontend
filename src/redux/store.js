@@ -11,6 +11,7 @@ import googleCalendarReducer from "../redux/integrations/googleCalendarSlice";
 import meetingReducer from '../redux/meetings/meetingSlice';
 import jiraReducer from '../redux/integrations/jiraSlice';
 import slackReducer from '../redux/integrations/slackSlice';
+import teamsReducer from '../redux/integrations/teamsSlice';
 
 
 // Persist config for zoom slice
@@ -56,6 +57,7 @@ const rootReducer = combineReducers({
   googleCalendar: googleCalendarReducer,
   jira: jiraReducer,
   slack: slackReducer,
+  teams: teamsReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

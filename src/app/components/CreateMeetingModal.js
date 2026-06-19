@@ -10,6 +10,7 @@ import {
   selectZoomUserInfo
 } from '../../redux/auth/zoomSlice'; // Adjust import path as needed
 import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
+import { selectTeamsIsConnected } from '@/redux/integrations/teamsSlice';
 import { createMeeting, getMeetings, selectMeetingLoading } from '@/redux/meetings/meetingSlice';
 
 const CreateMeetingModal = ({
@@ -43,6 +44,7 @@ const CreateMeetingModal = ({
   const [addError, setAddError] = useState("");
 
   const isGoogleConnected = useSelector(selectGoogleIsConnected);
+  const isTeamsConnected = useSelector(selectTeamsIsConnected);
 
   const memberListRef = useRef(null);
 
@@ -219,9 +221,14 @@ const CreateMeetingModal = ({
       alert("Please connect Zoom first");
       return;
     }
-    
+
     if (provider === "google" && !isGoogleConnected) {
       alert("Please connect Google Calendar first");
+      return;
+    }
+
+    if (provider === "teams" && !isTeamsConnected) {
+      alert("Please connect Microsoft Teams first");
       return;
     }
   
@@ -262,8 +269,9 @@ const CreateMeetingModal = ({
       }
 
       // Toast feedback
+      const providerLabel = provider === "zoom" ? "Zoom" : provider === "google" ? "Google" : "Teams";
       if (selectedMembers.length === 0) {
-        toast.success(`${provider === "zoom" ? "Zoom" : "Google"} meeting created`);
+        toast.success(`${providerLabel} meeting created`);
       } else if (invitesSent) {
         toast.success(`Meeting created and ${selectedMembers.length} invite${selectedMembers.length > 1 ? "s" : ""} sent`);
       } else {
@@ -338,7 +346,7 @@ const CreateMeetingModal = ({
           {/* Fixed Header */}
           <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
             <h3 className="text-xl font-semibold text-gray-900" id="modal-title">
-              Create {provider === "zoom" ? "Zoom" : "Google Calendar"} Meeting
+              Create {provider === "zoom" ? "Zoom" : provider === "google" ? "Google Calendar" : "Microsoft Teams"} Meeting
             </h3>
 
           </div>

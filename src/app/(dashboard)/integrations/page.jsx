@@ -43,6 +43,16 @@ import {
   startSlackOAuth,
 } from "@/redux/integrations/slackSlice";
 
+// TEAMS
+import {
+  selectTeamsIsConnected,
+  selectTeamsEmail,
+  selectTeamsName,
+  startTeamsOAuth,
+  disconnectTeams,
+  fetchTeamsStatus,
+} from "@/redux/integrations/teamsSlice";
+
 import { useMeetingsModal } from "@/app/hooks/useMeetings";
 import { useOrgRole } from "@/app/hooks/useOrgRole";
 import ZoomConfig from "@/app/components/ZoomConfig";
@@ -78,6 +88,12 @@ export default function IntegrationsPage() {
   const slackActionLoading = useSelector(selectSlackActionLoading);
   const [showSlackConnectModal, setShowSlackConnectModal] = useState(false);
 
+  const isTeamsConnected = useSelector(selectTeamsIsConnected);
+  const teamsEmail = useSelector(selectTeamsEmail);
+  const teamsName = useSelector(selectTeamsName);
+  const [showTeamsConnectModal, setShowTeamsConnectModal] = useState(false);
+  const [showTeamsDisconnectModal, setShowTeamsDisconnectModal] = useState(false);
+
   const [expanded, setExpanded] = useState(null);
   const { canManageOrgIntegrations } = useOrgRole();
 
@@ -85,6 +101,24 @@ export default function IntegrationsPage() {
     dispatch(getJiraConnectionStatus());
     dispatch(fetchGoogleStatus());
     dispatch(fetchSlackStatus());
+    dispatch(fetchTeamsStatus());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const teamsParam = params.get("teams");
+
+    if (teamsParam === "connected") {
+      dispatch(fetchTeamsStatus());
+    } else if (teamsParam === "personal-account-not-supported") {
+      alert("Microsoft Teams requires a work or school Microsoft 365 account. Personal accounts (outlook.com, hotmail.com) are not supported.");
+    }
+
+    if (teamsParam) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("teams");
+      window.history.replaceState({}, document.title, url.toString());
+    }
   }, [dispatch]);
 
   const toggleExpand = (key) => {
@@ -132,6 +166,19 @@ export default function IntegrationsPage() {
     dispatch(startSlackOAuth());
   };
 
+  const handleTeamsConnect = async () => {
+    const res = await dispatch(startTeamsOAuth());
+    if (res.payload?.auth_url) {
+      setShowTeamsConnectModal(false);
+      window.location.href = res.payload.auth_url;
+    }
+  };
+
+  const handleTeamsDisconnect = () => {
+    dispatch(disconnectTeams());
+    setShowTeamsDisconnectModal(false);
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-10">
       <div className="max-w-5xl mx-auto">
@@ -177,6 +224,21 @@ export default function IntegrationsPage() {
                 <DetailItem label="Email" value={googleEmail} />
                 <DetailItem label="Name" value={googleName} />
             </IntegrationRow>
+
+          {/* TEAMS */}
+          <IntegrationRow
+            name="Microsoft Teams"
+            icon="/meeting-tools-icons/teams-logo.png"
+            description="Create and manage Teams meetings via Microsoft 365."
+            isConnected={isTeamsConnected}
+            expanded={expanded === "teams"}
+            onToggle={() => toggleExpand("teams")}
+            onConnect={() => setShowTeamsConnectModal(true)}
+            onDisconnect={() => setShowTeamsDisconnectModal(true)}
+          >
+            <DetailItem label="Email" value={teamsEmail} />
+            <DetailItem label="Name" value={teamsName} />
+          </IntegrationRow>
 
         </Section>
 
@@ -292,6 +354,27 @@ export default function IntegrationsPage() {
             onConfirm={handleSlackConnect}
             onCancel={() => setShowSlackConnectModal(false)}
         />
+    )}
+
+    {showTeamsConnectModal && (
+      <ConfirmModal
+        title="Connect Microsoft Teams"
+        description="To create and manage Teams meetings, we need access to your Microsoft 365 account. You will be redirected to Microsoft to complete authorisation."
+        confirmText="Continue"
+        onConfirm={handleTeamsConnect}
+        onCancel={() => setShowTeamsConnectModal(false)}
+      />
+    )}
+
+    {showTeamsDisconnectModal && (
+      <ConfirmModal
+        title="Disconnect Microsoft Teams"
+        description="Are you sure you want to disconnect your Microsoft Teams account?"
+        confirmText="Disconnect"
+        danger
+        onConfirm={handleTeamsDisconnect}
+        onCancel={() => setShowTeamsDisconnectModal(false)}
+      />
     )}
 
     </main>

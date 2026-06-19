@@ -35,6 +35,7 @@ import EditMeetingModal from '@/app/components/EditMeetingModal';
 import UpgradeModal from '@/app/components/billing/UpgradeModal';
 import { getMeetings, selectMeetingError, selectMeetingLoading, selectMeetings } from '@/redux/meetings/meetingSlice';
 import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
+import { selectTeamsIsConnected } from '@/redux/integrations/teamsSlice';
 import { useOrgRole } from '@/app/hooks/useOrgRole';
 
 export default function Meetings() {
@@ -75,6 +76,7 @@ export default function Meetings() {
 
   const isZoomConnected = useSelector(selectZoomIsConnected);
   const isGoogleConnected = useSelector(selectGoogleIsConnected);
+  const isTeamsConnected = useSelector(selectTeamsIsConnected);
   const { canShareMeeting } = useOrgRole();
 
   const {
@@ -94,17 +96,22 @@ export default function Meetings() {
 
   const tabMeetings = filteredMeetings.filter((meeting) => {
     const source = meeting.source?.toLowerCase();
-  
+
     if (activeTab === "zoom") {
       if (!isZoomConnected) return false;
       return source === "zoom";
     }
-  
+
     if (activeTab === "google") {
       if (!isGoogleConnected) return false;
       return source === "google";
     }
-  
+
+    if (activeTab === "teams") {
+      if (!isTeamsConnected) return false;
+      return source === "teams";
+    }
+
     return false;
   });
 
@@ -254,25 +261,22 @@ export default function Meetings() {
         /> */}
 
         <div className="flex gap-2 mb-4 border-b border-gray-200">
-          {["zoom", "google"].map((tab) => (
+          {[
+            { key: "zoom", label: "Zoom", icon: "/images/zoom02.png" },
+            { key: "google", label: "Google Meet", icon: "/images/meet.png" },
+            { key: "teams", label: "Microsoft Teams", icon: "/meeting-tools-icons/teams-logo.png" },
+          ].map(({ key, label, icon }) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
+              key={key}
+              onClick={() => setActiveTab(key)}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab
+                activeTab === key
                   ? "border-indigo-600 text-indigo-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              <img
-                src={tab === "zoom" ? "/images/zoom02.png" : "/images/meet.png"}
-                alt={tab}
-                className="w-4 h-4"
-              />
-
-              <span>
-                {tab === "zoom" ? "Zoom" : "Google Meet"}
-              </span>
+              <img src={icon} alt={key} className="w-4 h-4" />
+              <span>{label}</span>
             </button>
           ))}
         </div>
@@ -298,6 +302,7 @@ export default function Meetings() {
           loading={loading}
           isZoomConnected={isZoomConnected}
           isGoogleConnected={isGoogleConnected}
+          isTeamsConnected={isTeamsConnected}
           orgName={orgName}
           organizationId={organizationId}
           onZoomConnectionClick={handleZoomConnectionClick}
