@@ -18,21 +18,21 @@ const integrations = [
   },
   {
     name: "Microsoft Teams",
-    desc: "Coming Soon",
+    desc: "Sync recordings and notes straight from Teams",
     logo: "/integrations/teams-logo.png",
-    available: false,
-  },
-  {
-    name: "Jira",
-    desc: "Coming Soon",
-    logo: "/integrations/jira-logo.png",
-    available: false,
+    available: true,
   },
   {
     name: "Slack",
-    desc: "Coming Soon",
+    desc: "Route action items to the right channels",
     logo: "/integrations/slack-logo.png",
-    available: false,
+    available: true,
+  },
+  {
+    name: "Jira",
+    desc: "Turn action items into Jira tickets instantly",
+    logo: "/integrations/jira-logo.png",
+    available: true,
   },
 ];
 
@@ -64,7 +64,7 @@ export default function IntegrationsSection() {
 
       {/* Cards */}
       <motion.div
-        className="max-w-[1400px] mx-auto grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
+        className="max-w-[1200px] mx-auto grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}

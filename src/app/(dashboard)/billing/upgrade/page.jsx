@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { fetchSubscription } from "@/redux/billing/billingSlice";
 import { ArrowLeft, Crown, Check, X } from "lucide-react";
 import { useOrgRole } from "@/app/hooks/useOrgRole";
+import { getFeatureLabel, PLAN_INTEGRATIONS } from "@/lib/billingFeatures";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return null;
@@ -235,25 +236,34 @@ export default function UpgradePage() {
 
                   {/* FEATURES */}
                   <ul className="space-y-3 text-sm mb-6">
-                    {plan.features.map((f) => {
-                      const label = f.feature_key.replaceAll("_", " ");
 
-                      return (
-                        <li key={f.feature_key} className="flex items-center gap-2">
+                    {PLAN_INTEGRATIONS.map((integration) => (
+                      <li key={integration.key} className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-500" />
+                        <span>{integration.label}</span>
+                      </li>
+                    ))}
+                    {plan.features.map((f) => (
+                      <li key={f.feature_key} className="flex items-center gap-2">
 
-                          {f.enabled ? (
-                            <Check className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <X className="w-4 h-4 text-gray-300" />
-                          )}
+                        {f.enabled ? (
+                          <Check className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <X className="w-4 h-4 text-gray-300" />
+                        )}
 
-                          <span className={f.enabled ? "" : "text-gray-400"}>
-                            {label}
-                            {f.limit && ` (${f.limit})`}
-                          </span>
-                        </li>
-                      );
-                    })}
+                        <span className={f.enabled ? "" : "text-gray-400"}>
+                          {getFeatureLabel(f)}
+                        </span>
+                      </li>
+                    ))}
+
+                    {/* {PLAN_INTEGRATIONS.map((integration) => (
+                      <li key={integration.key} className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-500" />
+                        <span>{integration.label}</span>
+                      </li>
+                    ))} */}
                   </ul>
 
                   {/* CTA */}

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { fetchSubscription } from "@/redux/billing/billingSlice";
 import toast from "react-hot-toast";
+import { getFeatureLabel, PLAN_INTEGRATIONS } from "@/lib/billingFeatures";
 
 
 export default function PricingPage() {
@@ -88,29 +89,6 @@ export default function PricingPage() {
     return `$ ${price / 100}`;
   };
 
-  const getFeatureLabel = (feature) => {
-    const labels = {
-      org_creation: "Organization Creation",
-      org_meetings: "Organization Meetings",
-      member_management: "Member Management",
-      org_calendar: "Organization Calendar",
-      personal_calendar: "Personal Calendar",
-      upload_transcribe: "Upload & Transcribe",
-      ai_notetaker: "AI Notetaker",
-      ai_assistant: "AI Assistant",
-    };
-
-    
-
-    let label = labels[feature.feature_key] || feature.feature_key;
-
-    if (feature.limit) {
-      label += ` (${feature.limit})`;
-    }
-
-    return label;
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -182,6 +160,15 @@ export default function PricingPage() {
 
                 {/* Features */}
                 <div className="flex-1 space-y-3 mb-6">
+                  {PLAN_INTEGRATIONS.map((integration) => (
+                      <div
+                        key={integration.key}
+                        className="flex items-center gap-3 text-sm"
+                      >
+                        <Check className="w-4 h-4 text-green-600" />
+                        <span className="text-gray-700">{integration.label}</span>
+                      </div>
+                  ))}
                   {plan.features.map((feature, index) => (
                     <div
                       key={index}

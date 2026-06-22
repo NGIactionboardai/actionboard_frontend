@@ -38,7 +38,7 @@ const features = [
 
 export default function FeatureCardsSection() {
   return (
-    <section className="relative py-24 px-6 lg:px-16 bg-gradient-to-b from-gray-50 to-gray-100 overflow-hidden">
+    <section id="features" className="relative py-24 px-6 lg:px-16 bg-gradient-to-b from-gray-50 to-gray-100 overflow-hidden scroll-mt-24">
 
       {/* soft background glow */}
       <div className="absolute inset-0 pointer-events-none">
