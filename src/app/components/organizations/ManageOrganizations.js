@@ -7,6 +7,8 @@ import {
   createOrganization,
   updateOrganization,
   deleteOrganization,
+  uploadOrganizationLogo,
+  deleteOrganizationLogo,
   getUserOrganizations,
   setCurrentOrganization,
   clearMessages,
@@ -23,6 +25,8 @@ import withProfileCompletionGuard from '../withProfileCompletionGuard';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { ORG_COLORS } from '@/app/constants/orgColors';
+import OrgLogo from './OrgLogo';
+import { prepareLogoFile } from './logoValidation';
 
 const ROLE_STYLES = {
   owner:  { label: 'Owner',  cls: 'bg-purple-100 text-purple-700' },
@@ -110,6 +114,8 @@ const ManageOrganizations = ({
   const [formData, setFormData] = useState({ name: '', color: '' });
   const [searchTerm, setSearchTerm] = useState('');
   const [formError, setFormError] = useState('');
+  const [logoError, setLogoError] = useState('');
+  const [logoUploading, setLogoUploading] = useState(false);
 
   // const ORG_COLORS = [
   //   '#4F46E5', // Indigo
@@ -235,6 +241,49 @@ const ManageOrganizations = ({
     }
   };
   
+  const handleLogoFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file || !selectedOrg) return;
+
+    setLogoError('');
+    setLogoUploading(true);
+
+    const { file: preparedFile, error } = await prepareLogoFile(file);
+    if (error) {
+      setLogoError(error);
+      setLogoUploading(false);
+      return;
+    }
+
+    try {
+      await dispatch(uploadOrganizationLogo({
+        orgId: selectedOrg.org_id || selectedOrg.id,
+        file: preparedFile
+      })).unwrap();
+      toast.success('Logo updated successfully!');
+    } catch (error) {
+      setLogoError(error?.message || 'Failed to upload logo. Please try again.');
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!selectedOrg) return;
+
+    setLogoError('');
+    setLogoUploading(true);
+    try {
+      await dispatch(deleteOrganizationLogo(selectedOrg.org_id || selectedOrg.id)).unwrap();
+      toast.success('Logo removed.');
+    } catch (error) {
+      setLogoError(error?.message || 'Failed to remove logo. Please try again.');
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
   const handleDeleteOrg = async () => {
     if (!selectedOrg) return;
   
@@ -266,6 +315,7 @@ const ManageOrganizations = ({
 
   const openEditModal = (org) => {
     setFormError('')
+    setLogoError('');
     setSelectedOrg(org);
     setFormData({
       name: org.name,
@@ -285,7 +335,16 @@ const ManageOrganizations = ({
     setIsDeleteModalOpen(false);
     setSelectedOrg(null);
     setFormData({ name: '' });
+    setLogoError('');
   };
+
+  // The selected org enriched with live logo updates from the store, since
+  // selectedOrg is a point-in-time snapshot taken when the edit modal opened.
+  const selectedOrgLive = selectedOrg
+    ? userOrganizations.find(org =>
+        (org.org_id || org.id) === (selectedOrg.org_id || selectedOrg.id)
+      ) || selectedOrg
+    : null;
 
   const handleSetCurrentOrg = (org) => {
     dispatch(setCurrentOrganization(org));
@@ -462,7 +521,8 @@ const ManageOrganizations = ({
                         <RoleBadge role={org.role} />
                       </div>
                     )}
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex flex-col items-center justify-center h-full gap-2">
+                      <OrgLogo org={org} size="lg" />
                       <h3 className={`text-xl font-bold text-center bg-clip-text text-transparent ${
                         isOwner
                           ? 'bg-linear-to-r from-[#0A0DC4] to-[#8B0782]'
@@ -513,12 +573,9 @@ const ManageOrganizations = ({
               const isOwner = !org.role || org.role === 'owner';
               return (
                 <div key={orgId} className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition">
-                  {/* Left: color dot + name + badge */}
+                  {/* Left: logo + name + badge */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{ backgroundColor: org.color || '#4F46E5' }}
-                    />
+                    <OrgLogo org={org} size="sm" />
                     <span className={`font-semibold truncate ${isOwner ? 'text-gray-900' : 'text-gray-500'}`}>
                       {org.name}
                     </span>
@@ -640,6 +697,42 @@ const ManageOrganizations = ({
                       <h3 className="text-lg leading-6 font-medium text-gray-900" id="edit-modal-title">
                         Edit Organization
                       </h3>
+
+                      {/* Logo upload */}
+                      <div className="mt-4 flex items-center gap-4">
+                        <OrgLogo org={selectedOrgLive} size="lg" />
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <label
+                              htmlFor="orgLogoInput"
+                              className={`px-3 py-1.5 text-sm font-medium rounded-md border border-gray-300 bg-white hover:bg-gray-50 cursor-pointer ${logoUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                              {logoUploading ? 'Uploading...' : selectedOrgLive?.logo_url ? 'Replace logo' : 'Upload logo'}
+                            </label>
+                            <input
+                              id="orgLogoInput"
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                              className="hidden"
+                              disabled={logoUploading}
+                              onChange={handleLogoFileChange}
+                            />
+                            {selectedOrgLive?.logo_url && (
+                              <button
+                                type="button"
+                                onClick={handleRemoveLogo}
+                                disabled={logoUploading}
+                                className="px-3 py-1.5 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 disabled:opacity-50"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-400">PNG, JPEG, WEBP, or SVG. Any size — we&apos;ll resize it automatically.</p>
+                          {logoError && <p className="text-sm text-red-500">{logoError}</p>}
+                        </div>
+                      </div>
+
                       <div className="mt-4">
                         <label htmlFor="editOrgName" className="block text-sm font-medium text-gray-700">
                           Organization Name

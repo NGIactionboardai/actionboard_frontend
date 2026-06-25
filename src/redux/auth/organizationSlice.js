@@ -13,7 +13,8 @@ const API_ENDPOINTS = {
   GET_ALL_ORGS: 'https://actionboard-ai-backend.onrender.com/api/organizations/',
   GET_ORG_DETAILS: `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/`,
   UPDATE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/update-organization/',
-  DELETE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/delete-organization/'
+  DELETE_ORG: 'https://actionboard-ai-backend.onrender.com/api/organisations/delete-organization/',
+  ORG_LOGO: `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations/`
 };
 
 // Safe localStorage utilities for SSR compatibility
@@ -322,6 +323,86 @@ export const updateOrganization = createAsyncThunk(
   }
 );
 
+// Async thunk for uploading/replacing an organization's logo
+export const uploadOrganizationLogo = createAsyncThunk(
+  'organization/uploadOrganizationLogo',
+  async ({ orgId, file }, { rejectWithValue, getState }) => {
+    try {
+      if (!orgId) {
+        throw new Error('Organization ID is required');
+      }
+      if (!file) {
+        throw new Error('A logo file is required');
+      }
+
+      const authState = getState()?.auth;
+      const token = authState?.token || storage.get('meetingsummarizer_token');
+
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+      };
+
+      const formData = new FormData();
+      formData.append('logo', file);
+
+      const response = await axios.post(`${API_ENDPOINTS.ORG_LOGO}${orgId}/logo/`, formData, config);
+
+      return {
+        orgId,
+        logoUrl: response.data.logo_url,
+        message: response.data.detail || 'Logo updated successfully'
+      };
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data || {};
+        return rejectWithValue({
+          message: data?.detail || data?.message || null,
+          fieldErrors: data || {},
+          status: err.response?.status || null,
+          raw: data
+        });
+      }
+
+      return rejectWithValue({
+        message: err.message || 'An unexpected error occurred',
+        fieldErrors: {},
+        status: null,
+        raw: {}
+      });
+    }
+  }
+);
+
+// Async thunk for removing an organization's logo
+export const deleteOrganizationLogo = createAsyncThunk(
+  'organization/deleteOrganizationLogo',
+  async (orgId, { rejectWithValue, getState }) => {
+    try {
+      if (!orgId) {
+        throw new Error('Organization ID is required');
+      }
+
+      const authState = getState()?.auth;
+      const token = authState?.token || storage.get('meetingsummarizer_token');
+
+      const config = {};
+      if (token) {
+        config.headers = { Authorization: `Bearer ${token}` };
+      }
+
+      await axios.delete(`${API_ENDPOINTS.ORG_LOGO}${orgId}/logo/`, config);
+
+      return { orgId, message: 'Logo removed successfully' };
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      return rejectWithValue({ message, code: error.response?.status });
+    }
+  }
+);
+
 // Async thunk for deleting organization
 export const deleteOrganization = createAsyncThunk(
   'organization/deleteOrganization',
@@ -360,6 +441,24 @@ export const deleteOrganization = createAsyncThunk(
     }
   }
 );
+
+// Patches logo_url for an org wherever it's cached in state
+const applyLogoUrl = (state, orgId, logoUrl) => {
+  const matchesOrg = (org) => org.org_id === orgId || org.id === orgId;
+
+  const orgIndex = state.userOrganizations.findIndex(matchesOrg);
+  if (orgIndex !== -1) {
+    state.userOrganizations[orgIndex] = { ...state.userOrganizations[orgIndex], logo_url: logoUrl };
+  }
+
+  if (state.currentOrganization && matchesOrg(state.currentOrganization)) {
+    state.currentOrganization = { ...state.currentOrganization, logo_url: logoUrl };
+  }
+
+  if (state.organizationDetails && matchesOrg(state.organizationDetails)) {
+    state.organizationDetails = { ...state.organizationDetails, logo_url: logoUrl };
+  }
+};
 
 // Initial state
 const initialState = {
@@ -587,6 +686,48 @@ const organizationSlice = createSlice({
         state.successMessage = null;
       })
       
+      // Upload Organization Logo
+      .addCase(uploadOrganizationLogo.pending, (state) => {
+        state.updating = true;
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(uploadOrganizationLogo.fulfilled, (state, action) => {
+        state.updating = false;
+        state.loading = false;
+        applyLogoUrl(state, action.payload.orgId, action.payload.logoUrl);
+        state.successMessage = action.payload.message;
+        state.error = null;
+      })
+      .addCase(uploadOrganizationLogo.rejected, (state, action) => {
+        state.updating = false;
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to upload logo';
+        state.successMessage = null;
+      })
+
+      // Delete Organization Logo
+      .addCase(deleteOrganizationLogo.pending, (state) => {
+        state.updating = true;
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(deleteOrganizationLogo.fulfilled, (state, action) => {
+        state.updating = false;
+        state.loading = false;
+        applyLogoUrl(state, action.payload.orgId, null);
+        state.successMessage = action.payload.message;
+        state.error = null;
+      })
+      .addCase(deleteOrganizationLogo.rejected, (state, action) => {
+        state.updating = false;
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to remove logo';
+        state.successMessage = null;
+      })
+
       // Delete Organization
       .addCase(deleteOrganization.pending, (state) => {
         state.deleting = true;
