@@ -27,6 +27,11 @@ export default function SendInviteModal({
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [newMember, setNewMember] = useState({ name: "", email: "" });
+  const [addingMember, setAddingMember] = useState(false);
+  const [addError, setAddError] = useState("");
+
   const memberListRef = useRef(null);
 
   const filteredMembers = members.filter(
@@ -39,6 +44,9 @@ export default function SendInviteModal({
     if (isOpen) {
       setSelected([]);
       setViewMode("invite");
+      setShowAddMember(false);
+      setNewMember({ name: "", email: "" });
+      setAddError("");
       fetchHistory();
       fetchMembers();
     }
@@ -87,6 +95,44 @@ export default function SendInviteModal({
     el.addEventListener("scroll", handleScroll);
     return () => el.removeEventListener("scroll", handleScroll);
   }, [hasMore, isFetchingMore, loadMoreMembers, searchTerm]);
+
+  const handleAddMember = async () => {
+    if (!newMember.email.trim()) {
+      setAddError("Email is required");
+      return;
+    }
+
+    try {
+      setAddingMember(true);
+      setAddError("");
+
+      const res = await axios.post(
+        `${API_BASE_URL}/organisations/${orgId}/members/`,
+        {
+          name: newMember.name,
+          email: newMember.email,
+        }
+      );
+
+      const createdMember = res.data;
+
+      setMembers((prev) => [createdMember, ...prev]);
+      setSelected((prev) => [...prev, createdMember.id]);
+
+      setNewMember({ name: "", email: "" });
+      setShowAddMember(false);
+
+      toast.success("Member added");
+    } catch (err) {
+      if (err.response?.data?.email) {
+        setAddError(err.response.data.email[0]);
+      } else {
+        setAddError("Failed to add member");
+      }
+    } finally {
+      setAddingMember(false);
+    }
+  };
 
   const handleSelectAll = () => setSelected(filteredMembers.map((m) => m.id));
   const handleDeselectAll = () => setSelected([]);
@@ -215,10 +261,64 @@ export default function SendInviteModal({
                         className="w-full mb-3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
 
+                      {showAddMember && (
+                        <div className="border border-gray-200 rounded-lg p-3 mb-3 bg-gray-50 space-y-2">
+                          <input
+                            type="text"
+                            placeholder="Name"
+                            value={newMember.name}
+                            onChange={(e) =>
+                              setNewMember((prev) => ({ ...prev, name: e.target.value }))
+                            }
+                            className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm"
+                          />
+
+                          <input
+                            type="email"
+                            placeholder="Email"
+                            value={newMember.email}
+                            onChange={(e) =>
+                              setNewMember((prev) => ({ ...prev, email: e.target.value }))
+                            }
+                            className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm"
+                          />
+
+                          {addError && (
+                            <p className="text-xs text-red-500">{addError}</p>
+                          )}
+
+                          <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setShowAddMember(false)}
+                              className="text-xs text-gray-500"
+                            >
+                              Cancel
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleAddMember}
+                              disabled={addingMember}
+                              className="text-xs bg-indigo-600 text-white px-2 py-1 rounded"
+                            >
+                              {addingMember ? "Adding..." : "Add"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Select / Deselect */}
                       <div className="flex justify-between items-center mb-3">
                         <span className="text-xs text-gray-500">{selected.length} selected</span>
                         <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setShowAddMember((prev) => !prev)}
+                            className="text-sm text-indigo-600 hover:underline font-medium"
+                          >
+                            + Add Member
+                          </button>
                           <button onClick={handleSelectAll} className="text-sm text-blue-600 hover:underline font-medium">
                             Select All
                           </button>
