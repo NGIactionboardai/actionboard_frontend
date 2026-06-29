@@ -29,7 +29,9 @@ const canvasToBlob = (canvas, type, quality) =>
 
 /**
  * Resizes an image file down to fit within LOGO_TARGET_DIMENSION (never upscales),
- * re-encoding at decreasing quality until it's under LOGO_MAX_SIZE_BYTES.
+ * then letterboxes it onto a square canvas — long/wide logos get padding instead of
+ * being cropped, since the logo renders inside a circle (object-cover would cut them off).
+ * Re-encodes at decreasing quality until it's under LOGO_MAX_SIZE_BYTES.
  * Returns a File ready to upload.
  */
 async function resizeImageFile(file) {
@@ -39,15 +41,25 @@ async function resizeImageFile(file) {
   const scale = Math.min(1, LOGO_TARGET_DIMENSION / Math.max(width, height));
   const targetWidth = Math.round(width * scale);
   const targetHeight = Math.round(height * scale);
+  const squareSize = Math.max(targetWidth, targetHeight);
 
   const canvas = document.createElement('canvas');
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
+  canvas.width = squareSize;
+  canvas.height = squareSize;
   const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
   // PNG can't be re-encoded at lower quality to shrink size — fall back to JPEG if needed
   const outputType = file.type === 'image/png' || file.type === 'image/webp' ? file.type : 'image/jpeg';
+
+  // JPEG has no alpha channel — pad with white instead of leaving (black) transparency
+  if (outputType === 'image/jpeg') {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, squareSize, squareSize);
+  }
+
+  const offsetX = Math.round((squareSize - targetWidth) / 2);
+  const offsetY = Math.round((squareSize - targetHeight) / 2);
+  ctx.drawImage(img, offsetX, offsetY, targetWidth, targetHeight);
   const qualities = [0.92, 0.8, 0.65, 0.5];
 
   let blob = null;

@@ -676,6 +676,11 @@ const [selectedSpeaker, setSelectedSpeaker] = useState('');
 
   };
 
+  const isMeetingHost = (meeting) => {
+    if (!meeting?.host?.email || !user?.email) return false;
+    return meeting.host.email.toLowerCase() === user.email.toLowerCase();
+  };
+
   const hasTranscript = () => {
     return transcript || summary || meeting_insights;
   };
@@ -1167,16 +1172,16 @@ const [selectedSpeaker, setSelectedSpeaker] = useState('');
             </div>
             {isMeetingFuture(meeting) && meeting.join_url && (
               <div className="mt-4">
-                <a 
-                  href={meeting.join_url} 
-                  target="_blank" 
+                <a
+                  href={meeting.join_url}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                 >
                   <svg className="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
-                  Join Meeting
+                  {isMeetingHost(meeting) ? 'Start Meeting' : 'Join Meeting'}
                 </a>
               </div>
             )}

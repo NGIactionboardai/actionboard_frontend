@@ -27,7 +27,7 @@ const OrgLogo = ({ org, size = 'md', className = '' }) => {
       <img
         src={org.logo_url}
         alt={`${org.name || 'Organization'} logo`}
-        className={`${sizeCls} rounded-full object-cover shrink-0 ${className}`}
+        className={`${sizeCls} rounded-full object-contain bg-white shrink-0 ${className}`}
       />
     );
   }

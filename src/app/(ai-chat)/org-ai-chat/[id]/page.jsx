@@ -18,6 +18,8 @@ import UpgradeModal from "@/app/components/billing/UpgradeModal";
 
 
 
+const MAX_SELECTABLE_MEETINGS = 30;
+
 export default function AIChatPage() {
   const { id: orgId } = useParams();
   const [messages, setMessages] = useState([
@@ -197,9 +199,9 @@ const closeUpgrade = () => setUpgradeConfig(null);
       // if already selected, unselect
       if (prev.includes(id)) return prev.filter((x) => x !== id);
   
-      // if not selected and already 10 selected, block further selection
-      if (prev.length >= 10) {
-        toast.error("You can select up to 10 meetings only.");
+      // if not selected and already at the max, block further selection
+      if (prev.length >= MAX_SELECTABLE_MEETINGS) {
+        toast.error(`You can select up to ${MAX_SELECTABLE_MEETINGS} meetings only.`);
         return prev;
       }
   
@@ -565,7 +567,7 @@ const closeUpgrade = () => setUpgradeConfig(null);
             <div className="flex items-start space-x-2 text-xs p-3 bg-blue-50/70 border border-blue-100 rounded-lg text-blue-700">
               <Info className="w-4 h-4 mt-0.5" />
               <p>
-                You can select up to <span className="font-semibold">10 meetings</span> at a time.
+                You can select up to <span className="font-semibold">{MAX_SELECTABLE_MEETINGS} meetings</span> at a time.
               </p>
             </div>
 
@@ -583,7 +585,7 @@ const closeUpgrade = () => setUpgradeConfig(null);
         <div className="flex-1 overflow-y-auto p-4 space-y-2 min-h-0">
         {filteredMeetings.map((meeting) => {
           const isDisabled =
-            !selectedMeetings.includes(meeting.id) && selectedMeetings.length >= 10;
+            !selectedMeetings.includes(meeting.id) && selectedMeetings.length >= MAX_SELECTABLE_MEETINGS;
 
           return (
             <div
@@ -836,14 +838,14 @@ const closeUpgrade = () => setUpgradeConfig(null);
             </div>
 
             <p className="text-xs text-gray-500 mb-3 text-center italic">
-              You can select up to <span className="font-medium text-gray-700">10 meetings</span> at a time.
+              You can select up to <span className="font-medium text-gray-700">{MAX_SELECTABLE_MEETINGS} meetings</span> at a time.
             </p>
 
 
             <div className="space-y-2">
             {filteredMeetings.map((meeting) => {
               const isDisabled =
-                !selectedMeetings.includes(meeting.id) && selectedMeetings.length >= 10;
+                !selectedMeetings.includes(meeting.id) && selectedMeetings.length >= MAX_SELECTABLE_MEETINGS;
 
               return (
                 <div
