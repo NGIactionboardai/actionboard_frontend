@@ -12,6 +12,7 @@ import meetingReducer from '../redux/meetings/meetingSlice';
 import jiraReducer from '../redux/integrations/jiraSlice';
 import slackReducer from '../redux/integrations/slackSlice';
 import teamsReducer from '../redux/integrations/teamsSlice';
+import aiChatReducer from '../redux/aiChat/aiChatSlice';
 
 
 // Persist config for zoom slice
@@ -45,7 +46,7 @@ const authPersistConfig = {
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist: ['zoom', 'auth'] // We handle these separately
+  blacklist: ['zoom', 'auth', 'aiChat'] // zoom/auth handled separately; aiChat should always be fresh from the server
 };
 
 const rootReducer = combineReducers({
@@ -58,6 +59,7 @@ const rootReducer = combineReducers({
   jira: jiraReducer,
   slack: slackReducer,
   teams: teamsReducer,
+  aiChat: aiChatReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

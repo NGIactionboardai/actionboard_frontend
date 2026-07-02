@@ -2,17 +2,8 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { XCircle } from "lucide-react";
-import axios from "axios";
-import toast from "react-hot-toast";
 
-export default function ClearChatModal({ isOpen, onClose, onConfirm, orgId, isClearing}) {
-
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-  const MEETINGS_API = `${API_BASE_URL}/ai-assistant/meetings/${orgId}/`;
-
-    
-
+export default function ClearChatModal({ isOpen, onClose, onConfirm, isClearing}) {
   return (
     <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
