@@ -125,6 +125,8 @@ export default function AiChatConversationPage() {
   const conversation = activeConversation.data;
   const selectedMeetings = conversation.selected_meetings || [];
 
+  console.log("Messages: ", conversation.messages)
+
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Conversation header */}
