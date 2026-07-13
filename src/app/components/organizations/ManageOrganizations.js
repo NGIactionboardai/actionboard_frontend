@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   createOrganization,
   updateOrganization,
@@ -83,7 +84,8 @@ const ManageOrganizations = ({
   viewMeetingsPath = "/meetings"
 }) => {
   const dispatch = useDispatch();
-  
+  const router = useRouter();
+
   // Redux state
   const userOrganizations = useSelector(selectUserOrganizations);
   const loading = useSelector(selectOrganizationLoading);
@@ -572,7 +574,14 @@ const ManageOrganizations = ({
               const orgId = org.org_id || org.id;
               const isOwner = !org.role || org.role === 'owner';
               return (
-                <div key={orgId} className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition">
+                <div
+                  key={orgId}
+                  onClick={() => {
+                    handleSetCurrentOrg(org);
+                    router.push(`${viewMeetingsPath}/${orgId}`);
+                  }}
+                  className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition cursor-pointer"
+                >
                   {/* Left: logo + name + badge */}
                   <div className="flex items-center gap-3 min-w-0">
                     <OrgLogo org={org} size="sm" />
@@ -582,17 +591,10 @@ const ManageOrganizations = ({
                     {org.role && <RoleBadge role={org.role} />}
                   </div>
 
-                  {/* Right: Open link + actions */}
-                  <div className="flex items-center gap-2 shrink-0 ml-4">
-                    <Link
-                      href={`${viewMeetingsPath}/${orgId}`}
-                      onClick={() => handleSetCurrentOrg(org)}
-                      className="px-3 py-1.5 text-sm font-medium rounded-full bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white hover:from-[#080aa8] hover:to-[#6d0668]"
-                    >
-                      Open
-                    </Link>
-                    {isOwner && (
-                      <Popover className="relative">
+                  {/* Right: actions */}
+                  {isOwner && (
+                    <div className="flex items-center gap-2 shrink-0 ml-4">
+                      <Popover className="relative" onClick={(e) => e.stopPropagation()}>
                         <Popover.Button className="p-1 rounded-full hover:bg-gray-100 focus:outline-none">
                           <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
                         </Popover.Button>
@@ -603,8 +605,8 @@ const ManageOrganizations = ({
                           </div>
                         </Popover.Panel>
                       </Popover>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

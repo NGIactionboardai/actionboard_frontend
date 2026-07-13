@@ -893,7 +893,8 @@ export default function OrgCalendar({ orgId }) {
                   events={loadingEvents ? skeletonEvents : apiEvents}
                   eventContent={(arg) => {
                     const isSkeleton = arg.event.extendedProps.isSkeleton;
-                  
+                    const isMonthView = arg.view.type === 'dayGridMonth';
+
                     return (
                       <div className="fc-event-main-frame">
                         <div className={`fc-event-title-container ${isSkeleton ? 'animate-pulse' : ''}`}>
@@ -901,6 +902,11 @@ export default function OrgCalendar({ orgId }) {
                             <div className={`font-medium text-sm truncate ${isSkeleton ? 'bg-gray-200 h-3 w-24 rounded' : ''}`}>
                               {!isSkeleton && arg.event.title}
                             </div>
+                            {!isSkeleton && isMonthView && arg.timeText && (
+                              <div className="text-xs font-light opacity-90 truncate">
+                                {arg.timeText}
+                              </div>
+                            )}
                             {!isSkeleton && (
                               <div className="text-xs font-light mt-0.5 opacity-90 truncate">
                                 {arg.event.extendedProps.organization}
