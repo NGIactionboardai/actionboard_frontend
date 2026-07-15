@@ -4,8 +4,10 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useOrgRole } from '@/app/hooks/useOrgRole';
 
-// Routes a viewer is allowed to visit (meeting detail only — shared via direct link)
-const VIEWER_ALLOWED_PREFIXES = ['/meeting/'];
+// Routes a viewer is allowed to visit: meeting detail (shared via direct link),
+// plus the org switcher so a viewer in the current org is never stranded —
+// they must always be able to switch to an org where they hold a fuller role.
+const VIEWER_ALLOWED_PREFIXES = ['/meeting/', '/organizations'];
 
 export default function ViewerGuard({ children }) {
   const router = useRouter();

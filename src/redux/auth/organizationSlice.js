@@ -625,6 +625,18 @@ const organizationSlice = createSlice({
       .addCase(getOrganizationDetails.fulfilled, (state, action) => {
         state.fetchingDetails = false;
         state.loading = false;
+
+        // action.meta.arg is the orgId this specific request was made for.
+        // If the user has since switched to a different org, a slower,
+        // earlier request can resolve after a newer one — discard it so a
+        // stale org's role/details never get applied to the org now in view.
+        const requestedOrgId = action.meta.arg;
+        const currentOrgId = state.currentOrganization?.org_id || state.currentOrganization?.id;
+        if (currentOrgId && requestedOrgId !== currentOrgId) {
+          console.warn('[RBAC] getOrganizationDetails: discarding stale response', { requestedOrgId, currentOrgId });
+          return;
+        }
+
         state.organizationDetails = action.payload.organization;
         state.error = null;
         const members = action.payload.organization?.members;

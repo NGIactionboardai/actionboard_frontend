@@ -7,6 +7,7 @@ import NewNavbar from '../components/layout/NewNavbar';
 import ViewerGuard from '../components/ViewerGuard';
 import UpcomingMeetingNotification from '../components/notifications/UpcomingMeetingNotification';
 import { selectCurrentOrganization, selectCurrentUserRole, getOrganizationDetails } from '@/redux/auth/organizationSlice';
+import { fetchSubscription } from '@/redux/billing/billingSlice';
 
 export default function DashboardLayout({ children }) {
   const dispatch = useDispatch();
@@ -26,6 +27,17 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     console.log('[RBAC] DashboardLayout: resolved role =', role);
   }, [role]);
+
+  // Billing/subscription state must reflect the org actually being viewed, not
+  // whichever value happened to be fetched at login. Only owners and admins can
+  // act on a lapsed subscription (see billing:view in organisations/permissions.py),
+  // so only they need this refetched per-org; members/viewers are never gated on it.
+  useEffect(() => {
+    const orgId = currentOrg?.org_id || currentOrg?.id;
+    if (orgId && (role === 'owner' || role === 'admin')) {
+      dispatch(fetchSubscription(orgId));
+    }
+  }, [currentOrg?.org_id, currentOrg?.id, role, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -108,7 +108,14 @@ export default function UpgradePage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center max-w-sm">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Restricted</h2>
-          <p className="text-gray-600 text-sm">Billing information is only available to organisation owners and admins.</p>
+          <p className="text-gray-600 text-sm mb-6">Billing information is only available to organisation owners and admins.</p>
+          <button
+            onClick={() => router.push("/organizations")}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium mx-auto"
+          >
+            <ArrowLeft size={16} />
+            Go to your organisations
+          </button>
         </div>
       </div>
     );

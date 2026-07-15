@@ -5,7 +5,7 @@ const API = `${process.env.NEXT_PUBLIC_API_BASE_URL}/billing/current-subscriptio
 
 export const fetchSubscription = createAsyncThunk(
   "billing/fetchSubscription",
-  async (_, { getState, rejectWithValue }) => {
+  async (orgId, { getState, rejectWithValue }) => {
     try {
       const token = getState()?.auth?.token;
 
@@ -13,6 +13,7 @@ export const fetchSubscription = createAsyncThunk(
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        params: orgId ? { org_id: orgId } : undefined,
       });
 
       return res.data;
