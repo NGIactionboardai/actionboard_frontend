@@ -98,6 +98,14 @@ export default function OrgAddEventModal({
     return dt.toISOString();
   };
 
+  const toLocalDateInputValue = (date) => {
+    if (!(date instanceof Date) || isNaN(date.getTime())) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSubmit = async () => {
     // Basic validation
     if (!title.trim()) {
@@ -237,8 +245,18 @@ export default function OrgAddEventModal({
                     </span>
                     <input
                       type="date"
-                      value={selectedDate.toISOString().slice(0, 10)}
-                      onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                      value={toLocalDateInputValue(selectedDate)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (!value) return;
+                        const [year, month, day] = value.split('-').map(Number);
+                        if (!year || !month || !day) return;
+                        const newDate = new Date(selectedDate);
+                        newDate.setFullYear(year, month - 1, day);
+                        if (!isNaN(newDate.getTime())) {
+                          setSelectedDate(newDate);
+                        }
+                      }}
                       className="border rounded px-2 py-1 text-sm"
                     />
                   </div>
