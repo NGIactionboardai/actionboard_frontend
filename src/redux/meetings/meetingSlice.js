@@ -119,13 +119,13 @@ export const cancelMeeting = createAsyncThunk(
 
 export const deleteMeeting = createAsyncThunk(
   'meeting/deleteMeeting',
-  async ({ meetingId }, { rejectWithValue, getState }) => {
+  async ({ meetingId, timezone }, { rejectWithValue, getState }) => {
     try {
       const headers = getAuthHeaders(getState);
 
       await axios.delete(
         `${API_BASE_URL}/meetings/meeting/${meetingId}/delete/`,
-        { headers }
+        { headers, data: { timezone } }
       );
 
       return meetingId;

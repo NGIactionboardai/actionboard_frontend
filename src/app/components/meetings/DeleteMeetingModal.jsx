@@ -23,8 +23,10 @@ export default function DeleteMeetingModal({ isOpen, onClose, meeting, onDeleted
   
     try {
       setLoading(true);
-  
-      await dispatch(deleteMeeting({ meetingId: idToDelete })).unwrap();
+
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      await dispatch(deleteMeeting({ meetingId: idToDelete, timezone })).unwrap();
   
       toast.success("Meeting deleted successfully");
   
