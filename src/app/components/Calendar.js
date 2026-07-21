@@ -382,7 +382,12 @@ export default function Calendar() {
 
     const handleEventDrop = async (info) => {
       const { event } = info;
-    
+
+      if (event.extendedProps?.isSkeleton) {
+        info.revert();
+        return;
+      }
+
       try {
         console.log('event.start:', event.start, 'event.end:', event.end);
 
@@ -476,6 +481,9 @@ export default function Calendar() {
         backgroundColor: '#e5e7eb', // Tailwind gray-200
         borderColor: '#e5e7eb',
         textColor: 'transparent',
+        editable: false,
+        startEditable: false,
+        durationEditable: false,
         extendedProps: {
           isSkeleton: true
         }
