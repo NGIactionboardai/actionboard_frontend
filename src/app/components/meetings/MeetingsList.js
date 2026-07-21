@@ -21,6 +21,7 @@ const MeetingsList = ({
   onJoinClick,
   onDeleteClick,
   onEditClick,
+  onCancelClick,
   activeTab,
   canShareMeeting = false,
 }) => {
@@ -166,6 +167,7 @@ const MeetingsList = ({
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                           ${status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
                             status === 'started' ? 'bg-green-100 text-green-800' :
+                            status === 'cancelled' ? 'bg-red-100 text-red-800' :
                             'bg-gray-100 text-gray-800'}`}>
                           {status.charAt(0).toUpperCase() + status.slice(1)}
                         </span>
@@ -221,6 +223,19 @@ const MeetingsList = ({
                         Edit
                       </button>
 
+                      {status !== 'cancelled' && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onCancelClick(meeting);
+                          }}
+                          className="px-4 py-2 text-sm font-semibold rounded-full border border-black text-black bg-orange-200 hover:bg-orange-300 transition"
+                        >
+                          Cancel
+                        </button>
+                      )}
+
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -269,6 +284,18 @@ const MeetingsList = ({
                       >
                         Edit
                       </button>
+                      {status !== 'cancelled' && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onCancelClick(meeting);
+                          }}
+                          className="w-full px-6 py-2 text-sm font-semibold rounded-full border border-black text-black bg-orange-200 hover:bg-orange-300 transition"
+                        >
+                          Cancel
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.preventDefault();

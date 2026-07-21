@@ -93,6 +93,30 @@ export const updateMeeting = createAsyncThunk(
 
 
 
+export const cancelMeeting = createAsyncThunk(
+  'meeting/cancelMeeting',
+  async ({ organizationId, meetingId, timezone }, { rejectWithValue, getState }) => {
+    try {
+      const headers = getAuthHeaders(getState);
+
+      const res = await axios.patch(
+        `${API_BASE_URL}/meetings/meeting/${organizationId}/${meetingId}/cancel/`,
+        { timezone },
+        { headers }
+      );
+
+      return {
+        meetingId,
+        response: res.data
+      };
+    } catch (error) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  }
+);
+
+
+
 export const deleteMeeting = createAsyncThunk(
   'meeting/deleteMeeting',
   async ({ meetingId }, { rejectWithValue, getState }) => {
@@ -196,6 +220,32 @@ const meetingSlice = createSlice({
       .addCase(updateMeeting.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to update meeting";
+      });
+
+
+      builder
+      .addCase(cancelMeeting.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(cancelMeeting.fulfilled, (state, action) => {
+        state.loading = false;
+
+        const { meetingId } = action.payload;
+        const index = state.meetings.findIndex(m => m.id === meetingId);
+
+        if (index !== -1) {
+          state.meetings[index] = {
+            ...state.meetings[index],
+            status: 'cancelled',
+          };
+        }
+
+        state.successMessage = "Meeting cancelled successfully";
+      })
+      .addCase(cancelMeeting.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to cancel meeting";
       });
 
 

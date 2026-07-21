@@ -31,6 +31,7 @@ import { selectZoomIsConnected, selectZoomUserInfo } from '@/redux/auth/zoomSlic
 import { Plus, SlidersHorizontal, X } from 'lucide-react';
 import MeetingsToolbarMobile from '@/app/components/meetings/MeetingsToolbarMobile';
 import DeleteMeetingModal from '@/app/components/meetings/DeleteMeetingModal';
+import CancelMeetingModal from '@/app/components/meetings/CancelMeetingModal';
 import EditMeetingModal from '@/app/components/EditMeetingModal';
 import UpgradeModal from '@/app/components/billing/UpgradeModal';
 import { getMeetings, selectMeetingError, selectMeetingLoading, selectMeetings } from '@/redux/meetings/meetingSlice';
@@ -53,6 +54,7 @@ export default function Meetings() {
   const [showRecordingInfoModal, setShowRecordingInfoModal] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
 
   const [nextUrl, setNextUrl] = useState(null);
@@ -327,6 +329,10 @@ export default function Meetings() {
             setSelectedMeeting(meeting);
             setIsEditMeetingModalOpen(true);
           }}
+          onCancelClick={(meeting) => {
+            setSelectedMeeting(meeting);
+            setIsCancelModalOpen(true);
+          }}
           activeTab={activeTab}
           canShareMeeting={canShareMeeting}
         />
@@ -390,6 +396,15 @@ export default function Meetings() {
             isOpen={isDeleteModalOpen}
             onClose={() => setIsDeleteModalOpen(false)}
             meeting={selectedMeeting}
+          />
+        )}
+
+        {selectedMeeting && (
+          <CancelMeetingModal
+            isOpen={isCancelModalOpen}
+            onClose={() => setIsCancelModalOpen(false)}
+            meeting={selectedMeeting}
+            organizationId={organizationId}
           />
         )}
 
