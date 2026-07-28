@@ -175,6 +175,10 @@ export default function OrgAddEventModal({
 
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+  const dateInputInitialValue = initialDate
+    ? (initialDate instanceof Date ? initialDate : new Date(initialDate))
+    : selectedDate;
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={handleClose}>
@@ -244,8 +248,9 @@ export default function OrgAddEventModal({
                       })}
                     </span>
                     <input
+                      key={String(initialDate ?? 'default')}
                       type="date"
-                      value={toLocalDateInputValue(selectedDate)}
+                      defaultValue={toLocalDateInputValue(dateInputInitialValue)}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (!value) return;

@@ -99,6 +99,7 @@ export default function AddEventModal({
   };
 
   const toLocalDateInputValue = (date) => {
+    if (!(date instanceof Date) || isNaN(date.getTime())) return '';
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
     const day = String(date.getDate()).padStart(2, '0');
@@ -176,6 +177,10 @@ export default function AddEventModal({
 
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+  const dateInputInitialValue = initialDate
+    ? (initialDate instanceof Date ? initialDate : new Date(initialDate))
+    : selectedDate;
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={handleClose}>
@@ -245,13 +250,19 @@ export default function AddEventModal({
                       })}
                     </span>
                     <input
+                      key={String(initialDate ?? 'default')}
                       type="date"
-                      value={toLocalDateInputValue(selectedDate)}
+                      defaultValue={toLocalDateInputValue(dateInputInitialValue)}
                       onChange={(e) => {
-                        const [year, month, day] = e.target.value.split('-').map(Number);
+                        const value = e.target.value;
+                        if (!value) return;
+                        const [year, month, day] = value.split('-').map(Number);
+                        if (!year || !month || !day) return;
                         const newDate = new Date(selectedDate);
                         newDate.setFullYear(year, month - 1, day);
-                        setSelectedDate(newDate);
+                        if (!isNaN(newDate.getTime())) {
+                          setSelectedDate(newDate);
+                        }
                       }}
                       className="border rounded px-2 py-1 text-sm"
                     />
