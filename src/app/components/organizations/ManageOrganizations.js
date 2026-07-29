@@ -524,7 +524,7 @@ const ManageOrganizations = ({
                       </div>
                     )}
                     <div className="flex flex-col items-center justify-center h-full gap-2">
-                      <OrgLogo org={org} size="lg" />
+                      <OrgLogo org={org} size="xl" />
                       <h3 className={`text-xl font-bold text-center bg-clip-text text-transparent ${
                         isOwner
                           ? 'bg-linear-to-r from-[#0A0DC4] to-[#8B0782]'

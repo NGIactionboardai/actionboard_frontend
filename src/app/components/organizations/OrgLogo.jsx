@@ -13,6 +13,7 @@ const SIZE_CLASSES = {
   sm: 'w-8 h-8 text-xs',
   md: 'w-12 h-12 text-base',
   lg: 'w-16 h-16 text-xl',
+  xl: 'w-20 h-20 text-2xl',
 };
 
 /**
