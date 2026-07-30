@@ -20,5 +20,6 @@ export function useOrgRole() {
     canSendBot:               role === 'owner' || role === 'admin',
     canShareMeeting:          role === 'owner' || role === 'admin',
     canManageOrgIntegrations: role === 'owner' || role === 'admin',
+    canTransferOwnership:     role === 'owner',
   };
 }

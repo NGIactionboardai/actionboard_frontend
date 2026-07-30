@@ -25,6 +25,8 @@ export default function NewNavbar({ variant = "default" }) {
   const [inviteDropdownOpen, setInviteDropdownOpen] = useState(false);
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [respondingToken, setRespondingToken] = useState(null);
+  const [pendingOwnershipTransfers, setPendingOwnershipTransfers] = useState([]);
+  const [respondingTransferToken, setRespondingTransferToken] = useState(null);
   const calendarRef = useRef(null);
   const orgRef = useRef(null);
   const inviteRef = useRef(null);
@@ -142,6 +144,21 @@ export default function NewNavbar({ variant = "default" }) {
   }, [isAuthenticated]);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchOwnershipTransfers = async () => {
+      try {
+        const res = await axios.get(
+          `${API_BASE_URL}/organisations/ownership-transfer/mine/`
+        );
+        setPendingOwnershipTransfers(res.data.transfers || []);
+      } catch {
+        // silently ignore — non-critical
+      }
+    };
+    fetchOwnershipTransfers();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (inviteRef.current && !inviteRef.current.contains(event.target)) {
         setInviteDropdownOpen(false);
@@ -188,6 +205,24 @@ export default function NewNavbar({ variant = "default" }) {
       console.error('Invitation response failed', err.response?.data);
     } finally {
       setRespondingToken(null);
+    }
+  };
+
+  const handleOwnershipTransferResponse = async (token, action) => {
+    setRespondingTransferToken(token);
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/organisations/ownership-transfer/${token}/${action}/`
+      );
+      setPendingOwnershipTransfers((prev) => prev.filter((t) => t.token !== token));
+      if (action === 'accept' && res.data.org_id) {
+        dispatch(getUserOrganizations());
+        router.push(`/meetings/${res.data.org_id}`);
+      }
+    } catch (err) {
+      console.error('Ownership transfer response failed', err.response?.data);
+    } finally {
+      setRespondingTransferToken(null);
     }
   };
 
@@ -361,7 +396,7 @@ export default function NewNavbar({ variant = "default" }) {
                       title="Pending invitations"
                     >
                       <Bell className="h-5 w-5" />
-                      {pendingInvitations.length > 0 && (
+                      {(pendingInvitations.length > 0 || pendingOwnershipTransfers.length > 0) && (
                         <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
                       )}
                     </button>
@@ -393,6 +428,40 @@ export default function NewNavbar({ variant = "default" }) {
                                   <button
                                     onClick={() => handleInviteResponse(inv.token, 'decline')}
                                     disabled={respondingToken === inv.token}
+                                    className="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50"
+                                  >
+                                    Decline
+                                  </button>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        <div className="px-4 py-3 border-t border-b border-gray-100">
+                          <p className="text-sm font-semibold text-gray-800">Ownership Transfer Requests</p>
+                        </div>
+                        {pendingOwnershipTransfers.length === 0 ? (
+                          <p className="px-4 py-4 text-sm text-gray-500 text-center">No pending ownership transfers</p>
+                        ) : (
+                          <ul className="py-1 max-h-72 overflow-y-auto">
+                            {pendingOwnershipTransfers.map((t) => (
+                              <li key={t.token} className="px-4 py-3 border-b border-gray-50 last:border-0">
+                                <p className="text-sm font-medium text-gray-800 truncate">{t.org_name}</p>
+                                <p className="text-xs text-gray-500 mb-2">
+                                  {t.initiated_by} wants to make you the owner
+                                </p>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleOwnershipTransferResponse(t.token, 'accept')}
+                                    disabled={respondingTransferToken === t.token}
+                                    className="flex-1 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-[#0A0DC4] to-[#8B0782] rounded-md hover:opacity-90 disabled:opacity-50"
+                                  >
+                                    {respondingTransferToken === t.token ? '...' : 'Accept'}
+                                  </button>
+                                  <button
+                                    onClick={() => handleOwnershipTransferResponse(t.token, 'decline')}
+                                    disabled={respondingTransferToken === t.token}
                                     className="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50"
                                   >
                                     Decline

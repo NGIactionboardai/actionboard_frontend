@@ -3,10 +3,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useOrgRole } from '@/app/hooks/useOrgRole';
 import withProfileCompletionGuard from '@/app/components/withProfileCompletionGuard';
 import MemberFormModal from '@/app/components/memberlist/MemberFormModal';
+import TransferOwnershipModal from '@/app/components/memberlist/TransferOwnershipModal';
+import {
+  getPendingOwnershipTransfer,
+  cancelOwnershipTransfer,
+  selectPendingOwnershipTransfer,
+  selectOwnershipTransferring,
+} from '@/redux/auth/organizationSlice';
 
 // ---------- tiny inline modals for contacts ----------
 
@@ -83,8 +90,11 @@ function MemberListPage() {
   const API = process.env.NEXT_PUBLIC_API_BASE_URL;
   const router = useRouter();
   const { org_id } = useParams();
+  const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.auth?.user);
-  const { canManageMembers } = useOrgRole();
+  const { canManageMembers, canTransferOwnership } = useOrgRole();
+  const pendingTransfer = useSelector(selectPendingOwnershipTransfer);
+  const transferring = useSelector(selectOwnershipTransferring);
 
   // Platform members (OrganisationMembership)
   const [platformMembers, setPlatformMembers] = useState([]);
@@ -101,6 +111,7 @@ function MemberListPage() {
 
   // Modal state
   const [inviteModal, setInviteModal] = useState(false);
+  const [transferModal, setTransferModal] = useState(false);
   const [editMemberModal, setEditMemberModal] = useState(null);   // { user_id, role, name, email }
   const [removeMemberTarget, setRemoveMemberTarget] = useState(null);
   const [removingMember, setRemovingMember] = useState(false);
@@ -168,6 +179,16 @@ function MemberListPage() {
   useEffect(() => {
     if (org_id) refreshAll();
   }, [org_id, canManageMembers]);
+
+  useEffect(() => {
+    if (org_id && canTransferOwnership) {
+      dispatch(getPendingOwnershipTransfer(org_id));
+    }
+  }, [org_id, canTransferOwnership, dispatch]);
+
+  const handleCancelTransfer = async () => {
+    await dispatch(cancelOwnershipTransfer(org_id));
+  };
 
   // Infinite scroll for contacts
   useEffect(() => {
@@ -242,15 +263,47 @@ function MemberListPage() {
             <div>
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Platform Members</h2>
             </div>
-            {canManageMembers && (
-              <button
-                onClick={() => setInviteModal(true)}
-                className="px-4 py-1.5 text-sm font-medium rounded-full text-white shadow bg-linear-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668]"
-              >
-                + Invite Member
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              {canTransferOwnership && (
+                <button
+                  onClick={() => setTransferModal(true)}
+                  disabled={Boolean(pendingTransfer)}
+                  className="px-4 py-1.5 text-sm font-medium rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Transfer Ownership
+                </button>
+              )}
+              {canManageMembers && (
+                <button
+                  onClick={() => setInviteModal(true)}
+                  className="px-4 py-1.5 text-sm font-medium rounded-full text-white shadow bg-linear-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668]"
+                >
+                  + Invite Member
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Pending ownership transfer */}
+          {canTransferOwnership && pendingTransfer && (
+            <div className="mb-4 flex items-center justify-between px-5 py-4 bg-purple-50 border border-purple-100 rounded-2xl">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  Ownership transfer to <span className="text-purple-700">{pendingTransfer.target_email}</span> pending
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Expires {new Date(pendingTransfer.expires_at).toLocaleDateString()}
+                </p>
+              </div>
+              <button
+                onClick={handleCancelTransfer}
+                disabled={transferring}
+                className="px-3 py-1.5 text-sm font-medium rounded-full border hover:bg-gray-100 text-gray-600 disabled:opacity-50"
+              >
+                {transferring ? 'Cancelling...' : 'Cancel'}
+              </button>
+            </div>
+          )}
 
           <div className="bg-white border border-gray-200 rounded-2xl divide-y">
             {platformMembers.length === 0 && (
@@ -369,6 +422,15 @@ function MemberListPage() {
           existing={{ id: editMemberModal.user_id, email: editMemberModal.email, name: editMemberModal.name, role: editMemberModal.role }}
           onClose={() => setEditMemberModal(null)}
           onSuccess={() => { setEditMemberModal(null); fetchPlatformMembers(); }}
+        />
+      )}
+
+      {/* Transfer ownership */}
+      {transferModal && (
+        <TransferOwnershipModal
+          orgId={org_id}
+          onClose={() => setTransferModal(false)}
+          onSuccess={() => dispatch(getPendingOwnershipTransfer(org_id))}
         />
       )}
 

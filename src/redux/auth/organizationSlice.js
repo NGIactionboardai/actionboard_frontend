@@ -442,6 +442,81 @@ export const deleteOrganization = createAsyncThunk(
   }
 );
 
+// Async thunk for starting an ownership transfer
+export const initiateOwnershipTransfer = createAsyncThunk(
+  'organization/initiateOwnershipTransfer',
+  async ({ orgId, targetEmail, initiatorNewRole }, { rejectWithValue, getState }) => {
+    try {
+      const authState = getState()?.auth;
+      const token = authState?.token || storage.get('meetingsummarizer_token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+      const response = await axios.post(
+        `${API_ENDPOINTS.GET_ORG_DETAILS}${orgId}/memberships/transfer-ownership/`,
+        { target_email: targetEmail, initiator_new_role: initiatorNewRole || null },
+        config
+      );
+
+      return {
+        orgId,
+        transfer: {
+          token: response.data.token,
+          target_email: response.data.target_email,
+          expires_at: response.data.expires_at,
+        },
+        message: response.data.detail || 'Ownership transfer request sent.',
+      };
+    } catch (err) {
+      const { message, fieldErrors, status: httpStatus } = normalizeAxiosError(err);
+      return rejectWithValue({ message, fieldErrors, status: httpStatus });
+    }
+  }
+);
+
+// Async thunk for fetching the org's current pending ownership transfer (if any)
+export const getPendingOwnershipTransfer = createAsyncThunk(
+  'organization/getPendingOwnershipTransfer',
+  async (orgId, { rejectWithValue, getState }) => {
+    try {
+      const authState = getState()?.auth;
+      const token = authState?.token || storage.get('meetingsummarizer_token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+      const response = await axios.get(
+        `${API_ENDPOINTS.GET_ORG_DETAILS}${orgId}/memberships/transfer-ownership/`,
+        config
+      );
+
+      return { orgId, transfer: response.data.transfer || null };
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      return rejectWithValue({ message, code: error.response?.status });
+    }
+  }
+);
+
+// Async thunk for cancelling a pending ownership transfer
+export const cancelOwnershipTransfer = createAsyncThunk(
+  'organization/cancelOwnershipTransfer',
+  async (orgId, { rejectWithValue, getState }) => {
+    try {
+      const authState = getState()?.auth;
+      const token = authState?.token || storage.get('meetingsummarizer_token');
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+      await axios.delete(
+        `${API_ENDPOINTS.GET_ORG_DETAILS}${orgId}/memberships/transfer-ownership/`,
+        config
+      );
+
+      return { orgId, message: 'Ownership transfer cancelled.' };
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      return rejectWithValue({ message, code: error.response?.status });
+    }
+  }
+);
+
 // Patches logo_url for an org wherever it's cached in state
 const applyLogoUrl = (state, orgId, logoUrl) => {
   const matchesOrg = (org) => org.org_id === orgId || org.id === orgId;
@@ -488,7 +563,11 @@ const initialState = {
   successMessage: null,
   
   // UI state
-  selectedOrgId: null
+  selectedOrgId: null,
+
+  // Ownership transfer
+  pendingTransfer: null,
+  transferring: false
 };
 
 const organizationSlice = createSlice({
@@ -780,6 +859,42 @@ const organizationSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || 'Failed to delete organization';
         state.successMessage = null;
+      })
+
+      // Initiate Ownership Transfer
+      .addCase(initiateOwnershipTransfer.pending, (state) => {
+        state.transferring = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(initiateOwnershipTransfer.fulfilled, (state, action) => {
+        state.transferring = false;
+        state.pendingTransfer = action.payload.transfer;
+        state.successMessage = action.payload.message;
+        state.error = null;
+      })
+      .addCase(initiateOwnershipTransfer.rejected, (state, action) => {
+        state.transferring = false;
+        state.error = action.payload?.message || 'Failed to start ownership transfer';
+      })
+
+      // Get Pending Ownership Transfer
+      .addCase(getPendingOwnershipTransfer.fulfilled, (state, action) => {
+        state.pendingTransfer = action.payload.transfer;
+      })
+
+      // Cancel Ownership Transfer
+      .addCase(cancelOwnershipTransfer.pending, (state) => {
+        state.transferring = true;
+      })
+      .addCase(cancelOwnershipTransfer.fulfilled, (state, action) => {
+        state.transferring = false;
+        state.pendingTransfer = null;
+        state.successMessage = action.payload.message;
+      })
+      .addCase(cancelOwnershipTransfer.rejected, (state, action) => {
+        state.transferring = false;
+        state.error = action.payload?.message || 'Failed to cancel ownership transfer';
       });
   }
 });
@@ -806,6 +921,8 @@ export const selectOrganizationLoading = (state) => state.organization?.loading 
 export const selectOrganizationError = (state) => state.organization?.error || null;
 export const selectOrganizationSuccessMessage = (state) => state.organization?.successMessage || null;
 export const selectSelectedOrgId = (state) => state.organization?.selectedOrgId || null;
+export const selectPendingOwnershipTransfer = (state) => state.organization?.pendingTransfer || null;
+export const selectOwnershipTransferring = (state) => state.organization?.transferring || false;
 
 // Cross-slice selector: derives current user's role from the org detail response.
 // The org detail endpoint (GET /api/organisations/<org_id>/) returns members[].role.
