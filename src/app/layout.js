@@ -5,6 +5,7 @@ import ReduxWrapper from '@/redux/ReduxWrapper';
 import AuthHydrator from './components/AuthHydrator';
 import { Toaster } from 'react-hot-toast';
 import InterceptorLoader from './components/InterceptorLoader';
+import GoogleTranslateGuard from './components/GoogleTranslateGuard';
 
 import 'rsuite/dist/rsuite-no-reset.min.css';
 
@@ -48,6 +49,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
+        <GoogleTranslateGuard />
         <ReduxWrapper>
           <AuthHydrator>
             <InterceptorLoader />
