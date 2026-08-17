@@ -4,10 +4,8 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  getZoomMeetings,
   getZoomConnectionStatus,
   setCurrentOrganization,
-  selectZoomMeetings,
   selectZoomLoading,
   selectZoomError,
   selectZoomIsConnected,
@@ -17,9 +15,8 @@ import {
 
 export const useMeetings = (organizationId) => {
   const dispatch = useDispatch();
-  
+
   // Redux state
-  const zoomMeetings = useSelector(selectZoomMeetings);
   const zoomLoading = useSelector(selectZoomLoading);
   const zoomError = useSelector(selectZoomError);
   const isZoomConnected = useSelector(selectZoomIsConnected);
@@ -34,14 +31,6 @@ export const useMeetings = (organizationId) => {
     }
   }, [dispatch, organizationId]);
 
-  // Fetch meetings when Zoom is connected and organization ID is available
-  useEffect(() => {
-    if (isZoomConnected && organizationId) {
-      console.log('Zoom is connected, loading meetings for org:', organizationId);
-      dispatch(getZoomMeetings(organizationId));
-    }
-  }, [dispatch, isZoomConnected, organizationId]);
-
   // Clear error messages after 5 seconds
   useEffect(() => {
     if (zoomError) {
@@ -52,16 +41,7 @@ export const useMeetings = (organizationId) => {
     }
   }, [zoomError, dispatch]);
 
-  // Handle connection status changes (refresh meetings list on reconnect)
-  useEffect(() => {
-    if (isZoomConnected && organizationId) {
-      // Refresh meetings when connection is established
-      dispatch(getZoomMeetings(organizationId));
-    }
-  }, [isZoomConnected, organizationId, dispatch]);
-
   return {
-    zoomMeetings,
     zoomLoading,
     zoomError,
     isZoomConnected,

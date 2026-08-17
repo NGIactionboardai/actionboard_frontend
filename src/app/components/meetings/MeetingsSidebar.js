@@ -1,7 +1,7 @@
 // src/app/components/meetings/MeetingsSidebar.js
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 import {
@@ -9,10 +9,10 @@ import {
   setShowConnectionModal,
   setShowDisconnectModal
 } from '@/redux/auth/zoomSlice';
+import { selectUserOrganizations, selectFetchingUserOrganizations } from '@/redux/auth/organizationSlice';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import OrgSwitcher from './OrgSwitcher';
 import { ZoomConnectionStatus } from '../ZoomConfig';
-import axios from 'axios';
 import { Video, MessageSquare, CalendarDays, Users, Settings, BotIcon, Crown } from "lucide-react";
 import ManualBotJoinModal from '../bots/ManualBotJoinModal';
 import { useFeature } from "@/app/hooks/useFeature";
@@ -25,16 +25,14 @@ import { TeamsConnectionStatus } from '../teams/TeamsConnectionStatus';
 
 export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, setUpgradeConfig, activeTab}) {
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth?.token);
   const isZoomConnected = useSelector(selectZoomIsConnected);
   const isGoogleConnected = useSelector(selectGoogleIsConnected);
   const isTeamsConnected = useSelector(selectTeamsIsConnected);
-  const [organizations, setOrganizations] = useState([]);
+  const organizations = useSelector(selectUserOrganizations);
+  const loading = useSelector(selectFetchingUserOrganizations);
   const [selectedOrg, setSelectedOrg] = useState(organizationId);
-  const [loading, setLoading] = useState(true); // New loading state
   const [showManualBotModal, setShowManualBotModal] = useState(false);
 
   const isConnected =
@@ -71,23 +69,6 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
     });
   };
 
-
-  useEffect(() => {
-    
-    const fetchOrgs = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/organisations/my-organisations/`);
-        setOrganizations(res.data || []);
-      } catch (err) {
-        console.error('Error fetching organizations:', err);
-      } finally {
-        setLoading(false);
-      }
-    }; 
-    
-    fetchOrgs();
-  
-  }, []);
 
   const handleZoomConnectionClick = () => {
     if (isZoomConnected) {

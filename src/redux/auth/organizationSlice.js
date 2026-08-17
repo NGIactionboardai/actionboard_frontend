@@ -915,6 +915,7 @@ export const {
 export const selectOrganization = (state) => state.organization || {};
 export const selectCurrentOrganization = (state) => state.organization?.currentOrganization || null;
 export const selectUserOrganizations = (state) => state.organization?.userOrganizations || [];
+export const selectFetchingUserOrganizations = (state) => state.organization?.fetchingUserOrgs || false;
 export const selectAllOrganizations = (state) => state.organization?.allOrganizations || [];
 export const selectOrganizationDetails = (state) => state.organization?.organizationDetails || null;
 export const selectOrganizationLoading = (state) => state.organization?.loading || false;
