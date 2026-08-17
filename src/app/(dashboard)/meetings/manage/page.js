@@ -4,28 +4,22 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 import {
-  createOrganization,
-  updateOrganization,
-  deleteOrganization,
-  getUserOrganizations,
-  setCurrentOrganization,
-  clearMessages,
-  selectUserOrganizations,
-  selectOrganizationLoading,
-  selectOrganizationError,
-  selectOrganizationSuccessMessage,
-  selectCurrentOrganization
-} from '../../../../redux/auth/organizationSlice';
+  useGetUserOrganizationsQuery,
+  useCreateOrganizationMutation,
+  useUpdateOrganizationMutation,
+  useDeleteOrganizationMutation,
+} from '../../../../redux/api/organizationApi';
+import { setCurrentOrganizationId, selectCurrentOrganizationId } from '../../../../redux/auth/orgSelectionSlice';
 
 export default function ManageOrganizations() {
   const dispatch = useDispatch();
-  
+
   // Redux state
-  const userOrganizations = useSelector(selectUserOrganizations);
-  const loading = useSelector(selectOrganizationLoading);
-  const error = useSelector(selectOrganizationError);
-  const successMessage = useSelector(selectOrganizationSuccessMessage);
-  const currentOrganization = useSelector(selectCurrentOrganization);
+  const { data: userOrganizations = [], isLoading: loading, error } = useGetUserOrganizationsQuery();
+  const [createOrganization, { isLoading: creating }] = useCreateOrganizationMutation();
+  const [updateOrganization, { isLoading: updating }] = useUpdateOrganizationMutation();
+  const [deleteOrganization, { isLoading: deleting }] = useDeleteOrganizationMutation();
+  const currentOrganizationId = useSelector(selectCurrentOrganizationId);
 
   // Local state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -36,42 +30,6 @@ export default function ManageOrganizations() {
     name: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Load organizations on component mount
-  useEffect(() => {
-    console.log('Component mounted, fetching organizations...');
-    console.log('Dispatching getUserOrganizations...');
-    const promise = dispatch(getUserOrganizations());
-    console.log('Dispatch returned:', promise);
-    
-    // Log the result
-    promise.then(result => {
-      console.log('getUserOrganizations resolved with:', result);
-    }).catch(error => {
-      console.error('getUserOrganizations rejected with:', error);
-    });
-  }, [dispatch]);
-
-  // Debug useEffect to track state changes
-  useEffect(() => {
-    console.log('=== ORGANIZATION STATE DEBUG ===');
-    console.log('userOrganizations:', userOrganizations);
-    console.log('userOrganizations length:', userOrganizations?.length);
-    console.log('loading:', loading);
-    console.log('error:', error);
-    console.log('currentOrganization:', currentOrganization);
-    console.log('==================================');
-  }, [userOrganizations, loading, error, currentOrganization]);
-
-  // Clear messages after 5 seconds
-  useEffect(() => {
-    if (successMessage || error) {
-      const timer = setTimeout(() => {
-        dispatch(clearMessages());
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage, error, dispatch]);
 
   // Filter organizations based on search term
   const filteredOrganizations = userOrganizations?.filter(org =>
@@ -86,7 +44,7 @@ export default function ManageOrganizations() {
     if (!formData.name.trim()) return;
 
     try {
-      const result = await dispatch(createOrganization({ name: formData.name })).unwrap();
+      const result = await createOrganization({ name: formData.name }).unwrap();
       setIsCreateModalOpen(false);
       setFormData({ name: '' });
       // The Redux state is automatically updated, no need to refetch
@@ -101,10 +59,10 @@ export default function ManageOrganizations() {
     if (!selectedOrg || !formData.name.trim()) return;
 
     try {
-      const result = await dispatch(updateOrganization({
+      const result = await updateOrganization({
         orgId: selectedOrg.org_id || selectedOrg.id, // Handle both field names
         updateData: { name: formData.name }
-      })).unwrap();
+      }).unwrap();
       setIsEditModalOpen(false);
       setSelectedOrg(null);
       setFormData({ name: '' });
@@ -119,7 +77,7 @@ export default function ManageOrganizations() {
     if (!selectedOrg) return;
 
     try {
-      const result = await dispatch(deleteOrganization(selectedOrg.org_id || selectedOrg.id)).unwrap(); // Handle both field names
+      const result = await deleteOrganization(selectedOrg.org_id || selectedOrg.id).unwrap(); // Handle both field names
       setIsDeleteModalOpen(false);
       setSelectedOrg(null);
       // The Redux state is automatically updated, no need to refetch
@@ -154,7 +112,7 @@ export default function ManageOrganizations() {
   };
 
   const handleSetCurrentOrg = (org) => {
-    dispatch(setCurrentOrganization(org));
+    dispatch(setCurrentOrganizationId(org.org_id || org.id));
   };
 
   return (
@@ -182,22 +140,7 @@ export default function ManageOrganizations() {
         </div>
       </div>
 
-      {/* Success/Error Messages */}
-      {successMessage && (
-        <div className="mb-4 rounded-md bg-green-50 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-green-800">{successMessage}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Error Messages */}
       {error && (
         <div className="mb-4 rounded-md bg-red-50 p-4">
           <div className="flex">
@@ -207,7 +150,7 @@ export default function ManageOrganizations() {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-red-800">{error}</p>
+              <p className="text-sm font-medium text-red-800">{error?.message || 'Something went wrong'}</p>
             </div>
           </div>
         </div>
@@ -254,10 +197,7 @@ export default function ManageOrganizations() {
                     <div className="flex-1">
                       <div className="flex items-center">
                         <h3 className="text-lg font-medium text-gray-900">{org.name}</h3>
-                        {(currentOrganization?.org_id === org.org_id || 
-                          currentOrganization?.id === org.id || 
-                          currentOrganization?.org_id === org.id ||
-                          currentOrganization?.id === org.org_id) && (
+                        {currentOrganizationId === (org.org_id || org.id) && (
                           <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             Current
                           </span>
@@ -274,10 +214,7 @@ export default function ManageOrganizations() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {!(currentOrganization?.org_id === org.org_id || 
-                       currentOrganization?.id === org.id || 
-                       currentOrganization?.org_id === org.id ||
-                       currentOrganization?.id === org.org_id) && (
+                    {currentOrganizationId !== (org.org_id || org.id) && (
                       <button
                         onClick={() => handleSetCurrentOrg(org)}
                         className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -376,10 +313,10 @@ export default function ManageOrganizations() {
                 <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
                     type="submit"
-                    disabled={loading || !formData.name.trim()}
+                    disabled={creating || !formData.name.trim()}
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Creating...' : 'Create'}
+                    {creating ? 'Creating...' : 'Create'}
                   </button>
                   <button
                     type="button"
@@ -439,10 +376,10 @@ export default function ManageOrganizations() {
                 <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
                     type="submit"
-                    disabled={loading || !formData.name.trim()}
+                    disabled={updating || !formData.name.trim()}
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Updating...' : 'Update'}
+                    {updating ? 'Updating...' : 'Update'}
                   </button>
                   <button
                     type="button"
@@ -497,10 +434,10 @@ export default function ManageOrganizations() {
                 <button
                   type="button"
                   onClick={handleDeleteOrg}
-                  disabled={loading}
+                  disabled={deleting}
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Deleting...' : 'Delete'}
+                  {deleting ? 'Deleting...' : 'Delete'}
                 </button>
                 <button
                   type="button"

@@ -1,9 +1,8 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { X, CheckCircle } from "lucide-react";
-import { useDispatch } from "react-redux";
 import { toast } from "react-hot-toast";
-import { initiateOwnershipTransfer } from "@/redux/auth/organizationSlice";
+import { useInitiateOwnershipTransferMutation } from "@/redux/api/organizationApi";
 
 const NEW_ROLE_OPTIONS = [
   { value: "admin", label: "Admin" },
@@ -12,11 +11,10 @@ const NEW_ROLE_OPTIONS = [
 ];
 
 export default function TransferOwnershipModal({ orgId, onClose, onSuccess }) {
-  const dispatch = useDispatch();
+  const [initiateOwnershipTransfer, { isLoading: loading }] = useInitiateOwnershipTransferMutation();
   const [targetEmail, setTargetEmail] = useState("");
   const [optOut, setOptOut] = useState(false);
   const [newRole, setNewRole] = useState("admin");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [transferSent, setTransferSent] = useState(false);
 
@@ -25,25 +23,19 @@ export default function TransferOwnershipModal({ orgId, onClose, onSuccess }) {
       setError("Email is required.");
       return;
     }
-    setLoading(true);
     setError("");
 
-    const result = await dispatch(
-      initiateOwnershipTransfer({
+    try {
+      await initiateOwnershipTransfer({
         orgId,
         targetEmail: targetEmail.trim(),
         initiatorNewRole: optOut ? null : newRole,
-      })
-    );
+      }).unwrap();
 
-    setLoading(false);
-
-    if (initiateOwnershipTransfer.fulfilled.match(result)) {
       setTransferSent(true);
       toast.success(`Ownership transfer request sent to ${targetEmail.trim()}.`);
       onSuccess?.();
-    } else {
-      const payload = result.payload;
+    } catch (payload) {
       setError(payload?.message || "Something went wrong. Please try again.");
     }
   };

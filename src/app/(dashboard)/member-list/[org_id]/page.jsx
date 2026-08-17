@@ -9,11 +9,9 @@ import withProfileCompletionGuard from '@/app/components/withProfileCompletionGu
 import MemberFormModal from '@/app/components/memberlist/MemberFormModal';
 import TransferOwnershipModal from '@/app/components/memberlist/TransferOwnershipModal';
 import {
-  getPendingOwnershipTransfer,
-  cancelOwnershipTransfer,
-  selectPendingOwnershipTransfer,
-  selectOwnershipTransferring,
-} from '@/redux/auth/organizationSlice';
+  useGetPendingOwnershipTransferQuery,
+  useCancelOwnershipTransferMutation,
+} from '@/redux/api/organizationApi';
 
 // ---------- tiny inline modals for contacts ----------
 
@@ -93,8 +91,10 @@ function MemberListPage() {
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.auth?.user);
   const { canManageMembers, canTransferOwnership } = useOrgRole();
-  const pendingTransfer = useSelector(selectPendingOwnershipTransfer);
-  const transferring = useSelector(selectOwnershipTransferring);
+  const { data: pendingTransfer } = useGetPendingOwnershipTransferQuery(org_id, {
+    skip: !org_id || !canTransferOwnership,
+  });
+  const [cancelOwnershipTransfer, { isLoading: transferring }] = useCancelOwnershipTransferMutation();
 
   // Platform members (OrganisationMembership)
   const [platformMembers, setPlatformMembers] = useState([]);
@@ -180,14 +180,8 @@ function MemberListPage() {
     if (org_id) refreshAll();
   }, [org_id, canManageMembers]);
 
-  useEffect(() => {
-    if (org_id && canTransferOwnership) {
-      dispatch(getPendingOwnershipTransfer(org_id));
-    }
-  }, [org_id, canTransferOwnership, dispatch]);
-
   const handleCancelTransfer = async () => {
-    await dispatch(cancelOwnershipTransfer(org_id));
+    await cancelOwnershipTransfer(org_id);
   };
 
   // Infinite scroll for contacts
@@ -430,7 +424,6 @@ function MemberListPage() {
         <TransferOwnershipModal
           orgId={org_id}
           onClose={() => setTransferModal(false)}
-          onSuccess={() => dispatch(getPendingOwnershipTransfer(org_id))}
         />
       )}
 

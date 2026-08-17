@@ -3,12 +3,12 @@ import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, 
 import storage from 'redux-persist/lib/storage'; // localStorage
 import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from '../redux/auth/authSlices';
-import organizationReducer from '../redux/auth/organizationSlice';
-// import meetingReducer from '../redux/auth/organizationSlice';
+import orgSelectionReducer from '../redux/auth/orgSelectionSlice';
+import { organizationApi } from '../redux/api/organizationApi';
+import { meetingsApi } from '../redux/api/meetingsApi';
 import zoomSlice from '../redux/auth/zoomSlice';
 import billingReducer from "../redux/billing/billingSlice";
 import googleCalendarReducer from "../redux/integrations/googleCalendarSlice";
-import meetingReducer from '../redux/meetings/meetingSlice';
 import jiraReducer from '../redux/integrations/jiraSlice';
 import slackReducer from '../redux/integrations/slackSlice';
 import teamsReducer from '../redux/integrations/teamsSlice';
@@ -46,13 +46,16 @@ const authPersistConfig = {
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist: ['zoom', 'auth', 'aiChat'] // zoom/auth handled separately; aiChat should always be fresh from the server
+  // zoom/auth handled separately; aiChat should always be fresh from the server;
+  // RTK Query cache reducers should always refetch fresh too, not survive a reload.
+  blacklist: ['zoom', 'auth', 'aiChat', organizationApi.reducerPath, meetingsApi.reducerPath],
 };
 
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
-  organization: organizationReducer,
-  meeting: meetingReducer,
+  orgSelection: orgSelectionReducer,
+  [organizationApi.reducerPath]: organizationApi.reducer,
+  [meetingsApi.reducerPath]: meetingsApi.reducer,
   zoom: persistReducer(zoomPersistConfig, zoomSlice),
   billing: billingReducer,
   googleCalendar: googleCalendarReducer,
@@ -71,7 +74,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }),
+    }).concat(organizationApi.middleware, meetingsApi.middleware),
 });
 
 export const persistor = persistStore(store);

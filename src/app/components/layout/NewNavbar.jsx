@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { userLogout, selectIsAuthenticated, selectUser, selectAuthLoading } from '../../../redux/auth/authSlices';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import axios from 'axios';
-import { getUserOrganizations, selectUserOrganizations } from '@/redux/auth/organizationSlice';
+import { organizationApi, useGetUserOrganizationsQuery } from '@/redux/api/organizationApi';
 import { HelpCircle, ChevronDown, Menu, X, Building2, Calendar, Settings, User, LogOut, Bell } from 'lucide-react';
 import { useRouter } from "next/navigation";
 
@@ -40,7 +40,7 @@ export default function NewNavbar({ variant = "default" }) {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   const authLoading = useSelector(selectAuthLoading);
-  const userOrganizations = useSelector(selectUserOrganizations);
+  const { data: userOrganizations = [] } = useGetUserOrganizationsQuery();
 
   const dropdownRef = useRef(null);
 
@@ -124,11 +124,6 @@ export default function NewNavbar({ variant = "default" }) {
   }, []);
 
   useEffect(() => {
-      console.log("Dispatched organization")
-      dispatch(getUserOrganizations());
-  }, [dispatch]);
-
-  useEffect(() => {
     if (!isAuthenticated) return;
     const fetchInvitations = async () => {
       try {
@@ -198,7 +193,7 @@ export default function NewNavbar({ variant = "default" }) {
       );
       setPendingInvitations((prev) => prev.filter((inv) => inv.token !== token));
       if (action === 'accept' && res.data.org_id) {
-        dispatch(getUserOrganizations());
+        dispatch(organizationApi.util.invalidateTags(['UserOrgs']));
         router.push(`/meetings/${res.data.org_id}`);
       }
     } catch (err) {
@@ -216,7 +211,7 @@ export default function NewNavbar({ variant = "default" }) {
       );
       setPendingOwnershipTransfers((prev) => prev.filter((t) => t.token !== token));
       if (action === 'accept' && res.data.org_id) {
-        dispatch(getUserOrganizations());
+        dispatch(organizationApi.util.invalidateTags(['UserOrgs']));
         router.push(`/meetings/${res.data.org_id}`);
       }
     } catch (err) {

@@ -21,10 +21,7 @@ import {
   selectSlackActionLoading,
 } from '@/redux/integrations/slackSlice';
 
-import {
-  selectUserOrganizations,
-  getUserOrganizations,
-} from '@/redux/auth/organizationSlice';
+import { useGetUserOrganizationsQuery } from '@/redux/api/organizationApi';
 
 import ConfirmModal from '@/app/components/integrations/ConfirmModal';
 import SlackDepartmentModal from '@/app/components/slack/SlackDepartmentModal';
@@ -43,7 +40,7 @@ export default function SlackIntegrationPage() {
   const workspacesLoading = useSelector(selectSlackWorkspacesLoading);
   const mappingsLoading = useSelector(selectSlackMappingsLoading);
   const actionLoading = useSelector(selectSlackActionLoading);
-  const userOrgs = useSelector(selectUserOrganizations);
+  const { data: userOrgs = [] } = useGetUserOrganizationsQuery();
 
   // Disconnect workspace confirm
   const [disconnectTarget, setDisconnectTarget] = useState(null); // { id, name }
@@ -71,9 +68,6 @@ export default function SlackIntegrationPage() {
   useEffect(() => {
     dispatch(fetchSlackWorkspaces());
     dispatch(fetchSlackMappings());
-    if (!userOrgs.length) {
-      dispatch(getUserOrganizations());
-    }
 
     const params = new URLSearchParams(window.location.search);
     const slackParam = params.get('slack');

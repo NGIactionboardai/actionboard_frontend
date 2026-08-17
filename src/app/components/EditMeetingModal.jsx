@@ -1,12 +1,11 @@
 // EditMeetingModal.jsx
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { editZoomMeeting, getZoomMeetings, selectZoomLoading, selectZoomUserInfo } from "../../redux/auth/zoomSlice";
-import { getMeetings, selectMeetingLoading, updateMeeting } from "@/redux/meetings/meetingSlice";
+import { useSelector } from "react-redux";
+import { selectZoomUserInfo } from "../../redux/auth/zoomSlice";
+import { useUpdateMeetingMutation } from "@/redux/api/meetingsApi";
 
 const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConnected, provider }) => {
-  const dispatch = useDispatch();
-  const meetingLoading = useSelector(selectMeetingLoading);
+  const [updateMeeting, { isLoading: meetingLoading }] = useUpdateMeetingMutation();
   const zoomUserInfo = useSelector(selectZoomUserInfo);
 
   const [form, setForm] = useState({
@@ -78,19 +77,17 @@ const EditMeetingModal = ({ isOpen, onClose, organizationId, meeting, isZoomConn
 
 
 
-      await dispatch(updateMeeting({
+      await updateMeeting({
         organizationId,
         meetingId: meeting.id,
         data: {
           ...meetingData,
           resend_invites: resendInvites
         }
-      })).unwrap();
-      
-      dispatch(getMeetings(organizationId));
+      }).unwrap();
 
       // close & refresh
-      
+
       onClose();
     } catch (err) {
       console.error("Failed to edit meeting", err);

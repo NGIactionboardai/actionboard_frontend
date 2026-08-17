@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { userLogout, selectIsAuthenticated, selectUser, selectAuthLoading } from '../../../redux/auth/authSlices';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import axios from 'axios';
-import { getUserOrganizations, selectUserOrganizations } from '@/redux/auth/organizationSlice';
+import { useGetUserOrganizationsQuery } from '@/redux/api/organizationApi';
 import { HelpCircle } from 'lucide-react';
 
 
@@ -30,7 +30,7 @@ export default function Navbar() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   const authLoading = useSelector(selectAuthLoading);
-  const userOrganizations = useSelector(selectUserOrganizations);
+  const { data: userOrganizations = [] } = useGetUserOrganizationsQuery();
 
   const dropdownRef = useRef(null);
 
@@ -114,11 +114,6 @@ export default function Navbar() {
   //     fetchOrgs();
   //   }
   // }, []);
-
-  useEffect(() => {
-      console.log("Dispatched organization")
-      dispatch(getUserOrganizations());
-  }, [dispatch]);
 
   // ✅ Now it's safe to check
   // if (!hasMounted) return null;

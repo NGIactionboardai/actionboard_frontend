@@ -5,20 +5,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  createOrganization,
-  updateOrganization,
-  deleteOrganization,
-  uploadOrganizationLogo,
-  deleteOrganizationLogo,
-  getUserOrganizations,
-  setCurrentOrganization,
-  clearMessages,
-  selectUserOrganizations,
-  selectOrganizationLoading,
-  selectOrganizationError,
-  selectOrganizationSuccessMessage,
-  selectCurrentOrganization
-} from '../../../redux/auth/organizationSlice'; // Adjust import path as needed
+  useGetUserOrganizationsQuery,
+  useCreateOrganizationMutation,
+  useUpdateOrganizationMutation,
+  useDeleteOrganizationMutation,
+  useUploadOrganizationLogoMutation,
+  useDeleteOrganizationLogoMutation,
+} from '../../../redux/api/organizationApi';
+import { setCurrentOrganizationId } from '../../../redux/auth/orgSelectionSlice';
 import { Popover } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { LayoutGrid, LayoutList } from 'lucide-react';
@@ -87,11 +81,12 @@ const ManageOrganizations = ({
   const router = useRouter();
 
   // Redux state
-  const userOrganizations = useSelector(selectUserOrganizations);
-  const loading = useSelector(selectOrganizationLoading);
-  const error = useSelector(selectOrganizationError);
-  const successMessage = useSelector(selectOrganizationSuccessMessage);
-  const currentOrganization = useSelector(selectCurrentOrganization);
+  const { data: userOrganizations = [], isLoading: orgsLoading } = useGetUserOrganizationsQuery();
+  const [createOrganization, { isLoading: creating }] = useCreateOrganizationMutation();
+  const [updateOrganization, { isLoading: updating }] = useUpdateOrganizationMutation();
+  const [deleteOrganization, { isLoading: deleting }] = useDeleteOrganizationMutation();
+  const [uploadOrganizationLogo] = useUploadOrganizationLogoMutation();
+  const [deleteOrganizationLogo] = useDeleteOrganizationLogoMutation();
 
   const currentUser = useSelector((state) => state.auth?.user);
 
@@ -145,21 +140,6 @@ const ManageOrganizations = ({
   // const availableColors = ORG_COLORS.filter(c => !usedColors.includes(c));
 
 
-  // Load organizations on component mount
-  useEffect(() => {
-    dispatch(getUserOrganizations());
-  }, [dispatch]);
-
-  // Clear messages after 5 seconds
-  useEffect(() => {
-    if (successMessage || error) {
-      const timer = setTimeout(() => {
-        dispatch(clearMessages());
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage, error, dispatch]);
-
   // Filter organizations based on search term
   // const filteredOrganizations = userOrganizations?.filter(org =>
   //   org?.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -189,7 +169,7 @@ const ManageOrganizations = ({
 
     if (!formData.name.trim()) return;
 
-    dispatch(createOrganization({ name: formData.name, color: formData.color }))
+    createOrganization({ name: formData.name, color: formData.color })
       .unwrap()
       .then(async (result) => {
         // Success flow
@@ -197,7 +177,7 @@ const ManageOrganizations = ({
 
         if (newLogoFile) {
           try {
-            await dispatch(uploadOrganizationLogo({ orgId: newOrgId, file: newLogoFile })).unwrap();
+            await uploadOrganizationLogo({ orgId: newOrgId, file: newLogoFile }).unwrap();
           } catch (logoErr) {
             toast.error(logoErr?.message || 'Organization created, but the logo failed to upload. You can add one from Edit.');
           }
@@ -235,10 +215,10 @@ const ManageOrganizations = ({
     if (!selectedOrg || !formData.name.trim()) return;
   
     try {
-      const result = await dispatch(updateOrganization({
+      const result = await updateOrganization({
         orgId: selectedOrg.org_id || selectedOrg.id,
         updateData: { name: formData.name, color:  formData.color,}
-      })).unwrap();
+      }).unwrap();
   
       setIsEditModalOpen(false);
       setSelectedOrg(null);
@@ -309,10 +289,10 @@ const ManageOrganizations = ({
     }
 
     try {
-      await dispatch(uploadOrganizationLogo({
+      await uploadOrganizationLogo({
         orgId: selectedOrg.org_id || selectedOrg.id,
         file: preparedFile
-      })).unwrap();
+      }).unwrap();
       toast.success('Logo updated successfully!');
     } catch (error) {
       setLogoError(error?.message || 'Failed to upload logo. Please try again.');
@@ -327,7 +307,7 @@ const ManageOrganizations = ({
     setLogoError('');
     setLogoUploading(true);
     try {
-      await dispatch(deleteOrganizationLogo(selectedOrg.org_id || selectedOrg.id)).unwrap();
+      await deleteOrganizationLogo(selectedOrg.org_id || selectedOrg.id).unwrap();
       toast.success('Logo removed.');
     } catch (error) {
       setLogoError(error?.message || 'Failed to remove logo. Please try again.');
@@ -340,8 +320,8 @@ const ManageOrganizations = ({
     if (!selectedOrg) return;
   
     try {
-      await dispatch(deleteOrganization(selectedOrg.org_id || selectedOrg.id)).unwrap();
-  
+      await deleteOrganization(selectedOrg.org_id || selectedOrg.id).unwrap();
+
       toast.success(`Organization "${selectedOrg.name}" deleted successfully!`);
   
       setIsDeleteModalOpen(false);
@@ -400,8 +380,8 @@ const ManageOrganizations = ({
     : null;
 
   const handleSetCurrentOrg = (org) => {
-    dispatch(setCurrentOrganization(org));
-    
+    dispatch(setCurrentOrganizationId(org.org_id || org.id));
+
     // Call custom callback if provided
     if (onOrganizationSelect) {
       onOrganizationSelect(org);
@@ -532,7 +512,7 @@ const ManageOrganizations = ({
 
       {/* Organizations List */}
       <div className="sm:rounded-lg">
-        {loading ? (
+        {orgsLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="h-40 p-4 rounded-xl shadow-md border border-gray-200 bg-gray-100 animate-pulse">
@@ -751,10 +731,10 @@ const ManageOrganizations = ({
                 <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
                     type="submit"
-                    disabled={loading || newLogoPreparing || !formData.name.trim()}
+                    disabled={creating || newLogoPreparing || !formData.name.trim()}
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Creating...' : 'Create'}
+                    {creating ? 'Creating...' : 'Create'}
                   </button>
                   <button
                     type="button"
@@ -857,10 +837,10 @@ const ManageOrganizations = ({
                 <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
                     type="submit"
-                    disabled={loading || !formData.name.trim()}
+                    disabled={updating || !formData.name.trim()}
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Updating...' : 'Update'}
+                    {updating ? 'Updating...' : 'Update'}
                   </button>
                   <button
                     type="button"
@@ -910,10 +890,10 @@ const ManageOrganizations = ({
                 <button
                   type="button"
                   onClick={handleDeleteOrg}
-                  disabled={loading}
+                  disabled={deleting}
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Deleting...' : 'Delete'}
+                  {deleting ? 'Deleting...' : 'Delete'}
                 </button>
                 <button
                   type="button"

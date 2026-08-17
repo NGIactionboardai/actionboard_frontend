@@ -9,7 +9,7 @@ import {
   setShowConnectionModal,
   setShowDisconnectModal
 } from '@/redux/auth/zoomSlice';
-import { selectUserOrganizations, selectFetchingUserOrganizations } from '@/redux/auth/organizationSlice';
+import { useGetUserOrganizationsQuery } from '@/redux/api/organizationApi';
 import { getAuthHeaders, makeApiCall } from '@/app/utils/api';
 import OrgSwitcher from './OrgSwitcher';
 import { ZoomConnectionStatus } from '../ZoomConfig';
@@ -30,8 +30,7 @@ export default function MeetingsSidebar({ organizationId, onCreateMeetingClick, 
   const isZoomConnected = useSelector(selectZoomIsConnected);
   const isGoogleConnected = useSelector(selectGoogleIsConnected);
   const isTeamsConnected = useSelector(selectTeamsIsConnected);
-  const organizations = useSelector(selectUserOrganizations);
-  const loading = useSelector(selectFetchingUserOrganizations);
+  const { data: organizations = [], isLoading: loading } = useGetUserOrganizationsQuery();
   const [selectedOrg, setSelectedOrg] = useState(organizationId);
   const [showManualBotModal, setShowManualBotModal] = useState(false);
 

@@ -6,38 +6,27 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import NewNavbar from '../components/layout/NewNavbar';
 import ViewerGuard from '../components/ViewerGuard';
 import UpcomingMeetingNotification from '../components/notifications/UpcomingMeetingNotification';
-import { selectCurrentOrganization, selectCurrentUserRole, getOrganizationDetails } from '@/redux/auth/organizationSlice';
+import { selectCurrentOrganizationId } from '@/redux/auth/orgSelectionSlice';
+import { useOrgRole } from '@/app/hooks/useOrgRole';
 import { fetchSubscription } from '@/redux/billing/billingSlice';
 
 export default function DashboardLayout({ children }) {
   const dispatch = useDispatch();
-  const currentOrg = useSelector(selectCurrentOrganization);
-  const role = useSelector(selectCurrentUserRole);
-
-  useEffect(() => {
-    const orgId = currentOrg?.org_id || currentOrg?.id;
-    console.log('[RBAC] DashboardLayout: currentOrg changed', { orgId, currentOrg });
-    if (orgId) {
-      dispatch(getOrganizationDetails(orgId));
-    } else {
-      console.warn('[RBAC] DashboardLayout: currentOrg is null — getOrganizationDetails will NOT be called');
-    }
-  }, [currentOrg?.org_id, currentOrg?.id, dispatch]);
-
-  useEffect(() => {
-    console.log('[RBAC] DashboardLayout: resolved role =', role);
-  }, [role]);
+  const orgId = useSelector(selectCurrentOrganizationId);
+  // Calling the query hook here (in addition to wherever else needs org details)
+  // is intentional — RTK Query dedupes identical in-flight/cached queries by arg,
+  // so this just "warms" the cache for every other consumer of this org's details.
+  const { role } = useOrgRole();
 
   // Billing/subscription state must reflect the org actually being viewed, not
   // whichever value happened to be fetched at login. Only owners and admins can
   // act on a lapsed subscription (see billing:view in organisations/permissions.py),
   // so only they need this refetched per-org; members/viewers are never gated on it.
   useEffect(() => {
-    const orgId = currentOrg?.org_id || currentOrg?.id;
     if (orgId && (role === 'owner' || role === 'admin')) {
       dispatch(fetchSubscription(orgId));
     }
-  }, [currentOrg?.org_id, currentOrg?.id, role, dispatch]);
+  }, [orgId, role, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-50">

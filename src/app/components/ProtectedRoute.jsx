@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@/redux/auth/authSlices';
-import { selectCurrentOrganization, selectCurrentUserRole } from '@/redux/auth/organizationSlice';
+import { selectCurrentOrganizationId } from '@/redux/auth/orgSelectionSlice';
+import { useOrgRole } from '@/app/hooks/useOrgRole';
 
 
 const PUBLIC_PATHS = [
@@ -33,8 +34,8 @@ export default function ProtectedRoute({ children }) {
   const pathname = usePathname();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const billing = useSelector((state) => state.billing);
-  const currentOrg = useSelector(selectCurrentOrganization);
-  const role = useSelector(selectCurrentUserRole);
+  const currentOrg = useSelector(selectCurrentOrganizationId);
+  const { role } = useOrgRole();
 
   // Check if current path is public (no auth required)
   const isPublic = PUBLIC_PATHS.some((path) => {

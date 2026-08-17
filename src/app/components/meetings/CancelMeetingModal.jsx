@@ -1,15 +1,12 @@
 "use client";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
-import { useDispatch } from "react-redux";
+import { Fragment } from "react";
 import toast from "react-hot-toast";
-import { cancelMeeting } from "@/redux/meetings/meetingSlice";
+import { useCancelMeetingMutation } from "@/redux/api/meetingsApi";
 
 export default function CancelMeetingModal({ isOpen, onClose, meeting, organizationId, onCancelled }) {
-  const [loading, setLoading] = useState(false);
-
-  const dispatch = useDispatch();
+  const [cancelMeeting, { isLoading: loading }] = useCancelMeetingMutation();
 
   if (!meeting) return null;
 
@@ -19,13 +16,9 @@ export default function CancelMeetingModal({ isOpen, onClose, meeting, organizat
     if (!idToCancel || !organizationId) return;
 
     try {
-      setLoading(true);
-
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      await dispatch(
-        cancelMeeting({ organizationId, meetingId: idToCancel, timezone })
-      ).unwrap();
+      await cancelMeeting({ organizationId, meetingId: idToCancel, timezone }).unwrap();
 
       toast.success("Meeting cancelled and invitees notified");
 
@@ -33,9 +26,7 @@ export default function CancelMeetingModal({ isOpen, onClose, meeting, organizat
       onCancelled?.();
     } catch (err) {
       console.error("Failed to cancel meeting:", err);
-      toast.error(err || "Error cancelling meeting");
-    } finally {
-      setLoading(false);
+      toast.error(err?.message || "Error cancelling meeting");
     }
   };
 

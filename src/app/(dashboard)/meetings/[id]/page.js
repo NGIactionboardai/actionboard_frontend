@@ -34,19 +34,17 @@ import DeleteMeetingModal from '@/app/components/meetings/DeleteMeetingModal';
 import CancelMeetingModal from '@/app/components/meetings/CancelMeetingModal';
 import EditMeetingModal from '@/app/components/EditMeetingModal';
 import UpgradeModal from '@/app/components/billing/UpgradeModal';
-import { getMeetings, selectMeetingError, selectMeetingLoading, selectMeetings } from '@/redux/meetings/meetingSlice';
+import { useGetMeetingsQuery } from '@/redux/api/meetingsApi';
+import { useGetOrganizationDetailsQuery } from '@/redux/api/organizationApi';
+import { setCurrentOrganizationId } from '@/redux/auth/orgSelectionSlice';
 import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
 import { selectTeamsIsConnected } from '@/redux/integrations/teamsSlice';
 import { useOrgRole } from '@/app/hooks/useOrgRole';
 
 export default function Meetings() {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
   const params = useParams();
   const organizationId = params?.id;
-  const [orgName, setOrgName] = useState('')
   const [members, setMembers] = useState([]);
-  const [orgError, setOrgError] = useState(null);
 
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -67,9 +65,14 @@ export default function Meetings() {
   
   const dispatch = useDispatch();
 
-  const meetings = useSelector(selectMeetings);
-  const loading = useSelector(selectMeetingLoading);
-  const error = useSelector(selectMeetingError);
+  const { data: meetings = [], isLoading: loading, error } = useGetMeetingsQuery(organizationId, {
+    skip: !organizationId,
+  });
+  const { data: orgDetails, isError: isOrgError } = useGetOrganizationDetailsQuery(organizationId, {
+    skip: !organizationId,
+  });
+  const orgName = orgDetails?.name || '';
+  const orgError = isOrgError ? 'Organization not found or invalid.' : null;
 
   // Custom hooks for state management
   const {
@@ -130,30 +133,14 @@ export default function Meetings() {
 
   const [isEditMeetingModalOpen, setIsEditMeetingModalOpen] = useState(false)
 
-  
+  // Ensures role/permission hooks (useOrgRole, ProtectedRoute, etc.) resolve
+  // correctly no matter how the user arrived here — direct link, navbar
+  // dropdown, or the org picker (which already sets this itself).
   useEffect(() => {
     if (organizationId) {
-      dispatch(getMeetings(organizationId));
+      dispatch(setCurrentOrganizationId(organizationId));
     }
   }, [organizationId, dispatch]);
-
-  useEffect(() => {
-    const fetchOrg = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/organisations/${organizationId}/`);
-        setOrgName(res.data.name);
-        setOrgError(null);
-        console.log("Organization Data:", res.data);
-      } catch (error) {
-        console.log("Failed to fetch organization details", error);
-        setOrgError("Organization not found or invalid.");
-      }
-    };
-  
-    if (organizationId) {
-      fetchOrg();
-    }
-  }, [organizationId]);
 
   useEffect(() => {
     const fetchMembers = async () => {

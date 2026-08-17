@@ -6,14 +6,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Menu } from 'lucide-react';
 import OrgLogo from '@/app/components/organizations/OrgLogo';
 import ConversationSidebar from '@/app/components/ai-chat/ConversationSidebar';
-import { getOrganizationDetails, selectOrganizationDetails } from '@/redux/auth/organizationSlice';
+import { useGetOrganizationDetailsQuery } from '@/redux/api/organizationApi';
 import { fetchConversations, selectConversations } from '@/redux/aiChat/aiChatSlice';
 
 export default function OrgAiChatLayout({ children }) {
   const { id: orgId, conversationId } = useParams();
   const dispatch = useDispatch();
 
-  const orgDetails = useSelector(selectOrganizationDetails);
+  const { data: orgDetails } = useGetOrganizationDetailsQuery(orgId, { skip: !orgId });
   const conversations = useSelector((state) => selectConversations(state, orgId));
 
   const [collapsed, setCollapsed] = useState(false);
@@ -21,7 +21,6 @@ export default function OrgAiChatLayout({ children }) {
 
   useEffect(() => {
     if (orgId) {
-      dispatch(getOrganizationDetails(orgId));
       dispatch(fetchConversations(orgId));
     }
   }, [orgId, dispatch]);

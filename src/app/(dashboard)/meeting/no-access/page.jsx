@@ -3,16 +3,17 @@
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { ArrowLeft, ShieldAlert } from 'lucide-react';
-import { selectCurrentOrganization, selectOrganizationDetails } from '@/redux/auth/organizationSlice';
+import { selectCurrentOrganizationId } from '@/redux/auth/orgSelectionSlice';
+import { useGetOrganizationDetailsQuery } from '@/redux/api/organizationApi';
 import { useOrgRole } from '@/app/hooks/useOrgRole';
 
 export default function MeetingNoAccessPage() {
   const router = useRouter();
-  const currentOrg = useSelector(selectCurrentOrganization);
-  const orgDetails = useSelector(selectOrganizationDetails);
+  const currentOrgId = useSelector(selectCurrentOrganizationId);
+  const { data: orgDetails } = useGetOrganizationDetailsQuery(currentOrgId, { skip: !currentOrgId });
   const { isViewer } = useOrgRole();
 
-  const orgName = orgDetails?.name || currentOrg?.name || 'this organisation';
+  const orgName = orgDetails?.name || 'this organisation';
   const owner = orgDetails?.created_by;
   const admins = (orgDetails?.members || []).filter((m) => m.role === 'admin');
 

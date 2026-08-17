@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@/redux/auth/authSlices';
-import { selectCurrentOrganization, selectCurrentUserRole } from '@/redux/auth/organizationSlice';
+import { selectCurrentOrganizationId } from '@/redux/auth/orgSelectionSlice';
+import { useOrgRole } from '@/app/hooks/useOrgRole';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -37,16 +38,14 @@ function formatLocalDateTime(utcDateStr) {
 export default function UpcomingMeetingNotification() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const token = useSelector((state) => state.auth?.token);
-  const currentOrg = useSelector(selectCurrentOrganization);
-  const role = useSelector(selectCurrentUserRole);
+  const orgId = useSelector(selectCurrentOrganizationId);
+  const { role } = useOrgRole();
 
   const [meeting, setMeeting] = useState(null);
   const [dismissed, setDismissed] = useState(false);
   const [visible, setVisible] = useState(false);
   const [relativeTime, setRelativeTime] = useState('');
   const timerRef = useRef(null);
-
-  const orgId = currentOrg?.org_id || currentOrg?.id;
 
   const fetchUpcoming = useCallback(async () => {
     if (!orgId || !isAuthenticated || !token) return;

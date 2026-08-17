@@ -1,28 +1,22 @@
 // src/app/components/CreateMeetingModal.js
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import {
-  createZoomMeeting,
-  getZoomMeetings,
-  selectZoomLoading,
-  selectZoomUserInfo
-} from '../../redux/auth/zoomSlice'; // Adjust import path as needed
+import { selectZoomUserInfo } from '../../redux/auth/zoomSlice'; // Adjust import path as needed
 import { selectGoogleIsConnected } from '@/redux/integrations/googleCalendarSlice';
 import { selectTeamsIsConnected } from '@/redux/integrations/teamsSlice';
-import { createMeeting, getMeetings, selectMeetingLoading } from '@/redux/meetings/meetingSlice';
+import { useCreateMeetingMutation } from '@/redux/api/meetingsApi';
 
 const CreateMeetingModal = ({
-  isOpen, 
-  onClose, 
+  isOpen,
+  onClose,
   organizationId,
   isZoomConnected,
   setShowRecordingInfoModal,
   provider
 }) => {
-  const dispatch = useDispatch();
-  const meetingLoading = useSelector(selectMeetingLoading);
+  const [createMeeting, { isLoading: meetingLoading }] = useCreateMeetingMutation();
   const zoomUserInfo = useSelector(selectZoomUserInfo);
 
   const [members, setMembers] = useState([]);
@@ -253,12 +247,10 @@ const CreateMeetingModal = ({
         };
       }
   
-      const res = await dispatch(
-        createMeeting({
-          organizationId,
-          data: meetingData,
-        })
-      ).unwrap();
+      const res = await createMeeting({
+        organizationId,
+        data: meetingData,
+      }).unwrap();
   
       const meetingId = res?.meeting?.id;
   
@@ -295,8 +287,7 @@ const CreateMeetingModal = ({
   
       onClose();
       setTimeout(() => setShowRecordingInfoModal(true), 300);
-      dispatch(getMeetings(organizationId));
-  
+
     } catch (error) {
       console.error('Failed to create meeting:', error);
       alert('Failed to create meeting. Please try again.');

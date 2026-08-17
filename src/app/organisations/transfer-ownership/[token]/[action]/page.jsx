@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSelector, useDispatch } from 'react-redux'
 import axios from 'axios'
 import { CheckCircle, XCircle, Loader2, LogIn, Crown } from 'lucide-react'
-import { getUserOrganizations } from '@/redux/auth/organizationSlice'
+import { organizationApi } from '@/redux/api/organizationApi'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -76,7 +76,7 @@ export default function OwnershipTransferResponsePage() {
         setMessage(res.data.detail || (action === 'accept' ? 'You are now the owner!' : 'Transfer declined.'))
         if (action === 'accept' && res.data.org_id) {
           setOrgData({ org_id: res.data.org_id, org_name: res.data.org_name })
-          dispatch(getUserOrganizations())
+          dispatch(organizationApi.util.invalidateTags(['UserOrgs']))
         }
         setStatus('success')
       } catch (err) {

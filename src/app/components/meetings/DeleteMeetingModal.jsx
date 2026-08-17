@@ -1,42 +1,35 @@
 "use client";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { Fragment } from "react";
 import toast from "react-hot-toast";
-import { deleteMeeting } from "@/redux/meetings/meetingSlice";
+import { useDeleteMeetingMutation } from "@/redux/api/meetingsApi";
 
 
 export default function DeleteMeetingModal({ isOpen, onClose, meeting, onDeleted }) {
-  const [loading, setLoading] = useState(false);
+  const [deleteMeeting, { isLoading: loading }] = useDeleteMeetingMutation();
 
   const provider = meeting?.source?.toLowerCase();
-
-  const dispatch = useDispatch();
 
   if (!meeting) return null;
 
   const handleDelete = async () => {
     const idToDelete = meeting.id || meeting.meeting_id;
-  
-    if (!idToDelete) return;
-  
-    try {
-      setLoading(true);
 
+    if (!idToDelete) return;
+
+    try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      await dispatch(deleteMeeting({ meetingId: idToDelete, timezone })).unwrap();
-  
+      await deleteMeeting({ meetingId: idToDelete, timezone }).unwrap();
+
       toast.success("Meeting deleted successfully");
-  
+
       onClose();
       onDeleted?.(); // optional refresh hook
     } catch (err) {
       console.error("Failed to delete meeting:", err);
       toast.error("Error deleting meeting");
-    } finally {
-      setLoading(false);
     }
   };
 
