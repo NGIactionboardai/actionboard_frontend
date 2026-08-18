@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import AuthHydrator from '../components/AuthHydrator';
 import ProtectedRoute from '../components/ProtectedRoute';
 import NewNavbar from '../components/layout/NewNavbar';
 import ViewerGuard from '../components/ViewerGuard';
@@ -29,15 +30,17 @@ export default function DashboardLayout({ children }) {
   }, [orgId, role, dispatch]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* <Navbar /> */}
-      <NewNavbar />
-      <ProtectedRoute>
-        <ViewerGuard>
-          <main className="mt-20 p-0">{children}</main>
-        </ViewerGuard>
-      </ProtectedRoute>
-      <UpcomingMeetingNotification />
-    </div>
+    <AuthHydrator>
+      <div className="min-h-screen bg-gray-50">
+        {/* <Navbar /> */}
+        <NewNavbar />
+        <ProtectedRoute>
+          <ViewerGuard>
+            <main className="mt-20 p-0">{children}</main>
+          </ViewerGuard>
+        </ProtectedRoute>
+        <UpcomingMeetingNotification />
+      </div>
+    </AuthHydrator>
   );
 }

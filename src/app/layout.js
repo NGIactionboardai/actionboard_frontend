@@ -2,7 +2,7 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
 import ReduxWrapper from '@/redux/ReduxWrapper';
-import AuthHydrator from './components/AuthHydrator';
+import AuthStateSync from './components/AuthStateSync';
 import { Toaster } from 'react-hot-toast';
 import InterceptorLoader from './components/InterceptorLoader';
 import GoogleTranslateGuard from './components/GoogleTranslateGuard';
@@ -51,39 +51,38 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <GoogleTranslateGuard />
         <ReduxWrapper>
-          <AuthHydrator>
-            <InterceptorLoader />
-            <div className="min-h-screen bg-gray-50">
-              {children}
-              <Toaster
-                position="top-center"
-                reverseOrder={false}
-                toastOptions={{
-                  style: {
-                    background: '#111827',
-                    color: '#fff',
-                    fontSize: '14px',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
+          <AuthStateSync />
+          <InterceptorLoader />
+          <div className="min-h-screen bg-gray-50">
+            {children}
+            <Toaster
+              position="top-center"
+              reverseOrder={false}
+              toastOptions={{
+                style: {
+                  background: '#111827',
+                  color: '#fff',
+                  fontSize: '14px',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                },
+                success: {
+                  duration: 3000,
+                  iconTheme: {
+                    primary: '#10b981',
+                    secondary: '#fff',
                   },
-                  success: {
-                    duration: 3000,
-                    iconTheme: {
-                      primary: '#10b981',
-                      secondary: '#fff',
-                    },
+                },
+                error: {
+                  duration: 3000,
+                  iconTheme: {
+                    primary: '#ef4444',
+                    secondary: '#fff',
                   },
-                  error: {
-                    duration: 3000,
-                    iconTheme: {
-                      primary: '#ef4444',
-                      secondary: '#fff',
-                    },
-                  },
-                }}
-              />
-            </div>
-          </AuthHydrator>
+                },
+              }}
+            />
+          </div>
         </ReduxWrapper>
       </body>
     </html>

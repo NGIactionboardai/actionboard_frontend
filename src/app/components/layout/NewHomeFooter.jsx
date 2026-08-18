@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Twitter, Linkedin, Github, Youtube, X, TwitterIcon, Facebook, LucideYoutube, Instagram } from "lucide-react";
 
 export default function NewHomeFooter() {
@@ -11,10 +12,12 @@ export default function NewHomeFooter() {
         {/* Brand */}
         <div>
           <Link href="/" className="flex items-center space-x-2">
-            <img
+            <Image
               src="/nous_logo.png"
               alt="Nous Meeting Logo"
-              className="h-10"
+              width={133}
+              height={40}
+              className="h-10 w-auto"
             />
           </Link>
           <p className="text-gray-600 mt-4 text-sm">

@@ -3,6 +3,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { userLogout, selectIsAuthenticated, selectUser, selectAuthLoading } from '../../../redux/auth/authSlices';
@@ -262,10 +263,13 @@ export default function NewNavbar({ variant = "default" }) {
           <div className="flex items-center">
             <Link href={logoHref} className="flex-shrink-0 flex items-center group">
               <div className="relative">
-                <img 
-                  src="/nous_logo.png" 
-                  alt="Nous Meeting Logo" 
-                  className="h-12 w-auto transition-transform duration-300 group-hover:scale-105" 
+                <Image
+                  src="/nous_logo.png"
+                  alt="Nous Meeting Logo"
+                  width={160}
+                  height={48}
+                  priority
+                  className="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
               </div>
