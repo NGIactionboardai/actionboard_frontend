@@ -332,7 +332,7 @@ const ManageOrganizations = ({
       }
     } catch (error) {
       console.error('Delete organization failed:', error);
-      toast.error('Failed to delete organization. Please try again.');
+      toast.error(error?.message || 'Failed to delete organization. Please try again.');
     }
   };
 
@@ -538,7 +538,7 @@ const ManageOrganizations = ({
 
             {filteredOrganizations.map((org) => {
               const orgId = org.org_id || org.id;
-              const isOwner = !org.role || org.role === 'owner';
+              const isOwner = org.role === 'owner';
               return (
                 <div key={orgId} className="relative group">
                   <Link
@@ -603,7 +603,7 @@ const ManageOrganizations = ({
 
             {filteredOrganizations.map((org) => {
               const orgId = org.org_id || org.id;
-              const isOwner = !org.role || org.role === 'owner';
+              const isOwner = org.role === 'owner';
               return (
                 <div
                   key={orgId}

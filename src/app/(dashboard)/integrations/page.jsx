@@ -422,23 +422,23 @@ function IntegrationRow({
           onClick={onToggle}
         >
           {/* LEFT */}
-          <div className="flex items-center gap-4">
-  
-            <div className="w-12 h-12 rounded-xl border bg-white flex items-center justify-center shadow-sm">
+          <div className="flex items-center gap-4 min-w-0">
+
+            <div className="w-12 h-12 rounded-xl border bg-white flex items-center justify-center shadow-sm shrink-0">
               <img src={icon} className="w-7 h-7" />
             </div>
-  
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-base md:text-lg font-semibold text-gray-900">{name}</p>
-  
-                <span className={`text-sm px-2.5 py-0.5 rounded-full font-medium ${
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-base md:text-lg font-semibold text-gray-900 whitespace-nowrap">{name}</p>
+
+                <span className={`text-sm px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap ${
                   isConnected ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
                 }`}>
                   {isConnected ? "Connected" : "Not Connected"}
                 </span>
               </div>
-  
+
               <p className="text-sm text-gray-500 mt-1 leading-relaxed">{description}</p>
             </div>
           </div>

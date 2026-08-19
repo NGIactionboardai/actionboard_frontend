@@ -33,7 +33,7 @@ export default function UpgradePage() {
   const [checkoutLoading, setCheckoutLoading] = useState(null);
   const [billingCycle, setBillingCycle] = useState("monthly");
 
-  const { canViewBilling, canUpgradePlan, canManagePayment } = useOrgRole();
+  const { canUpgradePlan, canManagePayment } = useOrgRole();
 
   const sub = billing.subscription;
 
