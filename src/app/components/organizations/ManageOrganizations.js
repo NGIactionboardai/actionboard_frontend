@@ -589,7 +589,7 @@ const ManageOrganizations = ({
           </div>
         ) : (
           /* ── LIST VIEW ── */
-          <div className="mt-8 bg-white border border-gray-200 rounded-2xl divide-y overflow-hidden">
+          <div className="mt-8 bg-white border border-gray-200 rounded-2xl divide-y [&>*:first-child]:rounded-t-2xl [&>*:last-child]:rounded-b-2xl">
             {/* Add org row */}
             <button
               onClick={openCreateModal}
