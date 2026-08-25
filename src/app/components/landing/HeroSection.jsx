@@ -31,6 +31,14 @@ export default function HeroSection() {
         {/* LEFT SIDE */}
         <div className="space-y-6 sm:space-y-8 text-center lg:text-left">
 
+          <motion.span
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-block text-xs sm:text-sm font-semibold tracking-wide uppercase text-[#0A0DC4] bg-[#0A0DC4]/10 px-3 py-1 rounded-full"
+          >
+            Nous Meeting
+          </motion.span>
+
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}

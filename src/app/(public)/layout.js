@@ -8,7 +8,7 @@ import NewHomeFooter from '../components/layout/NewHomeFooter';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Nous Meeting – Homepage',
+  title: 'Nous Meeting',
   description: 'Welcome to Nous Meeting – AI-powered meeting transcription and summarization.',
 };
 
