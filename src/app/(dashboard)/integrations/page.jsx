@@ -10,6 +10,8 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   selectZoomIsConnected,
   selectZoomSuccessMessage,
+  selectZoomUserInfo,
+  getZoomConnectionStatus,
   setShowConnectionModal,
   setShowDisconnectModal
 } from "@/redux/auth/zoomSlice";
@@ -63,6 +65,8 @@ export default function IntegrationsPage() {
 
   const isZoomConnected = useSelector(selectZoomIsConnected);
   const successMessage = useSelector(selectZoomSuccessMessage);
+  const zoomUserInfo = useSelector(selectZoomUserInfo);
+  const zoomName = zoomUserInfo && [zoomUserInfo.first_name, zoomUserInfo.last_name].filter(Boolean).join(' ');
   const {
         isCreateMeetingModalOpen,
         setIsCreateMeetingModalOpen,
@@ -98,6 +102,7 @@ export default function IntegrationsPage() {
   const { canManageOrgIntegrations } = useOrgRole();
 
   useEffect(() => {
+    dispatch(getZoomConnectionStatus());
     dispatch(getJiraConnectionStatus());
     dispatch(fetchGoogleStatus());
     dispatch(fetchSlackStatus());
@@ -207,7 +212,8 @@ export default function IntegrationsPage() {
             onConnect={() => dispatch(setShowConnectionModal(true))}
             onDisconnect={() => dispatch(setShowDisconnectModal(true))}
           >
-            <DetailItem label="Status" value="Connected to Zoom account" />
+            <DetailItem label="Email" value={zoomUserInfo?.email} />
+            <DetailItem label="Name" value={zoomName} />
           </IntegrationRow>
 
           {/* GOOGLE */}
