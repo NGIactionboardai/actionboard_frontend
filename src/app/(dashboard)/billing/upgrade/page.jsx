@@ -103,24 +103,6 @@ export default function UpgradePage() {
 
   const sortedPlans = [...plans].sort((a, b) => a.id - b.id);
 
-  if (!canViewBilling) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center max-w-sm">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Restricted</h2>
-          <p className="text-gray-600 text-sm mb-6">Billing information is only available to organisation owners and admins.</p>
-          <button
-            onClick={() => router.push("/organizations")}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium mx-auto"
-          >
-            <ArrowLeft size={16} />
-            Go to your organisations
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-10 px-4">
 
