@@ -20,7 +20,7 @@ import withProfileCompletionGuard from '../withProfileCompletionGuard';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { ORG_COLORS } from '@/app/constants/orgColors';
-import OrgLogo from './OrgLogo';
+import OrgLogo, { FALLBACK_COLOR } from './OrgLogo';
 import { prepareLogoFile } from './logoValidation';
 
 const ROLE_STYLES = {
@@ -340,7 +340,7 @@ const ManageOrganizations = ({
     setFormError('')
     setFormData({
       name: '',
-      color: '#4F46E5',
+      color: FALLBACK_COLOR,
     });
     setIsCreateModalOpen(true);
   };
@@ -351,7 +351,11 @@ const ManageOrganizations = ({
     setSelectedOrg(org);
     setFormData({
       name: org.name,
-      color: org.color || '',
+      // Orgs saved before a color existed (or created some other way) have
+      // color: null, but OrgLogo still renders them with FALLBACK_COLOR — so
+      // the picker needs to show that as the current selection, otherwise
+      // picking the same swatch back looks like nothing happened.
+      color: org.color || FALLBACK_COLOR,
     });
     setIsEditModalOpen(true);
   };
@@ -915,17 +919,18 @@ export default ManageOrganizations;
 
 
 
-const ColorSelector = ({ mode, formData, setFormData, userOrganizations, selectedOrg }) => {
+const ColorSelector = ({ mode, formData, setFormData, userOrganizations }) => {
   const usedColors = userOrganizations.map(org => org.color).filter(Boolean);
+  // formData.color is already normalized to a real value at modal-open time
+  // (see openCreateModal/openEditModal), so it's the single source of truth
+  // for "what does this org currently show as its color."
+  const currentColor = formData.color;
 
   const getAvailableColors = () => {
     if (mode === 'create') {
       // Only unused colors
       return ORG_COLORS.filter(color => !usedColors.includes(color));
     }
-
-    // Edit mode
-    const currentColor = selectedOrg?.color || formData.color;
 
     if (!currentColor) {
       // Org has no color — behave like create
@@ -948,7 +953,7 @@ const ColorSelector = ({ mode, formData, setFormData, userOrganizations, selecte
           const isUsedByOther =
             mode === 'edit' &&
             usedColors.includes(color) &&
-            color !== selectedOrg?.color;
+            color !== currentColor;
 
           return (
             <button

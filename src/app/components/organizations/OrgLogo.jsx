@@ -1,6 +1,6 @@
 'use client';
 
-const FALLBACK_COLOR = '#4F46E5';
+export const FALLBACK_COLOR = '#4F46E5';
 
 const getInitials = (name) => {
   const words = (name || '').trim().split(/\s+/).filter(Boolean);
@@ -29,6 +29,7 @@ const OrgLogo = ({ org, size = 'md', className = '' }) => {
         src={org.logo_url}
         alt={`${org.name || 'Organization'} logo`}
         className={`${sizeCls} rounded-full object-contain bg-white shrink-0 ${className}`}
+        style={{ boxShadow: `0 0 0 2px ${org?.color || FALLBACK_COLOR}` }}
       />
     );
   }
