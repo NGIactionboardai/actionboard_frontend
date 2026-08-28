@@ -775,7 +775,7 @@ const ManageOrganizations = ({
 
                       {/* Logo upload */}
                       <div className="mt-4 flex items-center gap-4">
-                        <OrgLogo org={selectedOrgLive} size="lg" />
+                        <OrgLogo org={{ ...selectedOrgLive, color: formData.color }} size="lg" />
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
                             <label
