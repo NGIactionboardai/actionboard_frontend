@@ -20,7 +20,7 @@ const SIZE_CLASSES = {
  * Round organization logo. Falls back to a colored circle with the
  * organization's initials when no logo has been uploaded.
  */
-const OrgLogo = ({ org, size = 'md', className = '' }) => {
+const OrgLogo = ({ org, size = 'md', className = '', ring = true }) => {
   const sizeCls = SIZE_CLASSES[size] || SIZE_CLASSES.md;
 
   if (org?.logo_url) {
@@ -29,7 +29,7 @@ const OrgLogo = ({ org, size = 'md', className = '' }) => {
         src={org.logo_url}
         alt={`${org.name || 'Organization'} logo`}
         className={`${sizeCls} rounded-full object-contain bg-white shrink-0 ${className}`}
-        style={{ boxShadow: `0 0 0 2px ${org?.color || FALLBACK_COLOR}` }}
+        style={ring ? { boxShadow: `0 0 0 2px ${org?.color || FALLBACK_COLOR}` } : undefined}
       />
     );
   }

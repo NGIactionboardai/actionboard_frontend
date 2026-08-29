@@ -559,7 +559,7 @@ const ManageOrganizations = ({
                       </div>
                     )}
                     <div className="flex flex-col items-center justify-center h-full gap-2">
-                      <OrgLogo org={org} size="xl" />
+                      <OrgLogo org={org} size="xl" ring={false} />
                       <h3 className={`text-xl font-bold text-center bg-clip-text text-transparent ${
                         isOwner
                           ? 'bg-linear-to-r from-[#0A0DC4] to-[#8B0782]'
@@ -619,7 +619,7 @@ const ManageOrganizations = ({
                 >
                   {/* Left: logo + name + badge */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <OrgLogo org={org} size="sm" />
+                    <OrgLogo org={org} size="sm" ring={false} />
                     <span className={`font-semibold truncate ${isOwner ? 'text-gray-900' : 'text-gray-500'}`}>
                       {org.name}
                     </span>
