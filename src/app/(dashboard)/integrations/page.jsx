@@ -261,12 +261,15 @@ export default function IntegrationsPage() {
             onToggle={() => toggleExpand("jira")}
             onConnect={handleJiraClick}
             onDisconnect={handleJiraClick}
-            extraAction={{
-              label: "Manage",
-              onClick: () => (window.location.href = "/integrations/jira")
-            }}
+            extraAction={
+              canManageOrgIntegrations
+                ? {
+                    label: "Manage",
+                    onClick: () => (window.location.href = "/integrations/jira")
+                  }
+                : undefined
+            }
             loading={jiraLoading}
-            locked={!canManageOrgIntegrations}
           >
             <DetailItem label="Status" value="Connected workspace" />
           </IntegrationRow>
@@ -281,12 +284,15 @@ export default function IntegrationsPage() {
             onToggle={() => toggleExpand("slack")}
             onConnect={() => setShowSlackConnectModal(true)}
             onDisconnect={() => (window.location.href = "/integrations/slack")}
-            extraAction={{
-              label: "Manage",
-              onClick: () => (window.location.href = "/integrations/slack")
-            }}
+            extraAction={
+              canManageOrgIntegrations
+                ? {
+                    label: "Manage",
+                    onClick: () => (window.location.href = "/integrations/slack")
+                  }
+                : undefined
+            }
             loading={slackActionLoading}
-            locked={!canManageOrgIntegrations}
           >
             <DetailItem
               label="Workspaces"
@@ -417,7 +423,6 @@ function IntegrationRow({
     onToggle,
     children,
     loading,
-    locked = false,
   }) {
     return (
       <div className="transition">
@@ -454,11 +459,7 @@ function IntegrationRow({
             className="flex items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
-            {locked ? (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 font-medium">
-                Owner / Admin only
-              </span>
-            ) : isConnected ? (
+            {isConnected ? (
               <>
                 {extraAction && (
                   <button
