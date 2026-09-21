@@ -16,11 +16,15 @@ const SIZE_CLASSES = {
   xl: 'w-20 h-20 text-2xl',
 };
 
+// Neutral border used wherever a per-org colored ring would look inconsistent
+// across a grid/list of many organizations (e.g. clashing with each org's own color).
+export const COMMON_BORDER_COLOR = '#E5E7EB'; // Tailwind gray-200
+
 /**
  * Round organization logo. Falls back to a colored circle with the
  * organization's initials when no logo has been uploaded.
  */
-const OrgLogo = ({ org, size = 'md', className = '', ring = true }) => {
+const OrgLogo = ({ org, size = 'md', className = '', ring = true, ringColor }) => {
   const sizeCls = SIZE_CLASSES[size] || SIZE_CLASSES.md;
 
   if (org?.logo_url) {
@@ -29,7 +33,7 @@ const OrgLogo = ({ org, size = 'md', className = '', ring = true }) => {
         src={org.logo_url}
         alt={`${org.name || 'Organization'} logo`}
         className={`${sizeCls} rounded-full object-contain bg-white shrink-0 ${className}`}
-        style={ring ? { boxShadow: `0 0 0 2px ${org?.color || FALLBACK_COLOR}` } : undefined}
+        style={ring ? { boxShadow: `0 0 0 2px ${ringColor || org?.color || FALLBACK_COLOR}` } : undefined}
       />
     );
   }

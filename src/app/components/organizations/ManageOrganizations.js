@@ -20,7 +20,7 @@ import withProfileCompletionGuard from '../withProfileCompletionGuard';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { ORG_COLORS } from '@/app/constants/orgColors';
-import OrgLogo, { FALLBACK_COLOR } from './OrgLogo';
+import OrgLogo, { FALLBACK_COLOR, COMMON_BORDER_COLOR } from './OrgLogo';
 import { prepareLogoFile } from './logoValidation';
 
 const ROLE_STYLES = {
@@ -559,7 +559,7 @@ const ManageOrganizations = ({
                       </div>
                     )}
                     <div className="flex flex-col items-center justify-center h-full gap-2">
-                      <OrgLogo org={org} size="xl" ring={false} />
+                      <OrgLogo org={org} size="xl" ringColor={COMMON_BORDER_COLOR} />
                       <h3 className={`text-xl font-bold text-center bg-clip-text text-transparent ${
                         isOwner
                           ? 'bg-linear-to-r from-[#0A0DC4] to-[#8B0782]'
@@ -619,7 +619,7 @@ const ManageOrganizations = ({
                 >
                   {/* Left: logo + name + badge */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <OrgLogo org={org} size="sm" ring={false} />
+                    <OrgLogo org={org} size="sm" ringColor={COMMON_BORDER_COLOR} />
                     <span className={`font-semibold truncate ${isOwner ? 'text-gray-900' : 'text-gray-500'}`}>
                       {org.name}
                     </span>
@@ -762,7 +762,9 @@ const ManageOrganizations = ({
               className="fixed inset-0 bg-[rgba(0,0,0,0.3)] transition-opacity" 
               aria-hidden="true"
               onClick={closeModals}
-            ></div>
+            >
+              
+            </div>
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={handleEditOrg}>
