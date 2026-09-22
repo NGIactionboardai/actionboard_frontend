@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { ORG_COLORS } from '@/app/constants/orgColors';
 import OrgLogo, { FALLBACK_COLOR, COMMON_BORDER_COLOR } from './OrgLogo';
 import { prepareLogoFile } from './logoValidation';
+import CropLogoModal from './CropLogoModal';
 
 const ROLE_STYLES = {
   owner:  { label: 'Owner',  cls: 'bg-purple-100 text-purple-700' },
@@ -120,6 +121,12 @@ const ManageOrganizations = ({
   const [newLogoPreview, setNewLogoPreview] = useState('');
   const [newLogoError, setNewLogoError] = useState('');
   const [newLogoPreparing, setNewLogoPreparing] = useState(false);
+
+  // Crop step — shared between the create and edit logo flows. `cropTarget`
+  // says which flow to resume with the cropped result once the user confirms.
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState('');
+  const [cropTarget, setCropTarget] = useState(null); // 'create' | 'edit'
 
   // const ORG_COLORS = [
   //   '#4F46E5', // Indigo
@@ -250,11 +257,7 @@ const ManageOrganizations = ({
     });
   };
 
-  const handleNewLogoFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = ''; // allow re-selecting the same file later
-    if (!file) return;
-
+  const processNewLogoFile = async (file) => {
     setNewLogoError('');
     setNewLogoPreparing(true);
 
@@ -273,10 +276,8 @@ const ManageOrganizations = ({
     });
   };
 
-  const handleLogoFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = ''; // allow re-selecting the same file later
-    if (!file || !selectedOrg) return;
+  const processLogoFile = async (file) => {
+    if (!selectedOrg) return;
 
     setLogoError('');
     setLogoUploading(true);
@@ -299,6 +300,62 @@ const ManageOrganizations = ({
     } finally {
       setLogoUploading(false);
     }
+  };
+
+  const openCropModal = (file, target) => {
+    setCropSrc((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    setCropTarget(target);
+    setCropModalOpen(true);
+  };
+
+  const closeCropModal = () => {
+    setCropModalOpen(false);
+    setCropTarget(null);
+    setCropSrc((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return '';
+    });
+  };
+
+  const handleCropConfirm = async (croppedBlob) => {
+    const target = cropTarget;
+    closeCropModal();
+
+    const file = new File([croppedBlob], 'logo.png', { type: 'image/png' });
+    if (target === 'create') {
+      await processNewLogoFile(file);
+    } else if (target === 'edit') {
+      await processLogoFile(file);
+    }
+  };
+
+  // SVGs are vector/scalable, so cropping them raster-style doesn't apply —
+  // prepareLogoFile already special-cases SVG to upload as-is.
+  const handleNewLogoFileChange = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+
+    if (file.type === 'image/svg+xml') {
+      processNewLogoFile(file);
+      return;
+    }
+    openCropModal(file, 'create');
+  };
+
+  const handleLogoFileChange = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file || !selectedOrg) return;
+
+    if (file.type === 'image/svg+xml') {
+      processLogoFile(file);
+      return;
+    }
+    openCropModal(file, 'edit');
   };
 
   const handleRemoveLogo = async () => {
@@ -373,6 +430,7 @@ const ManageOrganizations = ({
     setFormData({ name: '' });
     setLogoError('');
     resetNewLogo();
+    closeCropModal();
   };
 
   // The selected org enriched with live logo updates from the store, since
@@ -913,6 +971,13 @@ const ManageOrganizations = ({
           </div>
         </div>
       )}
+
+      <CropLogoModal
+        isOpen={cropModalOpen}
+        imageSrc={cropSrc}
+        onCancel={closeCropModal}
+        onConfirm={handleCropConfirm}
+      />
     </div>
   );
 };
