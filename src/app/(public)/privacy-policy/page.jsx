@@ -16,7 +16,7 @@ export default function PrivacyPolicy() {
                             PRIVACY POLICY
                         </h1>
                         <p className="mt-2 text-sm text-gray-500">
-                            Version 2.0 · Effective Date: December 22, 2025
+                            Version 2.1 · Effective Date: October 1, 2026
                         </p>
                     </div>
 
@@ -429,22 +429,38 @@ export default function PrivacyPolicy() {
                             Nous Meeting may provide links to third-party applications, websites, or services for your convenience. Please be aware that once you leave our platform, you are subject to the privacy policies and terms of service of those external sites. We do not control, endorse, or assume responsibility for the content, services, privacy practices, or security measures of external sites or third-party services. We encourage you to review the privacy policies of any third-party sites you visit.
                         </p>
 
-                        <h2 className="text-2xl font-bold mt-10 mb-4 text-zinc-800 dark:text-white">12. Data Retention</h2>
+                        <h2 id="google-user-data" className="text-2xl font-bold mt-10 mb-4 text-zinc-800 dark:text-white">12. Google User Data and Limited Use Disclosure</h2>
+                        <p className="mb-4">
+                            <strong>Nous Meeting&apos;s use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" className="underline">Google API Services User Data Policy</a>, including the Limited Use requirements. The use of raw or derived user data received from Google Workspace APIs will adhere to the Google User Data Policy, including the Limited Use requirements.</strong>
+                        </p>
+                        <p className="mb-4">
+                            When you choose to connect your Google Calendar, Nous Meeting requests the <code>https://www.googleapis.com/auth/calendar</code> scope solely to create, update and delete calendar events for meetings you schedule in Nous Meeting, and to attach the Nous Meeting join link to those events. We also receive your basic Google profile (name and email address) to identify the connected account.
+                        </p>
+                        <ul className="list-disc pl-6 mb-4 space-y-1">
+                            <li>We use Google user data only to provide and improve the user-facing calendar features described above.</li>
+                            <li>We do not use, transfer or sell Google user data, including raw, aggregated, anonymized or derived data, to develop, train or improve generalized or foundational artificial intelligence or machine learning models.</li>
+                            <li>We do not send Google Calendar data to any third-party AI or machine learning service. The AI features of Nous Meeting (transcription, summaries, action items and analysis) operate on meeting recordings and content you provide to Nous Meeting, not on data obtained from Google APIs.</li>
+                            <li>We do not sell Google user data, use it for advertising, or transfer it to data brokers or information resellers.</li>
+                            <li>We do not allow humans to read Google user data unless you give affirmative consent for specific data, it is necessary for security purposes (such as investigating abuse), it is required to comply with applicable law, or the data has been aggregated and anonymized for internal operations.</li>
+                            <li>Google OAuth tokens are transmitted only over encrypted (HTTPS) connections and stored on access-controlled servers. You can disconnect Google Calendar at any time from the Integrations page in Nous Meeting or at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" className="underline">myaccount.google.com/permissions</a>. When you disconnect, we delete the stored tokens.</li>
+                        </ul>
+
+                        <h2 className="text-2xl font-bold mt-10 mb-4 text-zinc-800 dark:text-white">13. Data Retention</h2>
                         <p>
                             We retain personal information for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required or permitted by law. When determining retention periods, we consider the nature of the information, the purposes for which it was collected, legal requirements, and our legitimate business interests. When personal information is no longer needed, we will securely delete or anonymize it in accordance with our data retention and deletion policies.
                         </p>
 
-                        <h2 className="text-2xl font-bold mt-10 mb-4 text-zinc-800 dark:text-white">13. Changes to This Privacy Policy</h2>
+                        <h2 className="text-2xl font-bold mt-10 mb-4 text-zinc-800 dark:text-white">14. Changes to This Privacy Policy</h2>
                         <p>
                             Nous Meeting reserves the right to modify or update this Privacy Policy at any time to reflect changes in our practices, legal requirements, or business operations. We will notify you of any material changes by posting the new privacy policy on this page, updating the &quot;Effective Date&quot; at the top, and providing notice through our platform or via email where appropriate. Your continued use of our services after such changes constitutes acceptance of the updated policy. We encourage users to periodically review this Privacy Policy to stay informed about how we are protecting your information.
                         </p>
 
-                        <h2 className="text-2xl font-bold mt-10 mb-4 text-zinc-800 dark:text-white">14. User Responsibility</h2>
+                        <h2 className="text-2xl font-bold mt-10 mb-4 text-zinc-800 dark:text-white">15. User Responsibility</h2>
                         <p>
                             We encourage users to carefully protect their personal information, including login credentials, passwords, authentication tokens, and any sensitive data submitted through the website or application. Users are responsible for maintaining the confidentiality of their account information and for all activities that occur under their account. Please notify us immediately if you suspect any unauthorized access to your account.
                         </p>
 
-                        <h2 className="text-2xl font-bold mt-10 mb-4 text-zinc-800 dark:text-white">15. Contact Us</h2>
+                        <h2 className="text-2xl font-bold mt-10 mb-4 text-zinc-800 dark:text-white">16. Contact Us</h2>
                         <p>If you have questions, concerns, or requests regarding this Privacy Policy or our privacy practices, please contact us at:</p>
                         <div className="bg-zinc-50 dark:bg-zinc-800/50 p-6 rounded-lg mt-4 border border-zinc-200 dark:border-zinc-700">
                             <p className="font-semibold">Next Generation Innovation L.L.C.</p>
