@@ -488,7 +488,14 @@ function IntegrationRow({
               </button>
             )}
 
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            <button
+              type="button"
+              onClick={onToggle}
+              className="p-1 -m-1 rounded hover:bg-gray-200"
+              aria-label={expanded ? "Collapse details" : "Expand details"}
+            >
+              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
           </div>
         </div>
   
