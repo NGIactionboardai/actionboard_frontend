@@ -298,7 +298,7 @@ export default function NewNavbar({ variant = "default" }) {
                     <button
                       type="button"
                       onClick={() => setOrgsOpen((prev) => !prev)}
-                      className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 focus:bg-blue-50 focus:text-blue-600 transition-all duration-200 group"
+                      className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 focus:bg-blue-50 focus:text-blue-600 transition-all duration-200 group cursor-pointer"
                     >
                       <Building2 className="w-4 h-4 mr-2 text-gray-500 group-hover:text-blue-500 transition-colors" />
                       Organizations
@@ -344,7 +344,7 @@ export default function NewNavbar({ variant = "default" }) {
                     <button
                       type="button"
                       onClick={() => setCalendarOpen((prev) => !prev)}
-                      className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 focus:bg-blue-50 focus:text-blue-600 transition-all duration-200 group"
+                      className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50/50 focus:bg-blue-50 focus:text-blue-600 transition-all duration-200 group cursor-pointer"
                     >
                       <Calendar className="w-4 h-4 mr-2 text-gray-500 group-hover:text-blue-500 transition-colors" />
                       Calendar
@@ -391,7 +391,7 @@ export default function NewNavbar({ variant = "default" }) {
                     <button
                       type="button"
                       onClick={() => setInviteDropdownOpen((prev) => !prev)}
-                      className="relative p-2 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-blue-50/50 transition-all duration-200"
+                      className="relative p-2 rounded-xl text-gray-500 hover:text-indigo-600 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer"
                       title="Pending invitations"
                     >
                       <Bell className="h-5 w-5" />
@@ -503,7 +503,7 @@ export default function NewNavbar({ variant = "default" }) {
                   <div className="relative" ref={dropdownRef}>
                     <button
                       type="button"
-                      className="flex items-center space-x-3 px-4 py-2 text-sm rounded-xl hover:bg-gray-50 focus:bg-gray-50 transition-all duration-200 group"
+                      className="flex items-center space-x-3 px-4 py-2 text-sm rounded-xl hover:bg-gray-50 focus:bg-gray-50 transition-all duration-200 group cursor-pointer"
                       onClick={() => setDropdownOpen(!dropdownOpen)}
                       aria-expanded={dropdownOpen}
                       aria-haspopup="true"
