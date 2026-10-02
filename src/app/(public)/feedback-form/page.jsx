@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { usePublicFormGuard } from '@/app/components/PublicFormGuard';
 
 const FeedbackPage = () => {
   const [form, setForm] = useState({
@@ -17,6 +18,7 @@ const FeedbackPage = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const guard = usePublicFormGuard();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,6 +41,10 @@ const FeedbackPage = () => {
       setErrors(validationErrors);
       return;
     }
+    if (!guard.isReady) {
+      toast.error('Please complete the verification check before submitting.');
+      return;
+    }
     setErrors({});
     setLoading(true);
 
@@ -53,6 +59,7 @@ const FeedbackPage = () => {
           confusing_or_difficult: form.difficulties,
           features_wished: form.features,
           other_comments: form.comments,
+          ...guard.payload,
         }
       );
 
@@ -68,9 +75,10 @@ const FeedbackPage = () => {
       });
     } catch (err) {
       console.error(err);
-      toast.error('Failed to submit feedback. Please try again.');
+      toast.error(err.response?.data?.detail || 'Failed to submit feedback. Please try again.');
     } finally {
       setLoading(false);
+      guard.reset();
     }
   };
 
@@ -197,6 +205,8 @@ const FeedbackPage = () => {
           </div>
 
           {/* Submit */}
+          {guard.fields}
+
           <div className="text-center pt-4">
             <button
               type="submit"

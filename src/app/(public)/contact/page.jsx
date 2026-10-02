@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import axios from "axios";
+import { usePublicFormGuard } from "@/app/components/PublicFormGuard";
 import toast from "react-hot-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,8 @@ export default function ContactPage() {
     return newErrors;
   };
 
+  const guard = usePublicFormGuard();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
@@ -73,18 +76,23 @@ export default function ContactPage() {
       setErrors(validationErrors);
       return;
     }
+    if (!guard.isReady) {
+      toast.error("Please complete the verification check before submitting.");
+      return;
+    }
     setLoading(true);
     setErrors({});
     try {
       const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/support/queries/`;
-      await axios.post(url, { ...form });
+      await axios.post(url, { ...form, ...guard.payload });
       toast.success("Your message has been sent!");
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (err) {
       console.error("Failed to submit query", err.response?.data || err.message);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(err.response?.data?.detail || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+      guard.reset();
     }
   };
 
@@ -454,6 +462,7 @@ export default function ContactPage() {
                         </motion.p>
                       )}
                     </div>
+                    {guard.fields}
                     <div className="text-center pt-4">
                       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                         <Button

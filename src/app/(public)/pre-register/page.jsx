@@ -7,6 +7,7 @@ import { useMemo, useState } from "react"
 import axios from "axios"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
+import { usePublicFormGuard } from "@/app/components/PublicFormGuard"
 
 export default function FreeTrialPage() {
   const router = useRouter()
@@ -38,11 +39,18 @@ export default function FreeTrialPage() {
     }))
   }
 
+  const guard = usePublicFormGuard()
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!formData.first_name || !formData.last_name || !formData.email || !formData.country) {
       toast.error("Please fill all required fields")
+      return
+    }
+
+    if (!guard.isReady) {
+      toast.error("Please complete the verification check before submitting.")
       return
     }
 
@@ -52,7 +60,7 @@ export default function FreeTrialPage() {
 
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/waitlist/signup/`,
-        formData
+        { ...formData, ...guard.payload }
       )
 
       toast.success("Pre-registration successful!")
@@ -70,6 +78,7 @@ export default function FreeTrialPage() {
 
     } finally {
       setLoading(false)
+      guard.reset()
     }
   }
 
@@ -193,6 +202,8 @@ export default function FreeTrialPage() {
               />
             </div>
 
+
+            {guard.fields}
 
             {/* BUTTON */}
             <button

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import axios from 'axios';
+import { usePublicFormGuard } from '@/app/components/PublicFormGuard';
 import toast from 'react-hot-toast';
 import BugReportModal from '../../components/BugReportModal';
 
@@ -106,6 +107,8 @@ const HelpPage = () => {
     return newErrors;
   };
 
+  const guard = usePublicFormGuard();
+
   // handle submit query
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -114,19 +117,24 @@ const HelpPage = () => {
       setErrors(validationErrors);
       return;
     }
+    if (!guard.isReady) {
+      toast.error('Please complete the verification check before submitting.');
+      return;
+    }
     setLoading(true);
     setErrors({});
     try {
       const payload = { ...form };
       const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/support/queries/`;
-      await axios.post(url, payload);
+      await axios.post(url, { ...payload, ...guard.payload });
       toast.success('Your query has been submitted successfully!');
       setForm({ name: '', email: '', subject: '', message: '' });
     } catch (err) {
       console.error('Failed to submit query', err.response?.data || err.message);
-      toast.error('Something went wrong. Please try again.');
+      toast.error(err.response?.data?.detail || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
+      guard.reset();
     }
   };
 
@@ -549,6 +557,7 @@ const HelpPage = () => {
                   )}
                 </div>
 
+                {guard.fields}
                 <div className="text-center pt-4">
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <button

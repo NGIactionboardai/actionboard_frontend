@@ -3,6 +3,7 @@
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { X, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -15,9 +16,10 @@ export default function BugReportModal({ isOpen, onClose }) {
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
   const [selectedSeverity, setSelectedSeverity] = useState(severities[0]);
 
+  // Bug reports require login; the backend uses the account email as the reporter.
+  const [token, setToken] = useState(null);
+
   // form fields
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [description, setDescription] = useState('');
   const [steps, setSteps] = useState('');
   const [errors, setErrors] = useState({});
@@ -26,8 +28,7 @@ export default function BugReportModal({ isOpen, onClose }) {
   // Reset form whenever modal is opened
   useEffect(() => {
     if (isOpen) {
-      setName('');
-      setEmail('');
+      setToken(localStorage.getItem('token'));
       setDescription('');
       setSteps('');
       setSelectedPlatform(platforms[0]);
@@ -39,12 +40,6 @@ export default function BugReportModal({ isOpen, onClose }) {
 
   const validate = () => {
     const newErrors = {};
-    if (!name.trim()) newErrors.name = 'Name is required';
-    if (!email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Enter a valid email';
-    }
     if (!description.trim()) newErrors.description = 'Description is required';
     return newErrors;
   };
@@ -64,16 +59,22 @@ export default function BugReportModal({ isOpen, onClose }) {
         description,
         steps_to_reproduce: steps,
         severity: selectedSeverity.toLowerCase(),
-        reporter_email: email,
-        reporter_name: name,
       };
       const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/support/bug-reports/`;
-      await axios.post(url, payload);
+      await axios.post(url, payload, { headers: { Authorization: `Bearer ${token}` } });
       toast.success('Bug report submitted successfully!');
       onClose();
     } catch (err) {
       console.error('Failed to submit bug report', err.response?.data || err.message);
-      toast.error('Something went wrong. Please try again.');
+      const status = err.response?.status;
+      if (status === 401) {
+        setToken(null);
+        toast.error('Your session has expired. Please log in again.');
+      } else if (status === 429) {
+        toast.error('Too many reports submitted. Please try again later.');
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -122,36 +123,27 @@ export default function BugReportModal({ isOpen, onClose }) {
                   </button>
                 </div>
 
-                {/* Bug Form */}
+                {!token ? (
+                  <div className="space-y-4 text-sm text-gray-700">
+                    <p>Please log in to report a bug, so we can follow up with you on your account.</p>
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200"
+                      >
+                        Cancel
+                      </button>
+                      <Link
+                        href="/auth/login"
+                        className="px-4 py-2 text-sm text-white rounded-md bg-indigo-600 hover:bg-indigo-700"
+                      >
+                        Log in
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
                 <form className="space-y-4" onSubmit={handleSubmit}>
-                  {/* Name */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full border rounded-md px-3 py-2 text-sm"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-                  </div>
-
-                  {/* Email */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full border rounded-md px-3 py-2 text-sm"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-                  </div>
-
                   {/* Platform */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -262,6 +254,7 @@ export default function BugReportModal({ isOpen, onClose }) {
                     </button>
                   </div>
                 </form>
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>
