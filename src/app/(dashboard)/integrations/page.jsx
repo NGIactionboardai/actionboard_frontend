@@ -21,6 +21,7 @@ import {
   selectGoogleIsConnected,
   selectGoogleEmail,
   selectGoogleName,
+  selectGoogleScopeMissing,
   startGoogleOAuth,
   disconnectGoogle,
   fetchGoogleStatus
@@ -78,6 +79,8 @@ export default function IntegrationsPage() {
   const isGoogleConnected = useSelector(selectGoogleIsConnected);
   const googleEmail = useSelector(selectGoogleEmail);
   const googleName = useSelector(selectGoogleName);
+  const googleScopeMissing = useSelector(selectGoogleScopeMissing);
+  const [googleCallbackStatus, setGoogleCallbackStatus] = useState(null);
   const [showGoogleConnectModal, setShowGoogleConnectModal] = useState(false);
   const [showGoogleDisconnectModal, setShowGoogleDisconnectModal] = useState(false);
 
@@ -122,6 +125,18 @@ export default function IntegrationsPage() {
     if (teamsParam) {
       const url = new URL(window.location.href);
       url.searchParams.delete("teams");
+      window.history.replaceState({}, document.title, url.toString());
+    }
+
+    const googleParam = params.get("google");
+
+    if (googleParam && googleParam !== "connected") {
+      setGoogleCallbackStatus(googleParam);
+    }
+
+    if (googleParam) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("google");
       window.history.replaceState({}, document.title, url.toString());
     }
   }, [dispatch]);
@@ -217,6 +232,26 @@ export default function IntegrationsPage() {
           </IntegrationRow>
 
           {/* GOOGLE */}
+            {(googleCallbackStatus === "scope-missing" || (googleScopeMissing && !googleCallbackStatus)) && (
+              <GoogleNotice
+                title="Calendar access wasn't granted"
+                message={<>Nous Meeting needs permission to manage your Google Calendar events to create meetings. Please connect again, and on the Google permissions screen make sure the box <strong>&quot;See, edit, share, and permanently delete all the calendars you can access using Google Calendar&quot;</strong> is ticked.</>}
+                actionLabel="Reconnect Google Calendar"
+                onAction={() => setShowGoogleConnectModal(true)}
+              />
+            )}
+            {googleCallbackStatus && googleCallbackStatus !== "scope-missing" && (
+              <GoogleNotice
+                title="Google Calendar couldn't be connected"
+                message={
+                  googleCallbackStatus === "auth-denied"
+                    ? "You cancelled the Google sign-in. Connect again whenever you're ready."
+                    : "Something went wrong while connecting to Google. Please try again."
+                }
+                actionLabel="Try again"
+                onAction={() => setShowGoogleConnectModal(true)}
+              />
+            )}
             <IntegrationRow
                 name="Google Meet"
                 icon="/meeting-tools-icons/meet-logo.png"
@@ -394,6 +429,21 @@ export default function IntegrationsPage() {
 }
 
 
+
+function GoogleNotice({ title, message, actionLabel, onAction }) {
+    return (
+      <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+        <p className="text-sm font-semibold text-amber-900">{title}</p>
+        <p className="text-sm text-amber-800 mt-1">{message}</p>
+        <button
+          onClick={onAction}
+          className="mt-3 text-sm font-medium text-amber-900 underline hover:text-amber-700"
+        >
+          {actionLabel}
+        </button>
+      </div>
+    );
+}
 
 function Section({ title, children }) {
     return (

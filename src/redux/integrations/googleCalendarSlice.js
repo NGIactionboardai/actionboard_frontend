@@ -106,6 +106,7 @@ const initialState = {
   email: null,
   name: null,
   lastSyncedAt: null,
+  scopeMissing: false,
 
   loading: false,
   error: null,
@@ -154,6 +155,7 @@ const googleCalendarSlice = createSlice({
         state.loading = false;
 
         state.connected = action.payload.connected;
+        state.scopeMissing = !!action.payload.scope_missing;
 
         if (action.payload.connected) {
           state.email = action.payload.email;
@@ -211,6 +213,7 @@ export const {
 export const selectGoogleIsConnected = (state) => state.googleCalendar.connected;
 export const selectGoogleEmail = (state) => state.googleCalendar.email;
 export const selectGoogleName = (state) => state.googleCalendar.name;
+export const selectGoogleScopeMissing = (state) => state.googleCalendar.scopeMissing;
 export const selectGoogleLoading = (state) => state.googleCalendar.loading;
 export const selectGoogleError = (state) => state.googleCalendar.error;
 export const selectGoogleSuccessMessage = (state) => state.googleCalendar.successMessage;
