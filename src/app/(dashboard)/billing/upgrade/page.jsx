@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { fetchSubscription } from "@/redux/billing/billingSlice";
 import { ArrowLeft, Crown, Check, X } from "lucide-react";
 import { useOrgRole } from "@/app/hooks/useOrgRole";
+import { selectCurrentOrganizationId } from "@/redux/auth/orgSelectionSlice";
 import { getFeatureLabel, PLAN_INTEGRATIONS } from "@/lib/billingFeatures";
 
 const formatDate = (dateStr) => {
@@ -33,7 +34,12 @@ export default function UpgradePage() {
   const [checkoutLoading, setCheckoutLoading] = useState(null);
   const [billingCycle, setBillingCycle] = useState("monthly");
 
-  const { canUpgradePlan, canManagePayment } = useOrgRole();
+  const currentOrg = useSelector(selectCurrentOrganizationId);
+  const { canUpgradePlan: isOrgOwner } = useOrgRole();
+  // Outside an org the user is looking at their own subscription, which they
+  // can always manage. Inside one, only the org's owner can.
+  const canUpgradePlan = !currentOrg || isOrgOwner;
+  const canManagePayment = canUpgradePlan;
 
   const sub = billing.subscription;
 
@@ -92,7 +98,7 @@ export default function UpgradePage() {
 
   const handleCustomerPortal = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/billing/customer-portal/`);
+      const res = await axios.post(`${API_BASE}/billing/customer-portal/`);
       window.location.href = res.data.url;
     } catch (err) {
       console.error("Failed to open portal");
@@ -130,8 +136,10 @@ export default function UpgradePage() {
 
         {(isExpired || isCanceled) && (
           <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm text-center">
-            {isExpired
-              ? "Your free plan has expired. Upgrade to continue using the platform."
+            {!canUpgradePlan
+              ? "This organisation's subscription is inactive. Ask the organisation owner to renew it."
+              : isExpired
+              ? "Your plan has expired. Upgrade to continue using the platform."
               : "Your subscription is inactive. Please upgrade or renew to continue."}
           </div>
         )}

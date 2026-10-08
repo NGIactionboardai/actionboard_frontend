@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserInfo, hydrateAuth, refreshToken, selectIsHydrated, storage } from '../../redux/auth/authSlices';
+import { fetchUserInfo, hydrateAuth, refreshToken, selectIsAuthenticated, selectIsHydrated, storage } from '../../redux/auth/authSlices';
 import { registerAuthInterceptor } from '../utils/registerAuthInterceptor';
 import LoadingPage from './LoadingPage';
 import { fetchSubscription } from '@/redux/billing/billingSlice';
@@ -18,6 +18,8 @@ export default function AuthHydrator({ children }) {
   const dispatch = useDispatch();
   const isHydrated = useSelector(selectIsHydrated);
   const [ready, setReady] = useState(false);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const billingStatus = useSelector((state) => state.billing.status);
 
   useEffect(() => {
     // Only hydrate once on client mount
@@ -62,6 +64,16 @@ export default function AuthHydrator({ children }) {
   
     if (isHydrated) initAuth();
   }, [isHydrated, dispatch]);
+
+  // The login pages live under this layout, so initAuth has already run (with
+  // no session) by the time a user signs in — it never fetched billing. Fetch it
+  // once the session exists; billing resets to 'idle' on logout, so this also
+  // covers switching accounts without a reload.
+  useEffect(() => {
+    if (ready && isAuthenticated && billingStatus === 'idle') {
+      dispatch(fetchSubscription());
+    }
+  }, [ready, isAuthenticated, billingStatus, dispatch]);
 
   if (!ready) {
     return <LoadingPage />;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { AlertTriangle, X } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@/redux/auth/authSlices';
@@ -36,6 +37,7 @@ export default function ProtectedRoute({ children }) {
   const billing = useSelector((state) => state.billing);
   const currentOrg = useSelector(selectCurrentOrganizationId);
   const { role } = useOrgRole();
+  const [adminNoticeDismissed, setAdminNoticeDismissed] = useState(false);
 
   // Check if current path is public (no auth required)
   const isPublic = PUBLIC_PATHS.some((path) => {
@@ -65,11 +67,9 @@ export default function ProtectedRoute({ children }) {
       // No org selected yet: this is account-level onboarding (the user hasn't
       // created/joined an org), gated by the user's own subscription.
       if (!currentOrg) {
-        if (billing.status === "idle" || billing.status === "loading") return;
-        if (billing.status === "failed") {
-          router.replace('/pricing');
-          return;
-        }
+        // Same rule as below: only a successful, user-level answer counts. A
+        // failed request (network, expired token) is not "no subscription".
+        if (billing.status !== "success" || billing.orgId !== null) return;
         const sub = billing.subscription;
         if (!sub || !sub.has_subscription) {
           router.replace('/pricing');
@@ -77,49 +77,37 @@ export default function ProtectedRoute({ children }) {
         return;
       }
 
-      // Inside an org: only owners/admins can act on that org's billing
-      // (see billing:view in organisations/permissions.py), so only they are
-      // ever redirected to the billing screen. Members/viewers are never
-      // blocked account-wide by another org's subscription state — a
-      // restricted org should only affect access to that org's resources,
-      // which is enforced separately, per-resource, by the backend.
-      if (role !== 'owner' && role !== 'admin') {
+      // Inside an org, billing is the owner's responsibility: only the owner can
+      // renew or upgrade (billing:manage), so only the owner is ever redirected
+      // to the billing screen. Admins can't act on it and get a notice instead
+      // (rendered below); members/viewers are never gated here — a restricted
+      // org only affects that org's resources, enforced per-resource by the
+      // backend.
+      if (role !== 'owner') {
         return;
       }
 
-      // WAIT for the org-scoped subscription fetch to resolve.
-      if (billing.status === "idle" || billing.status === "loading") {
+      // Only judge a subscription fetched for *this* org. Anything else — the
+      // user-level one from login, the previously viewed org's after a switch,
+      // a fetch still in flight — must not trigger a redirect.
+      if (billing.status !== "success" || billing.orgId !== currentOrg) {
         return;
       }
 
-      if (billing.status === "failed") {
+      if (isSubscriptionInactive(billing.subscription)) {
         router.replace('/billing/upgrade');
-        return;
-      }
-
-      const sub = billing.subscription;
-
-      if (!sub || !sub.has_subscription) {
-        router.replace('/billing/upgrade');
-        return;
-      }
-
-      if (sub.is_expired) {
-        router.replace('/billing/upgrade');
-        return;
-      }
-
-      if (!["active", "trialing"].includes(sub.status)) {
-        router.replace('/billing/upgrade');
-        return;
       }
     }
-  }, [isAuthenticated, isPublic, isBillingExempt, billing.status, billing.subscription, pathname, currentOrg, role]);
+  }, [isAuthenticated, isPublic, isBillingExempt, billing.status, billing.subscription, billing.orgId, pathname, currentOrg, role]);
 
-  // Show loading while checking auth on protected routes
+  // Show loading while checking auth on protected routes. Hold the page only while the first subscription for the current context
+  // loads; a background refetch of the same org keeps the page mounted.
+  const awaitingBilling =
+    billing.status === "loading" && billing.orgId !== (currentOrg || null);
+
   if (
     (!isAuthenticated && !isPublic) ||
-    (isAuthenticated && !isPublic && !isBillingExempt && billing.status === "loading")
+    (isAuthenticated && !isPublic && !isBillingExempt && awaitingBilling)
   ) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -131,5 +119,47 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  return children;
+  const showAdminNotice =
+    isAuthenticated &&
+    !isPublic &&
+    role === 'admin' &&
+    !adminNoticeDismissed &&
+    billing.status === "success" &&
+    billing.orgId === currentOrg &&
+    isSubscriptionInactive(billing.subscription);
+
+  return (
+    <>
+      {children}
+      {showAdminNotice && (
+        <div className="fixed bottom-4 inset-x-4 sm:left-auto sm:right-4 sm:max-w-md z-40 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 text-sm">
+              <p className="font-medium text-amber-900">This organisation&apos;s subscription is inactive</p>
+              <p className="text-amber-800 mt-1">
+                Some features may be unavailable. Ask the organisation owner to renew the plan.
+              </p>
+            </div>
+            <button
+              onClick={() => setAdminNoticeDismissed(true)}
+              className="text-amber-700 hover:text-amber-900 cursor-pointer"
+              aria-label="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function isSubscriptionInactive(sub) {
+  return (
+    !sub ||
+    !sub.has_subscription ||
+    sub.is_expired ||
+    !["active", "trialing"].includes(sub.status)
+  );
 }

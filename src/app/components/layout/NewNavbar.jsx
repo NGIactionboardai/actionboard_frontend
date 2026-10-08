@@ -100,7 +100,7 @@ export default function NewNavbar({ variant = "default" }) {
   useEffect(() => {
     if (!hasMounted) return;
     const handleResize = () => {
-      if (window.innerWidth >= 640 && mobileMenuOpen) {
+      if (window.innerWidth >= 1024 && mobileMenuOpen) {
         setMobileMenuOpen(false);
       }
     };
@@ -260,7 +260,7 @@ export default function NewNavbar({ variant = "default" }) {
     >
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
-          <div className="flex items-center">
+          <div className="flex items-center flex-shrink-0">
             <Link href={logoHref} className="flex-shrink-0 flex items-center group">
               <div className="relative">
                 <Image
@@ -280,7 +280,7 @@ export default function NewNavbar({ variant = "default" }) {
           </div>
           
           {/* Desktop menu */}
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          <div className="hidden lg:ml-6 lg:flex lg:items-center">
           {!hasMounted ? (
             // Show skeleton placeholder while mounting
             <div className="flex items-center space-x-4 animate-pulse">
@@ -512,7 +512,7 @@ export default function NewNavbar({ variant = "default" }) {
                       <div className="h-9 w-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium shadow-md group-hover:shadow-lg transition-shadow">
                         {getUserInitials()}
                       </div>
-                      <div className="flex flex-col items-start max-w-60">
+                      <div className="hidden xl:flex flex-col items-start max-w-60">
                         <span className="font-medium text-gray-900 text-sm max-w-45 truncate"
                           title={getUserDisplayName()}
                         >
@@ -624,7 +624,7 @@ export default function NewNavbar({ variant = "default" }) {
           </div>
           
           {/* Mobile menu button */}
-          <div className="flex items-center sm:hidden">
+          <div className="flex items-center lg:hidden">
             <button
               type="button"
               className="inline-flex items-center justify-center p-2 rounded-xl text-gray-600 hover:text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
@@ -645,7 +645,7 @@ export default function NewNavbar({ variant = "default" }) {
       
       {/* Mobile menu, show/hide based on menu state */}
         <div 
-          className={`sm:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200/50 z-50 transition-all duration-300 ease-in-out ${
+          className={`lg:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200/50 z-50 transition-all duration-300 ease-in-out ${
             mobileMenuOpen 
               ? 'translate-y-0 opacity-100 shadow-lg' 
               : '-translate-y-4 opacity-0 pointer-events-none'

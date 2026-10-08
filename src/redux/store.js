@@ -48,7 +48,10 @@ const persistConfig = {
   storage,
   // zoom/auth handled separately; aiChat should always be fresh from the server;
   // RTK Query cache reducers should always refetch fresh too, not survive a reload.
-  blacklist: ['zoom', 'auth', 'aiChat', organizationApi.reducerPath, meetingsApi.reducerPath],
+  // billing must never be restored from storage: a stale copy (pre-upgrade, a
+  // failed fetch, another account on this device) was being judged as current
+  // before the fresh fetch landed, bouncing paid users to /billing/upgrade.
+  blacklist: ['zoom', 'auth', 'aiChat', 'billing', organizationApi.reducerPath, meetingsApi.reducerPath],
 };
 
 const rootReducer = combineReducers({
