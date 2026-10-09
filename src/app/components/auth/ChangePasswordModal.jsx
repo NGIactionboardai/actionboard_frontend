@@ -10,11 +10,13 @@ import toast from 'react-hot-toast';
 export default function ChangePasswordModal({ isOpen, onClose }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const passwordRequirements = [
     { label: 'At least 8 characters', test: (pwd) => pwd.length >= 8 },
@@ -28,20 +30,27 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
     if (isOpen) {
       setCurrentPassword('');
       setNewPassword('');
+      setConfirmPassword('');
       setError('');
       setShowCurrent(false);
       setShowNew(false);
+      setShowConfirm(false);
     }
   }, [isOpen]);
 
   const handleSubmit = async () => {
-    if (!currentPassword || !newPassword) {
-      setError('Both fields are required');
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setError('All fields are required');
       return;
     }
 
     if (!passwordRequirements.every(req => req.test(newPassword))) {
       setError('New password does not meet all requirements');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
 
@@ -142,6 +151,27 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
                       {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+
+                  <div className="relative">
+                    <input
+                      type={showConfirm ? 'text' : 'password'}
+                      placeholder="Confirm New Password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full border rounded-md px-3 py-2 pr-10 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm((prev) => !prev)}
+                      className="absolute right-2 top-2.5 text-gray-500"
+                    >
+                      {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+
+                  {confirmPassword && newPassword !== confirmPassword && (
+                    <p className="text-red-500 text-xs">Passwords do not match</p>
+                  )}
 
                   {/* Password Requirements */}
                   {newPassword && (
