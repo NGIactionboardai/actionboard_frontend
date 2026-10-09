@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@/redux/auth/authSlices';
 import { selectCurrentOrganizationId } from '@/redux/auth/orgSelectionSlice';
 import { useOrgRole } from '@/app/hooks/useOrgRole';
+import Link from 'next/link';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -298,7 +299,7 @@ export default function UpcomingMeetingNotification() {
 
           {/* Action buttons */}
           <div style={{ display: 'flex', gap: '8px' }}>
-            {meeting.join_url && (
+            {isUrgent && meeting.join_url ? (
               <a
                 href={meeting.join_url}
                 target="_blank"
@@ -321,6 +322,27 @@ export default function UpcomingMeetingNotification() {
               >
                 Join Meeting
               </a>
+            ) : (
+              <Link
+                href={`/meeting/${meeting.id}`}
+                style={{
+                  flex: 1,
+                  display: 'block',
+                  textAlign: 'center',
+                  padding: '9px 0',
+                  borderRadius: '8px',
+                  background: '#1e3a8a',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  textDecoration: 'none',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#1d4ed8')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#1e3a8a')}
+              >
+                Meeting Details
+              </Link>
             )}
             <button
               onClick={handleDismiss}
