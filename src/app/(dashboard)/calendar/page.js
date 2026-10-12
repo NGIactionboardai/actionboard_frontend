@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { selectIsAuthenticated } from '../../../redux/auth/authSlices';
-import Calendar from '../../components/Calendar';
+import CalendarHub from '../../components/orgcalendar/CalendarHub';
 import withProfileCompletionGuard from '../../components/withProfileCompletionGuard';
 
 function CalendarPage() {
@@ -30,7 +30,7 @@ function CalendarPage() {
 
   return (
     <main className="p-0">
-      <Calendar />
+      <CalendarHub />
     </main>
   );
 }

@@ -225,7 +225,7 @@ export default function Navbar() {
                       <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
                         <div className="py-1 text-sm text-gray-700">
                           <Link
-                            href="/calendar"
+                            href="/calendar/personal"
                             className="block px-4 py-2 hover:bg-gray-100"
                             onClick={() => setCalendarOpen(false)}
                           >
@@ -401,7 +401,7 @@ export default function Navbar() {
                 <details className="px-3">
                   <summary className="cursor-pointer text-white font-medium py-2">Calendar</summary>
                   <div className="ml-3 space-y-1">
-                    <MobileNavLinkDark href="/calendar" onClick={() => setMobileMenuOpen(false)}>Personal</MobileNavLinkDark>
+                    <MobileNavLinkDark href="/calendar/personal" onClick={() => setMobileMenuOpen(false)}>Personal</MobileNavLinkDark>
                     {userOrganizations.map((org) => (
                       <MobileNavLinkDark key={org.org_id} href={`/calendar/${org.org_id}`} onClick={() => setMobileMenuOpen(false)}>
                         {org.name}

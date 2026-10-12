@@ -360,6 +360,14 @@ export default function NewNavbar({ variant = "default" }) {
                             onClick={() => setCalendarOpen(false)}
                           >
                             <Calendar className="w-4 h-4 mr-3 text-gray-400" />
+                            All calendars
+                          </Link>
+                          <Link
+                            href="/calendar/personal"
+                            className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors mx-2 rounded-lg"
+                            onClick={() => setCalendarOpen(false)}
+                          >
+                            <Calendar className="w-4 h-4 mr-3 text-gray-400" />
                             Personal
                           </Link>
                           {userOrganizations.length > 0 && (
@@ -718,7 +726,8 @@ export default function NewNavbar({ variant = "default" }) {
                     <ChevronDown className="w-4 h-4 ml-auto text-gray-400 group-open:rotate-180 transition-transform" />
                   </summary>
                   <div className="ml-8 mt-2 space-y-1">
-                    <MobileNavLink href="/calendar" onClick={() => setMobileMenuOpen(false)}>Personal</MobileNavLink>
+                    <MobileNavLink href="/calendar" onClick={() => setMobileMenuOpen(false)}>All calendars</MobileNavLink>
+                    <MobileNavLink href="/calendar/personal" onClick={() => setMobileMenuOpen(false)}>Personal</MobileNavLink>
                     {userOrganizations.map((org) => (
                       <MobileNavLink key={org.org_id} href={`/calendar/${org.org_id}`} onClick={() => setMobileMenuOpen(false)}>
                         {org.name}

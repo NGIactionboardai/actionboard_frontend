@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   useGetUserOrganizationsQuery,
@@ -11,37 +10,19 @@ import {
   useDeleteOrganizationMutation,
   useUploadOrganizationLogoMutation,
   useDeleteOrganizationLogoMutation,
+  useGetDashboardSummaryQuery,
 } from '../../../redux/api/organizationApi';
 import { setCurrentOrganizationId } from '../../../redux/auth/orgSelectionSlice';
-import { Popover } from '@headlessui/react';
-import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
-import { LayoutGrid, LayoutList } from 'lucide-react';
+import { LayoutGrid, List, Plus, Search } from 'lucide-react';
 import withProfileCompletionGuard from '../withProfileCompletionGuard';
 import toast from 'react-hot-toast';
-import Image from 'next/image';
 import { ORG_COLORS } from '@/app/constants/orgColors';
-import OrgLogo, { FALLBACK_COLOR, COMMON_BORDER_COLOR } from './OrgLogo';
+import OrgLogo, { FALLBACK_COLOR } from './OrgLogo';
 import { prepareLogoFile } from './logoValidation';
 import CropLogoModal from './CropLogoModal';
-
-const ROLE_STYLES = {
-  owner:  { label: 'Owner',  cls: 'bg-purple-100 text-purple-700' },
-  admin:  { label: 'Admin',  cls: 'bg-blue-100   text-blue-700'   },
-  member: { label: 'Member', cls: 'bg-green-100  text-green-700'  },
-  viewer: { label: 'Viewer', cls: 'bg-gray-100   text-gray-600'   },
-};
-
-function RoleBadge({ role }) {
-  const meta = ROLE_STYLES[role];
-  if (!meta) return null;
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${meta.cls}`}>
-      {meta.label}
-    </span>
-  );
-}
-
-
+import KpiCards from './dashboard/KpiCards';
+import { OrgCard, OrgCardSkeleton, OrgListRow } from './dashboard/OrgCards';
+import { getFirstName, getGreeting } from './dashboard/format';
 
 /**
  * ManageOrganizations Component
@@ -55,7 +36,6 @@ function RoleBadge({ role }) {
  * - Search and filter functionality
  * 
  * @param {Object} props - Component props
- * @param {string} [props.title] - Custom title for the page
  * @param {string} [props.description] - Custom description for the page
  * @param {string} [props.createButtonText] - Custom text for create button
  * @param {Function} [props.onOrganizationSelect] - Callback when organization is selected
@@ -67,9 +47,8 @@ function RoleBadge({ role }) {
  * @param {string} [props.viewMeetingsPath] - Custom path for view meetings link
  */
 const ManageOrganizations = ({
-  title = "Please Choose Your Organization",
   description = "Create, edit, and manage your organizations",
-  createButtonText = "Create Organization",
+  createButtonText = "Add Organization",
   onOrganizationSelect,
   onOrganizationCreate,
   onOrganizationUpdate,
@@ -83,6 +62,10 @@ const ManageOrganizations = ({
 
   // Redux state
   const { data: userOrganizations = [], isLoading: orgsLoading } = useGetUserOrganizationsQuery();
+  // Polled so "Upcoming today" and the card stats stay current while the page is open.
+  const { data: dashboardSummary, isLoading: summaryLoading } = useGetDashboardSummaryQuery(undefined, {
+    pollingInterval: 60000,
+  });
   const [createOrganization, { isLoading: creating }] = useCreateOrganizationMutation();
   const [updateOrganization, { isLoading: updating }] = useUpdateOrganizationMutation();
   const [deleteOrganization, { isLoading: deleting }] = useDeleteOrganizationMutation();
@@ -450,262 +433,135 @@ const ManageOrganizations = ({
     }
   };
 
+  const orgHref = (org) => `${viewMeetingsPath}/${org.org_id || org.id}`;
+  const orgStats = (org) => dashboardSummary?.orgs?.[org.org_id || org.id];
+  const orgCount = userOrganizations.length;
+  const firstName = getFirstName(currentUser);
+
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header */}
-      <div className="md:flex md:items-center md:justify-between mb-8">
-        <div className="flex-1 min-w-0">
-        <h2 className="pb-1 mb-3 sm:mb-5 flex items-center gap-1">
-          <span className="text-4xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
-            Welcome to
-          </span>
-          <Image
-            src="/nous-text.png"
-            alt="nous meeting"
-            width={100}   // default mobile width
-            height={45}
-            className="object-contain sm:w-[140px] sm:h-[60px] lg:w-[180px] lg:h-[75px]"
-            priority
-          />
-        </h2>
-        {/* <h2 className="text-2xl sm:text-3xl font-bold pb-1 mb-3 sm:mb-5 flex items-center gap-2">
-          <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
-            Welcome to
-          </span>
-          <span className="bg-gradient-to-r from-[#8B0782] via-pink-600 to-purple-800 bg-clip-text text-transparent lowercase">
-            nous meeting
-          </span>
-        </h2> */}
-          
+    <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1600px] mx-auto">
+      {/* Greeting + search */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold text-gray-900">
+            {getGreeting()}{firstName && <>, <span className="text-indigo-600">{firstName}</span></>}
+          </h1>
+          <p className="mt-1 text-gray-600">
+            {orgCount === 0
+              ? 'Create an organization to get started'
+              : `Here's what's happening across your ${orgCount} ${orgCount === 1 ? 'organization' : 'organizations'}`}
+          </p>
         </div>
-        {/* <div className="mt-4 flex space-x-3 md:mt-0 md:ml-4">
-          <button
-            onClick={openCreateModal}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            {createButtonText}
-          </button>
-        </div> */}
-      </div>
-
-      {/* Success/Error Messages */}
-      {/* {successMessage && (
-        <div className="mb-4 rounded-md bg-green-50 p-4">
-          <div className="flex">
-            <div className="shrink-0">
-              <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-green-800">{successMessage}</p>
-            </div>
-          </div>
-        </div>
-      )} */}
-
-      {/* {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-4">
-          <div className="flex">
-            <div className="shrink-0">
-              <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-red-800">{error}</p>
-            </div>
-          </div>
-        </div>
-      )} */}
-
-      {/* Search + View Toggle */}
-      <div className="flex items-center gap-3 mb-6">
         {showSearch && (
-          <div className="flex-1 max-w-md">
-            <div className="relative rounded-md shadow-sm">
-              <input
-                type="text"
-                className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 py-2 border-gray-300 rounded-md"
-                placeholder="Search organizations..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-            </div>
+          <div className="relative w-full lg:w-[480px] xl:w-[570px] shrink-0">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              className="block w-full h-12 pl-12 pr-4 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Search organizations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         )}
+      </div>
 
-        {/* View mode toggle */}
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 ml-auto">
-          <button
-            onClick={() => setView('grid')}
-            className={`p-1.5 rounded-md transition ${viewMode === 'grid' ? 'bg-white shadow text-gray-800' : 'text-gray-400 hover:text-gray-600'}`}
-            title="Grid view"
-          >
-            <LayoutGrid size={16} />
-          </button>
-          <button
-            onClick={() => setView('list')}
-            className={`p-1.5 rounded-md transition ${viewMode === 'list' ? 'bg-white shadow text-gray-800' : 'text-gray-400 hover:text-gray-600'}`}
-            title="List view"
-          >
-            <LayoutList size={16} />
-          </button>
+      {/* Analytics */}
+      <KpiCards kpis={dashboardSummary?.kpis} isLoading={summaryLoading} />
+
+      {/* Organizations header */}
+      <div className="mt-10 mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Your Organizations</h2>
+          <p className="mt-1 text-gray-600">Choose an organization to view its workspace, meetings and insights.</p>
         </div>
-      </div>
-
-      <div className="text-center mt-6">
-        <h4 className="text-lg sm:text-xl font-bold pb-1 leading-snug text-gray-900">
-          <span className="bg-gradient-to-r from-[#0A0DC4] via-[#5A0DB4] to-[#8B0782] bg-clip-text text-transparent">
-            {filteredOrganizations.length === 0
-              ? "Create your first organization"
-              : title}
-          </span>
-        </h4>
-      </div>
-
-      {/* Organizations List */}
-      <div className="sm:rounded-lg">
-        {orgsLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-40 p-4 rounded-xl shadow-md border border-gray-200 bg-gray-100 animate-pulse">
-                <div className="flex items-center justify-center h-full">
-                  <div className="w-3/4 h-6 bg-gray-300 rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : viewMode === 'grid' ? (
-          /* ── GRID VIEW ── */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {/* Add Organization Card */}
-            <div
-              onClick={openCreateModal}
-              className="flex flex-col justify-center items-center p-6 rounded-lg border border-gray-300 shadow hover:shadow-md cursor-pointer transition bg-white"
+        <div className="flex items-center gap-3">
+          {[
+            { mode: 'grid', icon: LayoutGrid, title: 'Grid view' },
+            { mode: 'list', icon: List, title: 'List view' },
+          ].map(({ mode, icon: Icon, title: label }) => (
+            <button
+              key={mode}
+              onClick={() => setView(mode)}
+              title={label}
+              aria-pressed={viewMode === mode}
+              className={`h-11 w-11 flex items-center justify-center rounded-xl border transition ${
+                viewMode === mode
+                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  : 'bg-white border-gray-200 text-gray-500 hover:text-gray-700'
+              }`}
             >
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-linear-to-r from-[#0A0DC4] to-[#8B0782] hover:from-[#080aa8] hover:to-[#6d0668] text-white text-2xl font-bold">
-                +
-              </div>
-              <p className="mt-4 text-sm font-medium text-gray-600">Add Organization</p>
-            </div>
-
-            {filteredOrganizations.map((org) => {
-              const orgId = org.org_id || org.id;
-              const isOwner = org.role === 'owner';
-              return (
-                <div key={orgId} className="relative group">
-                  <Link
-                    href={`${viewMeetingsPath}/${orgId}`}
-                    onClick={() => handleSetCurrentOrg(org)}
-                    className={`block h-40 p-4 rounded-xl shadow-md bg-white border hover:shadow-xl hover:scale-[1.015] transition-transform duration-200 ease-in-out ${
-                      isOwner ? 'border-gray-200' : 'border-dashed border-gray-300'
-                    }`}
-                  >
-                    {/* Role badge — top-left, only for non-owners */}
-                    {org.role && !isOwner && (
-                      <div className="absolute top-2 left-2">
-                        <RoleBadge role={org.role} />
-                      </div>
-                    )}
-                    <div className="flex flex-col items-center justify-center h-full gap-2">
-                      <OrgLogo org={org} size="xl" ringColor={COMMON_BORDER_COLOR} />
-                      <h3 className={`text-xl font-bold text-center bg-clip-text text-transparent ${
-                        isOwner
-                          ? 'bg-linear-to-r from-[#0A0DC4] to-[#8B0782]'
-                          : 'bg-linear-to-r from-gray-500 to-gray-700'
-                      }`}>
-                        {org.name}
-                      </h3>
-                    </div>
-                  </Link>
-
-                  {/* Popover — only for owners */}
-                  {isOwner && (
-                    <Popover className="absolute top-2 right-2 z-10">
-                      <Popover.Button
-                        className="bg-white p-1 rounded-full hover:bg-gray-100 focus:outline-none"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <EllipsisVerticalIcon className="h-6 w-6 text-gray-500" />
-                      </Popover.Button>
-                      <Popover.Panel className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
-                        <div className="py-1 text-sm text-gray-700">
-                          <button onClick={() => openEditModal(org)} className="w-full text-left px-4 py-2 hover:bg-gray-100">Edit</button>
-                          <button onClick={() => openDeleteModal(org)} className="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600">Delete</button>
-                        </div>
-                      </Popover.Panel>
-                    </Popover>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          /* ── LIST VIEW ── */
-          <div className="mt-8 bg-white border border-gray-200 rounded-2xl divide-y [&>*:first-child]:rounded-t-2xl [&>*:last-child]:rounded-b-2xl">
-            {/* Add org row */}
+              <Icon className="h-5 w-5" />
+            </button>
+          ))}
+          {showActions && (
             <button
               onClick={openCreateModal}
-              className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition text-left"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white text-lg font-bold shrink-0">
-                +
-              </div>
-              <span className="text-sm font-medium text-gray-500">Add Organization</span>
+              <Plus className="h-5 w-5" />
+              {createButtonText}
             </button>
-
-            {filteredOrganizations.map((org) => {
-              const orgId = org.org_id || org.id;
-              const isOwner = org.role === 'owner';
-              return (
-                <div
-                  key={orgId}
-                  onClick={() => {
-                    handleSetCurrentOrg(org);
-                    router.push(`${viewMeetingsPath}/${orgId}`);
-                  }}
-                  className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition cursor-pointer"
-                >
-                  {/* Left: logo + name + badge */}
-                  <div className="flex items-center gap-3 min-w-0">
-                    <OrgLogo org={org} size="sm" ringColor={COMMON_BORDER_COLOR} />
-                    <span className={`font-semibold truncate ${isOwner ? 'text-gray-900' : 'text-gray-500'}`}>
-                      {org.name}
-                    </span>
-                    {org.role && <RoleBadge role={org.role} />}
-                  </div>
-
-                  {/* Right: actions */}
-                  {isOwner && (
-                    <div className="flex items-center gap-2 shrink-0 ml-4">
-                      <Popover className="relative" onClick={(e) => e.stopPropagation()}>
-                        <Popover.Button className="p-1 rounded-full hover:bg-gray-100 focus:outline-none">
-                          <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
-                        </Popover.Button>
-                        <Popover.Panel className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
-                          <div className="py-1 text-sm text-gray-700">
-                            <button onClick={() => openEditModal(org)} className="w-full text-left px-4 py-2 hover:bg-gray-100">Edit</button>
-                            <button onClick={() => openDeleteModal(org)} className="w-full text-left px-4 py-2 hover:bg-red-100 text-red-600">Delete</button>
-                          </div>
-                        </Popover.Panel>
-                      </Popover>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Organizations */}
+      {orgsLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => <OrgCardSkeleton key={i} />)}
+        </div>
+      ) : filteredOrganizations.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-dashed border-gray-300 py-14 text-center">
+          <p className="text-lg font-semibold text-gray-900">
+            {orgCount === 0 ? 'Create your first organization' : 'No organizations match your search'}
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            {orgCount === 0
+              ? 'Organizations hold your meetings, members and insights.'
+              : 'Try a different name.'}
+          </p>
+          {orgCount === 0 && showActions && (
+            <button
+              onClick={openCreateModal}
+              className="mt-5 inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold"
+            >
+              <Plus className="h-5 w-5" />
+              {createButtonText}
+            </button>
+          )}
+        </div>
+      ) : viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {filteredOrganizations.map((org) => (
+            <OrgCard
+              key={org.org_id || org.id}
+              org={org}
+              stats={orgStats(org)}
+              href={orgHref(org)}
+              onOpen={() => handleSetCurrentOrg(org)}
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl divide-y divide-gray-100 [&>*:first-child]:rounded-t-2xl [&>*:last-child]:rounded-b-2xl">
+          {filteredOrganizations.map((org) => (
+            <OrgListRow
+              key={org.org_id || org.id}
+              org={org}
+              stats={orgStats(org)}
+              onOpen={() => {
+                handleSetCurrentOrg(org);
+                router.push(orgHref(org));
+              }}
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Create Modal */}
       {isCreateModalOpen && (

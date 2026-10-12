@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import AuthHydrator from '../components/AuthHydrator';
 import ProtectedRoute from '../components/ProtectedRoute';
 import NewNavbar from '../components/layout/NewNavbar';
+import AppSidebar, { hasSidebar } from '../components/layout/AppSidebar';
 import ViewerGuard from '../components/ViewerGuard';
 import UpcomingMeetingNotification from '../components/notifications/UpcomingMeetingNotification';
 import { selectCurrentOrganizationId } from '@/redux/auth/orgSelectionSlice';
@@ -18,6 +20,7 @@ export default function DashboardLayout({ children }) {
   // is intentional — RTK Query dedupes identical in-flight/cached queries by arg,
   // so this just "warms" the cache for every other consumer of this org's details.
   const { role } = useOrgRole();
+  const showSidebar = hasSidebar(usePathname());
 
   const billingOrgId = useSelector((state) => state.billing.orgId);
   const billingStatus = useSelector((state) => state.billing.status);
@@ -48,7 +51,8 @@ export default function DashboardLayout({ children }) {
         <NewNavbar />
         <ProtectedRoute>
           <ViewerGuard>
-            <main className="mt-20 p-0">{children}</main>
+            {showSidebar && <AppSidebar />}
+            <main className={`mt-20 p-0 ${showSidebar ? 'lg:pl-60' : ''}`}>{children}</main>
           </ViewerGuard>
         </ProtectedRoute>
         <UpcomingMeetingNotification />

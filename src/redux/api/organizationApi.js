@@ -20,7 +20,7 @@ const storage = {
 export const organizationApi = createApi({
   reducerPath: 'organizationApi',
   baseQuery: axiosBaseQuery({ baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}/organisations` }),
-  tagTypes: ['UserOrgs', 'Org', 'PendingOwnershipTransfer'],
+  tagTypes: ['UserOrgs', 'Org', 'PendingOwnershipTransfer', 'DashboardSummary'],
   endpoints: (builder) => ({
     getUserOrganizations: builder.query({
       query: () => ({ url: '/my-organisations/' }),
@@ -33,6 +33,16 @@ export const organizationApi = createApi({
           // fetch failed — leave any previously-cached list in localStorage alone
         }
       },
+    }),
+
+    // KPI tiles + per-org card stats for the /organizations dashboard. Week and
+    // day boundaries are computed server-side in the viewer's timezone.
+    getDashboardSummary: builder.query({
+      query: () => ({
+        url: '/dashboard-summary/',
+        params: { tz: Intl.DateTimeFormat().resolvedOptions().timeZone },
+      }),
+      providesTags: ['DashboardSummary'],
     }),
 
     getOrganizationDetails: builder.query({
@@ -50,7 +60,7 @@ export const organizationApi = createApi({
         organization: response,
         message: response?.message || 'Organization created successfully',
       }),
-      invalidatesTags: ['UserOrgs'],
+      invalidatesTags: ['UserOrgs', 'DashboardSummary'],
     }),
 
     updateOrganization: builder.mutation({
@@ -82,7 +92,7 @@ export const organizationApi = createApi({
 
     deleteOrganization: builder.mutation({
       query: (orgId) => ({ url: `/delete-organization/${orgId}/`, method: 'delete' }),
-      invalidatesTags: (result, error, orgId) => [{ type: 'Org', id: orgId }, 'UserOrgs'],
+      invalidatesTags: (result, error, orgId) => [{ type: 'Org', id: orgId }, 'UserOrgs', 'DashboardSummary'],
     }),
 
     initiateOwnershipTransfer: builder.mutation({
@@ -109,6 +119,7 @@ export const organizationApi = createApi({
 
 export const {
   useGetUserOrganizationsQuery,
+  useGetDashboardSummaryQuery,
   useGetOrganizationDetailsQuery,
   useCreateOrganizationMutation,
   useUpdateOrganizationMutation,
