@@ -264,7 +264,25 @@ export default function UpgradePage() {
                   </ul>
 
                   {/* CTA */}
-                  {isCurrent ? (
+                  {isCurrent && (isExpired || isCanceled) ? (
+                    canUpgradePlan ? (
+                      <button
+                        onClick={() => handleCheckout(plan)}
+                        disabled={checkoutLoading === plan.id}
+                        className="w-full bg-linear-to-r from-[#0A0DC4] to-[#8B0782] text-white py-2 rounded-lg hover:opacity-90"
+                      >
+                        {checkoutLoading === plan.id ? "Processing..." : "Renew Plan"}
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        className="w-full bg-gray-100 text-gray-400 py-2 rounded-lg cursor-not-allowed"
+                        title="Only the organisation owner can renew the plan"
+                      >
+                        Owner Only
+                      </button>
+                    )
+                  ) : isCurrent ? (
                     <button
                       disabled
                       className="w-full bg-gray-200 text-gray-500 py-2 rounded-lg"
