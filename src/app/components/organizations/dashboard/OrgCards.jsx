@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Popover } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
-import { ArrowRight, CalendarDays, Clock, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, Clock, Mail, Users } from 'lucide-react';
 import OrgLogo, { COMMON_BORDER_COLOR } from '../OrgLogo';
 import { formatLastActive } from './format';
 
@@ -45,6 +45,7 @@ function OwnerMenu({ org, onEdit, onDelete, className = 'relative' }) {
 function statRows(stats) {
   return [
     { icon: Users, label: 'Members', value: stats ? stats.member_count : '—' },
+    { icon: Mail, label: 'Email Contacts', value: stats ? stats.contact_count ?? '—' : '—' },
     { icon: CalendarDays, label: 'Upcoming Meetings', value: stats ? stats.upcoming_meetings : '—' },
     { icon: Clock, label: 'Last Active', value: stats ? formatLastActive(stats.last_active_at) : '—' },
   ];
@@ -84,7 +85,7 @@ export function OrgCard({ org, stats, href, onOpen, onEdit, onDelete }) {
 
 export function OrgListRow({ org, stats, onOpen, onEdit, onDelete }) {
   const isOwner = org.role === 'owner';
-  const [members, upcoming, lastActive] = statRows(stats);
+  const rows = statRows(stats);
   return (
     <div
       onClick={onOpen}
@@ -95,8 +96,8 @@ export function OrgListRow({ org, stats, onOpen, onEdit, onDelete }) {
         <span className="font-semibold text-gray-900 truncate">{org.name}</span>
         {org.role && !isOwner && <RoleBadge role={org.role} />}
       </div>
-      {[members, upcoming, lastActive].map(({ icon: Icon, label, value }) => (
-        <div key={label} className="hidden md:flex items-center gap-2 w-44 text-sm">
+      {rows.map(({ icon: Icon, label, value }) => (
+        <div key={label} className="hidden lg:flex items-center gap-2 w-44 text-sm">
           <Icon className="h-4 w-4 text-gray-400 shrink-0" />
           <span className="text-gray-500 truncate">{label}:</span>
           <span className="font-medium text-gray-900 whitespace-nowrap">{value}</span>
