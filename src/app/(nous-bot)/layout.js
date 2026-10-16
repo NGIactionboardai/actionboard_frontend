@@ -6,21 +6,26 @@ import { useDispatch, useSelector } from "react-redux";
 import { Bot } from "lucide-react";
 import NewNavbar from "../components/layout/NewNavbar";
 import { fetchSubscription } from "@/redux/billing/billingSlice";
+import { selectIsAuthenticated } from "@/redux/auth/authSlices";
 
 export default function NousBotLayout({ children }) {
   const dispatch = useDispatch();
 
   // Feature gating (useFeature) always reads the viewing user's own
   // subscription — Subscription is a per-user model, there's no org-level
-  // plan. This route never fetches billing itself, so without this it shows
-  // whatever was last loaded elsewhere (e.g. an org-scoped admin view from a
-  // dashboard page for a different org), which can wrongly paywall a Pro user.
+  // plan. Unlike (dashboard), this route group never mounts AuthHydrator, so
+  // nothing else ever performs the *first* billing fetch — on a cold load
+  // (direct link, fresh tab) billing.status is still 'idle' and billing.orgId
+  // is still its initial null, which looks identical to "already has the
+  // correct user-level data". Fetch it ourselves whenever that's the case, or
+  // whenever it holds stale org-scoped data from a dashboard page elsewhere.
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const billingOrgId = useSelector((state) => state.billing.orgId);
   const billingStatus = useSelector((state) => state.billing.status);
   useEffect(() => {
-    if (billingStatus === 'idle' || billingStatus === 'loading') return;
-    if (billingOrgId !== null) dispatch(fetchSubscription());
-  }, [billingOrgId, billingStatus, dispatch]);
+    if (!isAuthenticated || billingStatus === 'loading') return;
+    if (billingStatus === 'idle' || billingOrgId !== null) dispatch(fetchSubscription());
+  }, [isAuthenticated, billingOrgId, billingStatus, dispatch]);
 
   return (
     <div className="min-h-[calc(100vh-4.5rem)] flex flex-col bg-gray-50">
