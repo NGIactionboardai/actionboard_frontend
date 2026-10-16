@@ -8,6 +8,7 @@ import OrgLogo from '@/app/components/organizations/OrgLogo';
 import ConversationSidebar from '@/app/components/ai-chat/ConversationSidebar';
 import { useGetOrganizationDetailsQuery } from '@/redux/api/organizationApi';
 import { fetchConversations, selectConversations } from '@/redux/aiChat/aiChatSlice';
+import { fetchSubscription } from '@/redux/billing/billingSlice';
 
 export default function OrgAiChatLayout({ children }) {
   const { id: orgId, conversationId } = useParams();
@@ -24,6 +25,18 @@ export default function OrgAiChatLayout({ children }) {
       dispatch(fetchConversations(orgId));
     }
   }, [orgId, dispatch]);
+
+  // Feature gating (useFeature) always reads the viewing user's own
+  // subscription — Subscription is a per-user model, there's no org-level
+  // plan. This route never fetches billing itself, so without this it shows
+  // whatever was last loaded elsewhere (e.g. an org-scoped admin view from a
+  // dashboard page for a different org), which can wrongly paywall a Pro user.
+  const billingOrgId = useSelector((state) => state.billing.orgId);
+  const billingStatus = useSelector((state) => state.billing.status);
+  useEffect(() => {
+    if (billingStatus === 'idle' || billingStatus === 'loading') return;
+    if (billingOrgId !== null) dispatch(fetchSubscription());
+  }, [billingOrgId, billingStatus, dispatch]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-4.5rem)] bg-gray-50 overflow-hidden">
